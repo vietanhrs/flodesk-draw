@@ -1,113 +1,262 @@
 @import "tailwindcss";
 
-:root {
-  --text: #6b6375;
-  --text-h: #08060d;
-  --bg: #fff;
-  --border: #e5e4e7;
-  --code-bg: #f4f3ec;
-  --accent: #aa3bff;
-  --accent-bg: rgba(170, 59, 255, 0.1);
-  --accent-border: rgba(170, 59, 255, 0.5);
-  --social-bg: rgba(244, 243, 236, 0.5);
-  --shadow:
-    rgba(0, 0, 0, 0.1) 0 10px 15px -3px, rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
+@theme {
+  /* Fonts */
+  --font-flodesk: "Flodesk Sans", "Helvetica Neue", Arial, sans-serif;
 
-  --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --heading: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --mono: ui-monospace, Consolas, monospace;
+  /* Typography (error page) */
+  --text-title: 35px;
+  --text-body: 14px;
+  --leading-title: 1.1;
+  --leading-body: 1.87;
+  --tracking-logo: 0.02em;
 
-  font: 18px/145% var(--sans);
-  letter-spacing: 0.18px;
-  color-scheme: light dark;
-  color: var(--text);
-  background: var(--bg);
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  /* Backgrounds */
+  --color-background: var(--grn-color-background);
+  --color-background2: var(--grn-color-background2);
+  --color-background3: var(--grn-color-background3);
+  --color-disabledBackground: var(--grn-color-disabledBackground);
+  --color-floatingBackground: var(--grn-color-floatingBackground);
+  --color-backdrop: var(--grn-color-backdrop);
 
-  @media (max-width: 1024px) {
-    font-size: 16px;
-  }
+  /* Content / Text */
+  --color-content: var(--grn-color-content);
+  --color-content2: var(--grn-color-content2);
+  --color-content3: var(--grn-color-content3);
+  --color-disabledContent: var(--grn-color-disabledContent);
+  --color-contentDanger: var(--grn-color-contentDanger);
+  --color-contentWarning: var(--grn-color-contentWarning);
+  --color-contentSuccess: var(--grn-color-contentSuccess);
+  --color-contentInfo: var(--grn-color-contentInfo);
+
+  /* Icon */
+  --color-icon: var(--grn-color-icon);
+  --color-iconDanger: var(--grn-color-iconDanger);
+  --color-disabledIcon: var(--grn-color-disabledIcon);
+
+  /* Border */
+  --color-border: var(--grn-color-border);
+  --color-border2: var(--grn-color-border2);
+
+  /* Overlay */
+  --color-overlay: var(--grn-color-overlay);
+  --color-overlay2: var(--grn-color-overlay2);
+  --color-overlayDanger: var(--grn-color-overlayDanger);
+  --color-overlayDanger2: var(--grn-color-overlayDanger2);
+
+  /* Status - Danger */
+  --color-backgroundDanger: var(--grn-color-backgroundDanger);
+  --color-onBackgroundDanger: var(--grn-color-onBackgroundDanger);
+  --color-backgroundDangerSubtle: var(--grn-color-backgroundDangerSubtle);
+  --color-onBackgroundDangerSubtle: var(--grn-color-onBackgroundDangerSubtle);
+  --color-backgroundDangerSubtleLarge: var(
+    --grn-color-backgroundDangerSubtleLarge
+  );
+
+  /* Status - Warning */
+  --color-backgroundWarning: var(--grn-color-backgroundWarning);
+  --color-onBackgroundWarning: var(--grn-color-onBackgroundWarning);
+  --color-backgroundWarningSubtle: var(--grn-color-backgroundWarningSubtle);
+  --color-onBackgroundWarningSubtle: var(--grn-color-onBackgroundWarningSubtle);
+  --color-backgroundWarningSubtleLarge: var(
+    --grn-color-backgroundWarningSubtleLarge
+  );
+
+  /* Status - Success */
+  --color-backgroundSuccess: var(--grn-color-backgroundSuccess);
+  --color-onBackgroundSuccess: var(--grn-color-onBackgroundSuccess);
+  --color-backgroundSuccessSubtle: var(--grn-color-backgroundSuccessSubtle);
+  --color-onBackgroundSuccessSubtle: var(--grn-color-onBackgroundSuccessSubtle);
+  --color-backgroundSuccessSubtleLarge: var(
+    --grn-color-backgroundSuccessSubtleLarge
+  );
+
+  /* Status - Info */
+  --color-backgroundInfo: var(--grn-color-backgroundInfo);
+  --color-onBackgroundInfo: var(--grn-color-onBackgroundInfo);
+  --color-backgroundInfoSubtle: var(--grn-color-backgroundInfoSubtle);
+  --color-onBackgroundInfoSubtle: var(--grn-color-onBackgroundInfoSubtle);
+  --color-backgroundInfoSubtleLarge: var(--grn-color-backgroundInfoSubtleLarge);
+
+  /* Selection */
+  --color-selection: var(--grn-color-selection);
+
+  /* Core colors - Shade */
+  --color-shade1: var(--grn-color-shade1);
+  --color-shade2: var(--grn-color-shade2);
+  --color-shade3: var(--grn-color-shade3);
+  --color-shade4: var(--grn-color-shade4);
+  --color-shade5: var(--grn-color-shade5);
+  --color-shade6: var(--grn-color-shade6);
+  --color-shade7: var(--grn-color-shade7);
+  --color-shade8: var(--grn-color-shade8);
+  --color-shade9: var(--grn-color-shade9);
+  --color-shade10: var(--grn-color-shade10);
+  --color-shade11: var(--grn-color-shade11);
+  --color-shade12: var(--grn-color-shade12);
+  --color-shade13: var(--grn-color-shade13);
+
+  /* Core colors - ShadeTone */
+  --color-shadeTone1: var(--grn-color-shadeTone1);
+  --color-shadeTone2: var(--grn-color-shadeTone2);
+  --color-shadeTone3: var(--grn-color-shadeTone3);
+  --color-shadeTone4: var(--grn-color-shadeTone4);
+  --color-shadeTone5: var(--grn-color-shadeTone5);
+  --color-shadeTone6: var(--grn-color-shadeTone6);
+  --color-shadeTone7: var(--grn-color-shadeTone7);
+  --color-shadeTone8: var(--grn-color-shadeTone8);
+  --color-shadeTone9: var(--grn-color-shadeTone9);
+  --color-shadeTone10: var(--grn-color-shadeTone10);
+  --color-shadeTone11: var(--grn-color-shadeTone11);
+  --color-shadeTone12: var(--grn-color-shadeTone12);
+  --color-shadeTone13: var(--grn-color-shadeTone13);
+
+  /* Core colors - Fade */
+  --color-fade1: var(--grn-color-fade1);
+  --color-fade2: var(--grn-color-fade2);
+  --color-fade3: var(--grn-color-fade3);
+  --color-fade4: var(--grn-color-fade4);
+  --color-fade5: var(--grn-color-fade5);
+  --color-fade6: var(--grn-color-fade6);
+  --color-fade7: var(--grn-color-fade7);
+  --color-fade8: var(--grn-color-fade8);
+  --color-fade9: var(--grn-color-fade9);
+  --color-fade10: var(--grn-color-fade10);
+
+  /* Core colors - LightFade */
+  --color-lightFade1: var(--grn-color-lightFade1);
+  --color-lightFade2: var(--grn-color-lightFade2);
+  --color-lightFade3: var(--grn-color-lightFade3);
+  --color-lightFade4: var(--grn-color-lightFade4);
+  --color-lightFade5: var(--grn-color-lightFade5);
+  --color-lightFade6: var(--grn-color-lightFade6);
+  --color-lightFade7: var(--grn-color-lightFade7);
+  --color-lightFade8: var(--grn-color-lightFade8);
+  --color-lightFade9: var(--grn-color-lightFade9);
+  --color-lightFade10: var(--grn-color-lightFade10);
+
+  /* Core colors - DarkFade */
+  --color-darkFade1: var(--grn-color-darkFade1);
+  --color-darkFade2: var(--grn-color-darkFade2);
+  --color-darkFade3: var(--grn-color-darkFade3);
+  --color-darkFade4: var(--grn-color-darkFade4);
+  --color-darkFade5: var(--grn-color-darkFade5);
+  --color-darkFade6: var(--grn-color-darkFade6);
+  --color-darkFade7: var(--grn-color-darkFade7);
+  --color-darkFade8: var(--grn-color-darkFade8);
+  --color-darkFade9: var(--grn-color-darkFade9);
+  --color-darkFade10: var(--grn-color-darkFade10);
+
+  /* Core colors - Blue */
+  --color-blue1: var(--grn-color-blue1);
+  --color-blue2: var(--grn-color-blue2);
+  --color-blue3: var(--grn-color-blue3);
+  --color-blue4: var(--grn-color-blue4);
+  --color-blue5: var(--grn-color-blue5);
+  --color-blue6: var(--grn-color-blue6);
+  --color-blue7: var(--grn-color-blue7);
+  --color-blue8: var(--grn-color-blue8);
+  --color-blue9: var(--grn-color-blue9);
+  --color-blue10: var(--grn-color-blue10);
+  --color-blue11: var(--grn-color-blue11);
+  --color-blue12: var(--grn-color-blue12);
+
+  /* Core colors - Green */
+  --color-green1: var(--grn-color-green1);
+  --color-green2: var(--grn-color-green2);
+  --color-green3: var(--grn-color-green3);
+  --color-green4: var(--grn-color-green4);
+  --color-green5: var(--grn-color-green5);
+  --color-green6: var(--grn-color-green6);
+  --color-green7: var(--grn-color-green7);
+  --color-green8: var(--grn-color-green8);
+  --color-green9: var(--grn-color-green9);
+  --color-green10: var(--grn-color-green10);
+  --color-green11: var(--grn-color-green11);
+  --color-green12: var(--grn-color-green12);
+
+  /* Core colors - Yellow */
+  --color-yellow1: var(--grn-color-yellow1);
+  --color-yellow2: var(--grn-color-yellow2);
+  --color-yellow3: var(--grn-color-yellow3);
+  --color-yellow4: var(--grn-color-yellow4);
+  --color-yellow5: var(--grn-color-yellow5);
+  --color-yellow6: var(--grn-color-yellow6);
+  --color-yellow7: var(--grn-color-yellow7);
+  --color-yellow8: var(--grn-color-yellow8);
+  --color-yellow9: var(--grn-color-yellow9);
+  --color-yellow10: var(--grn-color-yellow10);
+  --color-yellow11: var(--grn-color-yellow11);
+  --color-yellow12: var(--grn-color-yellow12);
+
+  /* Core colors - Red */
+  --color-red1: var(--grn-color-red1);
+  --color-red2: var(--grn-color-red2);
+  --color-red3: var(--grn-color-red3);
+  --color-red4: var(--grn-color-red4);
+  --color-red5: var(--grn-color-red5);
+  --color-red6: var(--grn-color-red6);
+  --color-red7: var(--grn-color-red7);
+  --color-red8: var(--grn-color-red8);
+  --color-red9: var(--grn-color-red9);
+  --color-red10: var(--grn-color-red10);
+  --color-red11: var(--grn-color-red11);
+  --color-red12: var(--grn-color-red12);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --text: #9ca3af;
-    --text-h: #f3f4f6;
-    --bg: #16171d;
-    --border: #2e303a;
-    --code-bg: #1f2028;
-    --accent: #c084fc;
-    --accent-bg: rgba(192, 132, 252, 0.15);
-    --accent-border: rgba(192, 132, 252, 0.5);
-    --social-bg: rgba(47, 48, 58, 0.5);
-    --shadow:
-      rgba(0, 0, 0, 0.4) 0 10px 15px -3px, rgba(0, 0, 0, 0.25) 0 4px 6px -2px;
-  }
-
-  #social .button-icon {
-    filter: invert(1) brightness(2);
-  }
+/* Paper plane figure-8 animation (replicated from Flodesk's error page) */
+.paper-airplane {
+  padding: 15px;
+  margin: 45px auto;
+  max-width: 280px;
 }
 
-#root {
-  width: 1126px;
-  max-width: 100%;
-  margin: 0 auto;
-  text-align: center;
-  border-inline: 1px solid var(--border);
-  min-height: 100svh;
-  display: flex;
-  flex-direction: column;
-  box-sizing: border-box;
-}
-
-body {
+.paper-airplane__line {
   margin: 0;
+  width: 50%;
+  position: relative;
+  transform-origin: center center 0;
+  animation: paper-airplane-flip 4s step-end infinite;
+  border-radius: 50%;
 }
 
-h1,
-h2 {
-  font-family: var(--heading);
-  font-weight: 500;
-  color: var(--text-h);
+.paper-airplane__line::before {
+  content: "";
+  display: block;
+  width: 100%;
+  height: 0;
+  padding: 0 0 100%;
 }
 
-h1 {
-  font-size: 56px;
-  letter-spacing: -1.68px;
-  margin: 32px 0;
-  @media (max-width: 1024px) {
-    font-size: 36px;
-    margin: 20px 0;
+.paper-airplane__icon {
+  position: absolute;
+  top: -15px;
+  left: 50%;
+  width: 28px;
+  margin-left: -14px;
+  height: calc(50% + 15px);
+  transform-origin: center bottom 0;
+  animation: paper-airplane-roll 4s linear infinite;
+  color: var(--grn-color-shade7);
+}
+
+.paper-airplane__icon svg {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+@keyframes paper-airplane-roll {
+  to {
+    transform: rotate(-2turn);
   }
 }
-h2 {
-  font-size: 24px;
-  line-height: 118%;
-  letter-spacing: -0.24px;
-  margin: 0 0 8px;
-  @media (max-width: 1024px) {
-    font-size: 20px;
+
+@keyframes paper-airplane-flip {
+  37.5% {
+    transform: rotateY(0.5turn) translate(-100%);
   }
-}
-p {
-  margin: 0;
-}
-
-code,
-.counter {
-  font-family: var(--mono);
-  display: inline-flex;
-  border-radius: 4px;
-  color: var(--text-h);
-}
-
-code {
-  font-size: 15px;
-  line-height: 135%;
-  padding: 4px 8px;
-  background: var(--code-bg);
+  87.5% {
+    transform: rotateY(0turn);
+  }
 }
