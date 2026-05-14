@@ -1,15 +1,46 @@
 @import "tailwindcss";
 
+@font-face {
+  font-family: "Flodesk Sans";
+  src: url("/fonts/flodesk-sans-400.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Flodesk Sans";
+  src: url("/fonts/flodesk-sans-500.woff2") format("woff2");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Flodesk FlotesqueGX";
+  src: url("/fonts/flodesk-flotesquegx-400.ttf") format("truetype");
+  font-weight: 0 100;
+  font-style: normal;
+  font-display: swap;
+}
+
 @theme {
   /* Fonts */
   --font-flodesk: "Flodesk Sans", "Helvetica Neue", Arial, sans-serif;
+  --font-flodesk-flotesque: "Flodesk FlotesqueGX";
 
   /* Typography (error page) */
   --text-title: 35px;
   --text-body: 14px;
+  --text-h3: 22px;
   --leading-title: 1.1;
   --leading-body: 1.87;
   --tracking-logo: 0.02em;
+  --tracking-wordmark: 0.04em;
+  --tracking-caps: 0.06em;
+
+  /* Radius */
+  --radius-card: 10px;
 
   /* Backgrounds */
   --color-background: var(--grn-color-background);
@@ -202,6 +233,15 @@
   --color-red10: var(--grn-color-red10);
   --color-red11: var(--grn-color-red11);
   --color-red12: var(--grn-color-red12);
+
+  /* Shadow tokens — https://grain.flodesk.com/tokens/shadow */
+  --shadow-s: var(--grn-shadow-s);
+  --shadow-m: var(--grn-shadow-m);
+  --shadow-l: var(--grn-shadow-l);
+}
+
+@utility grid-cols-content {
+  grid-template-columns: repeat(2, min-content);
 }
 
 /* Paper plane figure-8 animation (replicated from Flodesk's error page) */
@@ -258,5 +298,35 @@
   }
   87.5% {
     transform: rotateY(0turn);
+  }
+}
+
+.flodesk-logo {
+  display: inline-flex;
+}
+
+.flodesk-logo__letter {
+  display: inline-block;
+  font-weight: 0;
+  font-variation-settings: "wght" 0;
+  will-change: font-variation-settings;
+}
+
+.flodesk-logo:hover .flodesk-logo__letter,
+.flodesk-logo:focus-visible .flodesk-logo__letter {
+  animation: flodesk-logo-weight-sweep 560ms ease-in-out;
+  animation-delay: var(--flodesk-delay, 0ms);
+}
+
+@keyframes flodesk-logo-weight-sweep {
+  0%,
+  100% {
+    font-weight: 0;
+    font-variation-settings: "wght" 0;
+  }
+
+  50% {
+    font-weight: 100;
+    font-variation-settings: "wght" 100;
   }
 }
