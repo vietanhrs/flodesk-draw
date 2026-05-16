@@ -1,4 +1,5 @@
-@import "tailwindcss";
+/* Global base styles — no Tailwind, no third-party CSS frameworks.
+   Colour and shadow tokens come from @flodesk/grain CSS variables. */
 
 @font-face {
   font-family: "Flodesk Sans";
@@ -24,224 +25,117 @@
   font-display: swap;
 }
 
-@theme {
-  /* Fonts */
-  --font-flodesk: "Flodesk Sans", "Helvetica Neue", Arial, sans-serif;
-  --font-flodesk-flotesque: "Flodesk FlotesqueGX";
-
-  /* Typography (error page) */
-  --text-title: 35px;
-  --text-body: 14px;
-  --text-h3: 22px;
-  --leading-title: 1.1;
-  --leading-body: 1.87;
-  --tracking-logo: 0.02em;
-  --tracking-wordmark: 0.04em;
-  --tracking-caps: 0.06em;
-
-  /* Radius */
-  --radius-card: 10px;
-
-  /* Backgrounds */
-  --color-background: var(--grn-color-background);
-  --color-background2: var(--grn-color-background2);
-  --color-background3: var(--grn-color-background3);
-  --color-disabledBackground: var(--grn-color-disabledBackground);
-  --color-floatingBackground: var(--grn-color-floatingBackground);
-  --color-backdrop: var(--grn-color-backdrop);
-
-  /* Content / Text */
-  --color-content: var(--grn-color-content);
-  --color-content2: var(--grn-color-content2);
-  --color-content3: var(--grn-color-content3);
-  --color-disabledContent: var(--grn-color-disabledContent);
-  --color-contentDanger: var(--grn-color-contentDanger);
-  --color-contentWarning: var(--grn-color-contentWarning);
-  --color-contentSuccess: var(--grn-color-contentSuccess);
-  --color-contentInfo: var(--grn-color-contentInfo);
-
-  /* Icon */
-  --color-icon: var(--grn-color-icon);
-  --color-iconDanger: var(--grn-color-iconDanger);
-  --color-disabledIcon: var(--grn-color-disabledIcon);
-
-  /* Border */
-  --color-border: var(--grn-color-border);
-  --color-border2: var(--grn-color-border2);
-
-  /* Overlay */
-  --color-overlay: var(--grn-color-overlay);
-  --color-overlay2: var(--grn-color-overlay2);
-  --color-overlayDanger: var(--grn-color-overlayDanger);
-  --color-overlayDanger2: var(--grn-color-overlayDanger2);
-
-  /* Status - Danger */
-  --color-backgroundDanger: var(--grn-color-backgroundDanger);
-  --color-onBackgroundDanger: var(--grn-color-onBackgroundDanger);
-  --color-backgroundDangerSubtle: var(--grn-color-backgroundDangerSubtle);
-  --color-onBackgroundDangerSubtle: var(--grn-color-onBackgroundDangerSubtle);
-  --color-backgroundDangerSubtleLarge: var(
-    --grn-color-backgroundDangerSubtleLarge
-  );
-
-  /* Status - Warning */
-  --color-backgroundWarning: var(--grn-color-backgroundWarning);
-  --color-onBackgroundWarning: var(--grn-color-onBackgroundWarning);
-  --color-backgroundWarningSubtle: var(--grn-color-backgroundWarningSubtle);
-  --color-onBackgroundWarningSubtle: var(--grn-color-onBackgroundWarningSubtle);
-  --color-backgroundWarningSubtleLarge: var(
-    --grn-color-backgroundWarningSubtleLarge
-  );
-
-  /* Status - Success */
-  --color-backgroundSuccess: var(--grn-color-backgroundSuccess);
-  --color-onBackgroundSuccess: var(--grn-color-onBackgroundSuccess);
-  --color-backgroundSuccessSubtle: var(--grn-color-backgroundSuccessSubtle);
-  --color-onBackgroundSuccessSubtle: var(--grn-color-onBackgroundSuccessSubtle);
-  --color-backgroundSuccessSubtleLarge: var(
-    --grn-color-backgroundSuccessSubtleLarge
-  );
-
-  /* Status - Info */
-  --color-backgroundInfo: var(--grn-color-backgroundInfo);
-  --color-onBackgroundInfo: var(--grn-color-onBackgroundInfo);
-  --color-backgroundInfoSubtle: var(--grn-color-backgroundInfoSubtle);
-  --color-onBackgroundInfoSubtle: var(--grn-color-onBackgroundInfoSubtle);
-  --color-backgroundInfoSubtleLarge: var(--grn-color-backgroundInfoSubtleLarge);
-
-  /* Selection */
-  --color-selection: var(--grn-color-selection);
-
-  /* Core colors - Shade */
-  --color-shade1: var(--grn-color-shade1);
-  --color-shade2: var(--grn-color-shade2);
-  --color-shade3: var(--grn-color-shade3);
-  --color-shade4: var(--grn-color-shade4);
-  --color-shade5: var(--grn-color-shade5);
-  --color-shade6: var(--grn-color-shade6);
-  --color-shade7: var(--grn-color-shade7);
-  --color-shade8: var(--grn-color-shade8);
-  --color-shade9: var(--grn-color-shade9);
-  --color-shade10: var(--grn-color-shade10);
-  --color-shade11: var(--grn-color-shade11);
-  --color-shade12: var(--grn-color-shade12);
-  --color-shade13: var(--grn-color-shade13);
-
-  /* Core colors - ShadeTone */
-  --color-shadeTone1: var(--grn-color-shadeTone1);
-  --color-shadeTone2: var(--grn-color-shadeTone2);
-  --color-shadeTone3: var(--grn-color-shadeTone3);
-  --color-shadeTone4: var(--grn-color-shadeTone4);
-  --color-shadeTone5: var(--grn-color-shadeTone5);
-  --color-shadeTone6: var(--grn-color-shadeTone6);
-  --color-shadeTone7: var(--grn-color-shadeTone7);
-  --color-shadeTone8: var(--grn-color-shadeTone8);
-  --color-shadeTone9: var(--grn-color-shadeTone9);
-  --color-shadeTone10: var(--grn-color-shadeTone10);
-  --color-shadeTone11: var(--grn-color-shadeTone11);
-  --color-shadeTone12: var(--grn-color-shadeTone12);
-  --color-shadeTone13: var(--grn-color-shadeTone13);
-
-  /* Core colors - Fade */
-  --color-fade1: var(--grn-color-fade1);
-  --color-fade2: var(--grn-color-fade2);
-  --color-fade3: var(--grn-color-fade3);
-  --color-fade4: var(--grn-color-fade4);
-  --color-fade5: var(--grn-color-fade5);
-  --color-fade6: var(--grn-color-fade6);
-  --color-fade7: var(--grn-color-fade7);
-  --color-fade8: var(--grn-color-fade8);
-  --color-fade9: var(--grn-color-fade9);
-  --color-fade10: var(--grn-color-fade10);
-
-  /* Core colors - LightFade */
-  --color-lightFade1: var(--grn-color-lightFade1);
-  --color-lightFade2: var(--grn-color-lightFade2);
-  --color-lightFade3: var(--grn-color-lightFade3);
-  --color-lightFade4: var(--grn-color-lightFade4);
-  --color-lightFade5: var(--grn-color-lightFade5);
-  --color-lightFade6: var(--grn-color-lightFade6);
-  --color-lightFade7: var(--grn-color-lightFade7);
-  --color-lightFade8: var(--grn-color-lightFade8);
-  --color-lightFade9: var(--grn-color-lightFade9);
-  --color-lightFade10: var(--grn-color-lightFade10);
-
-  /* Core colors - DarkFade */
-  --color-darkFade1: var(--grn-color-darkFade1);
-  --color-darkFade2: var(--grn-color-darkFade2);
-  --color-darkFade3: var(--grn-color-darkFade3);
-  --color-darkFade4: var(--grn-color-darkFade4);
-  --color-darkFade5: var(--grn-color-darkFade5);
-  --color-darkFade6: var(--grn-color-darkFade6);
-  --color-darkFade7: var(--grn-color-darkFade7);
-  --color-darkFade8: var(--grn-color-darkFade8);
-  --color-darkFade9: var(--grn-color-darkFade9);
-  --color-darkFade10: var(--grn-color-darkFade10);
-
-  /* Core colors - Blue */
-  --color-blue1: var(--grn-color-blue1);
-  --color-blue2: var(--grn-color-blue2);
-  --color-blue3: var(--grn-color-blue3);
-  --color-blue4: var(--grn-color-blue4);
-  --color-blue5: var(--grn-color-blue5);
-  --color-blue6: var(--grn-color-blue6);
-  --color-blue7: var(--grn-color-blue7);
-  --color-blue8: var(--grn-color-blue8);
-  --color-blue9: var(--grn-color-blue9);
-  --color-blue10: var(--grn-color-blue10);
-  --color-blue11: var(--grn-color-blue11);
-  --color-blue12: var(--grn-color-blue12);
-
-  /* Core colors - Green */
-  --color-green1: var(--grn-color-green1);
-  --color-green2: var(--grn-color-green2);
-  --color-green3: var(--grn-color-green3);
-  --color-green4: var(--grn-color-green4);
-  --color-green5: var(--grn-color-green5);
-  --color-green6: var(--grn-color-green6);
-  --color-green7: var(--grn-color-green7);
-  --color-green8: var(--grn-color-green8);
-  --color-green9: var(--grn-color-green9);
-  --color-green10: var(--grn-color-green10);
-  --color-green11: var(--grn-color-green11);
-  --color-green12: var(--grn-color-green12);
-
-  /* Core colors - Yellow */
-  --color-yellow1: var(--grn-color-yellow1);
-  --color-yellow2: var(--grn-color-yellow2);
-  --color-yellow3: var(--grn-color-yellow3);
-  --color-yellow4: var(--grn-color-yellow4);
-  --color-yellow5: var(--grn-color-yellow5);
-  --color-yellow6: var(--grn-color-yellow6);
-  --color-yellow7: var(--grn-color-yellow7);
-  --color-yellow8: var(--grn-color-yellow8);
-  --color-yellow9: var(--grn-color-yellow9);
-  --color-yellow10: var(--grn-color-yellow10);
-  --color-yellow11: var(--grn-color-yellow11);
-  --color-yellow12: var(--grn-color-yellow12);
-
-  /* Core colors - Red */
-  --color-red1: var(--grn-color-red1);
-  --color-red2: var(--grn-color-red2);
-  --color-red3: var(--grn-color-red3);
-  --color-red4: var(--grn-color-red4);
-  --color-red5: var(--grn-color-red5);
-  --color-red6: var(--grn-color-red6);
-  --color-red7: var(--grn-color-red7);
-  --color-red8: var(--grn-color-red8);
-  --color-red9: var(--grn-color-red9);
-  --color-red10: var(--grn-color-red10);
-  --color-red11: var(--grn-color-red11);
-  --color-red12: var(--grn-color-red12);
-
-  /* Shadow tokens — https://grain.flodesk.com/tokens/shadow */
-  --shadow-s: var(--grn-shadow-s);
-  --shadow-m: var(--grn-shadow-m);
-  --shadow-l: var(--grn-shadow-l);
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
 }
 
-@utility grid-cols-content {
-  grid-template-columns: repeat(2, min-content);
+html,
+body,
+#root {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: "Flodesk Sans", "Helvetica Neue", Arial, sans-serif;
+  color: var(--grn-color-content);
+  background: var(--grn-color-background);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ─── Flodesk wordmark (variable-weight TTF, sweep animation) ───────────── */
+
+.flodesk-logo {
+  display: inline-flex;
+  font-family: "Flodesk FlotesqueGX", "Helvetica Neue", Arial, sans-serif;
+  font-size: 22px; /* h3 token */
+  line-height: 1;
+  letter-spacing: 0.04em;
+  text-transform: lowercase;
+  text-decoration: none;
+  color: inherit;
+}
+
+@media (min-width: 1024px) {
+  .flodesk-logo {
+    font-size: 18px;
+  }
+}
+
+.flodesk-logo__letter {
+  display: inline-block;
+  font-weight: 0;
+  font-variation-settings: "wght" 0;
+  will-change: font-variation-settings;
+}
+
+.flodesk-logo:hover .flodesk-logo__letter,
+.flodesk-logo:focus-visible .flodesk-logo__letter {
+  animation: flodesk-logo-weight-sweep 560ms ease-in-out;
+  animation-delay: var(--flodesk-delay, 0ms);
+}
+
+@keyframes flodesk-logo-weight-sweep {
+  0%,
+  100% {
+    font-weight: 0;
+    font-variation-settings: "wght" 0;
+  }
+  50% {
+    font-weight: 100;
+    font-variation-settings: "wght" 100;
+  }
+}
+
+/* ─── Error boundary fallback page (404-style) ──────────────────────────── */
+
+.eb-shell {
+  min-height: 100vh;
+  width: 100%;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  background: var(--grn-color-shade2);
+}
+
+.eb-card {
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 0 16px;
+  text-align: center;
+  color: var(--grn-color-shade13);
+}
+
+.eb-wordmark {
+  padding-top: 78px;
+  font-size: 18px;
+  font-weight: 400;
+  letter-spacing: 0.02em;
+  line-height: 1;
+}
+
+.eb-title {
+  margin: 110px 0 0;
+  font-size: 35px;
+  font-weight: 500;
+  line-height: 1.1;
+}
+
+.eb-body {
+  margin: 45px 0 0;
+  font-size: 14px;
+  font-weight: 300;
+  line-height: 1.87;
+}
+
+.eb-body a {
+  color: inherit;
+  text-decoration: underline;
+  font-weight: 400;
 }
 
 /* Paper plane figure-8 animation (replicated from Flodesk's error page) */
@@ -298,35 +192,5 @@
   }
   87.5% {
     transform: rotateY(0turn);
-  }
-}
-
-.flodesk-logo {
-  display: inline-flex;
-}
-
-.flodesk-logo__letter {
-  display: inline-block;
-  font-weight: 0;
-  font-variation-settings: "wght" 0;
-  will-change: font-variation-settings;
-}
-
-.flodesk-logo:hover .flodesk-logo__letter,
-.flodesk-logo:focus-visible .flodesk-logo__letter {
-  animation: flodesk-logo-weight-sweep 560ms ease-in-out;
-  animation-delay: var(--flodesk-delay, 0ms);
-}
-
-@keyframes flodesk-logo-weight-sweep {
-  0%,
-  100% {
-    font-weight: 0;
-    font-variation-settings: "wght" 0;
-  }
-
-  50% {
-    font-weight: 100;
-    font-variation-settings: "wght" 100;
   }
 }

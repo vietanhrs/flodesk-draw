@@ -7,12 +7,7 @@ interface FlodeskLogoProps {
 }
 
 export const FlodeskLogo = ({ className }: FlodeskLogoProps) => {
-  const classes = [
-    "flodesk-logo font-flodesk-flotesque text-h3 lg:text-lg tracking-wordmark leading-none lowercase no-underline",
-    className,
-  ]
-    .filter(Boolean)
-    .join(" ");
+  const classes = ["flodesk-logo", className].filter(Boolean).join(" ");
 
   return (
     <Link to="/" aria-label="Flodesk homepage" className={classes}>
