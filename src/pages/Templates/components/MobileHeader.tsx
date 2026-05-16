@@ -11,23 +11,27 @@ interface MobileHeaderProps {
 export const MobileHeader = ({ activeCategoryId }: MobileHeaderProps) => {
   const navigate = useNavigate();
 
-  const options = categories.map((c) => ({ value: c.id, content: c.label }));
+  const SCRATCH_VALUE = "__start-from-scratch";
+  const options = [
+    ...categories.map((c) => ({ value: c.id, content: c.label })),
+    { value: SCRATCH_VALUE, content: "Start from scratch" },
+  ];
 
   return (
     <>
-      <div className="xl:hidden flex flex-col gap-6 pt-0">
-        <FlodeskLogo className="self-start pb-10" />
-        <h2 className="font-flodesk text-shade13 text-3xl font-medium leading-tight m-0">
-          What's your goal?
-        </h2>
+      <div className="tpl-mobile">
+        <FlodeskLogo className="tpl-mobile__logo" />
+        <h2 className="tpl-mobile__heading">What's your goal?</h2>
       </div>
-      <div className="xl:hidden sticky top-0 z-10 -mx-4 px-4 py-2 bg-background mt-3 mb-4">
+      <div className="tpl-mobile__filter">
         <Select
           aria-label="Filter templates by category"
           options={options}
           value={activeCategoryId}
           onChange={(option) => {
-            if (option.value === ALL_CATEGORY_ID) {
+            if (option.value === SCRATCH_VALUE) {
+              navigate("/editor");
+            } else if (option.value === ALL_CATEGORY_ID) {
               navigate("/templates");
             } else {
               navigate(`/templates?category=${option.value}`);

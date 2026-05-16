@@ -8,6 +8,7 @@ import { templates } from "@src/data/templates";
 import { MobileHeader } from "./components/MobileHeader";
 import { Sidebar } from "./components/Sidebar";
 import { TemplateCard } from "./components/TemplateCard";
+import "./templates.css";
 
 export const Templates = () => {
   const [searchParams] = useSearchParams();
@@ -23,24 +24,18 @@ export const Templates = () => {
   }, [activeCategoryId]);
 
   return (
-    <main className="min-h-screen xl:bg-background2 flex flex-col xl:flex-row xl:gap-26 pb-20 p-4 xl:p-0">
+    <main className="tpl-page">
       <Sidebar activeCategoryId={activeCategoryId} />
 
-      <section
-        aria-label="Templates"
-        className="flex-1 min-w-0 xl:pt-34 2xl:max-w-230"
-      >
+      <section aria-label="Templates" className="tpl-section">
         <MobileHeader activeCategoryId={activeCategoryId} />
 
         {visibleTemplates.length === 0 ? (
-          <p className="text-content2 text-body mt-10">
+          <p className="tpl-section__empty">
             No templates in this category yet.
           </p>
         ) : (
-          <ul
-            role="list"
-            className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-content gap-x-18 gap-y-15 list-none p-0 m-0"
-          >
+          <ul role="list" className="tpl-grid">
             {visibleTemplates.map((template) => (
               <li key={template.id}>
                 <TemplateCard template={template} />

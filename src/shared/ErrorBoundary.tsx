@@ -39,31 +39,19 @@ export class ErrorBoundary extends Component<
       }
 
       return (
-        <div className="min-h-screen w-full flex items-start justify-center bg-shade2">
-          <div className="w-full max-w-150 mx-auto text-center px-4 font-flodesk text-shade13">
-            <div className="pt-19.5 text-lg font-normal tracking-logo leading-none">
-              flodesk
-            </div>
+        <div className="eb-shell">
+          <div className="eb-card">
+            <div className="eb-wordmark">flodesk</div>
 
-            <h1 className="mt-27.5 mb-0 text-title font-medium leading-title">
-              Oops!
-            </h1>
-            <p className="mt-11.25 text-body font-light leading-body">
+            <h1 className="eb-title">Oops!</h1>
+            <p className="eb-body">
               It looks like something went wrong on our side.
               <br />
               Please{" "}
-              <a
-                href="#"
-                onClick={this.handleRefresh}
-                className="underline font-normal text-inherit"
-              >
+              <a href="#" onClick={this.handleRefresh}>
                 refresh
               </a>{" "}
-              the page or{" "}
-              <a href="/" className="underline font-normal text-inherit">
-                go back and try again
-              </a>
-              .
+              the page or <a href="/">go back and try again</a>.
             </p>
 
             <div className="paper-airplane" aria-hidden="true">

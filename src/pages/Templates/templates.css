@@ -1,0 +1,269 @@
+/* Templates page — no Tailwind. Uses @flodesk/grain CSS variables for colour. */
+
+.tpl-page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  padding: 16px;
+  padding-bottom: 80px;
+}
+
+.tpl-section {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.tpl-section__empty {
+  margin-top: 40px;
+  color: var(--grn-color-content2);
+  font-size: 14px;
+}
+
+.tpl-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  column-gap: 72px;
+  row-gap: 60px;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+@media (min-width: 768px) {
+  .tpl-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1280px) {
+  .tpl-page {
+    background: var(--grn-color-background2);
+    flex-direction: row;
+    gap: 104px;
+    padding: 0;
+    padding-bottom: 80px;
+  }
+  .tpl-section {
+    padding-top: 136px;
+  }
+  .tpl-grid {
+    grid-template-columns: repeat(2, min-content);
+  }
+}
+
+@media (min-width: 1536px) {
+  .tpl-section {
+    max-width: 920px;
+  }
+}
+
+/* ─── Sidebar (xl+) ─────────────────────────────────────────────────────── */
+
+.tpl-sidebar {
+  display: none;
+}
+
+@media (min-width: 1280px) {
+  .tpl-sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 60px;
+    padding: 40px 28px 0 20px;
+    background: var(--grn-color-background);
+  }
+}
+
+@media (min-width: 1536px) {
+  .tpl-sidebar {
+    padding-left: 40px;
+    padding-right: 24px;
+  }
+}
+
+.tpl-sidebar__inner {
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+  margin-left: 68px;
+  margin-right: 40px;
+}
+
+@media (min-width: 1536px) {
+  .tpl-sidebar__inner {
+    margin-left: 136px;
+    margin-right: 80px;
+  }
+}
+
+.tpl-sidebar__heading {
+  margin: 12px 0 0;
+  color: var(--grn-color-shade13);
+  line-height: 1.15;
+  font-family: "Flodesk Sans", "Helvetica Neue", Arial, sans-serif;
+}
+
+.tpl-sidebar__nav {
+  margin: 0;
+  padding: 0;
+}
+
+.tpl-sidebar__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  row-gap: var(--grn-space-s);
+}
+
+.tpl-sidebar__link {
+  line-height: var(--grn-lineHeight-global);
+  display: block;
+  font-family: inherit;
+  font-size: 14px;
+  text-decoration: none;
+  font-weight: 400;
+  color: var(--grn-color-content2);
+  transition: color 120ms ease;
+}
+
+.tpl-sidebar__link:hover {
+  color: var(--grn-color-shade13);
+}
+
+.tpl-sidebar__link--active {
+  color: var(--grn-color-shade13);
+  font-weight: 500;
+}
+
+/* ─── Mobile header (below xl) ──────────────────────────────────────────── */
+
+.tpl-mobile {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.tpl-mobile__logo {
+  align-self: flex-start;
+  padding-bottom: 40px;
+}
+
+.tpl-mobile__heading {
+  margin: 0;
+  font-family: "Flodesk Sans", "Helvetica Neue", Arial, sans-serif;
+  color: var(--grn-color-shade13);
+  font-size: 30px;
+  font-weight: 500;
+  line-height: 1.15;
+}
+
+.tpl-mobile__filter {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  margin: 12px -16px 16px;
+  padding: 8px 16px;
+  background: var(--grn-color-background);
+}
+
+@media (min-width: 1280px) {
+  .tpl-mobile,
+  .tpl-mobile__filter {
+    display: none;
+  }
+}
+
+/* ─── Template card ─────────────────────────────────────────────────────── */
+
+.tpl-card {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  width: 100%;
+}
+
+@media (min-width: 1280px) {
+  .tpl-card {
+    width: min-content;
+  }
+}
+
+.tpl-card__preview {
+  position: relative;
+  border-radius: 10px;
+  width: 100%;
+  overflow: hidden;
+  background: #ffffff;
+  box-shadow: var(--grn-shadow-m);
+  aspect-ratio: 600 / 785;
+  container-type: inline-size;
+}
+
+@media (min-width: 1280px) {
+  .tpl-card__preview {
+    width: 328px;
+  }
+}
+
+.tpl-card__iframe {
+  display: block;
+  border: 0;
+  pointer-events: none;
+  transform-origin: top left;
+}
+
+.tpl-card__overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 200ms ease;
+  text-decoration: none;
+  background-color: var(--grn-color-backdrop);
+}
+
+.tpl-card:hover .tpl-card__overlay,
+.tpl-card__overlay:focus-visible {
+  opacity: 1;
+}
+
+.tpl-card__button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--grn-color-shade2);
+  color: var(--grn-color-shade13);
+  font-size: 14px;
+  font-weight: 500;
+  border-radius: 6px;
+  padding: 0 16px;
+  height: 40px;
+  border: 1px solid var(--grn-color-border);
+  font-family: "Flodesk Sans", "Helvetica Neue", Arial, sans-serif;
+}
+
+.tpl-card__meta {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-family: "Flodesk Sans", "Helvetica Neue", Arial, sans-serif;
+}
+
+.tpl-card__category {
+  margin: 0;
+  color: var(--grn-color-content2);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.tpl-card__title {
+  margin: 0;
+  color: var(--grn-color-shade13);
+  font-size: 18px;
+  font-weight: 500;
+  line-height: 1.3;
+}
