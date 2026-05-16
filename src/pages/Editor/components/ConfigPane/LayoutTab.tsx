@@ -12,7 +12,7 @@ export const LayoutTab = ({ row }: Props) => {
   const { updateRow, setRowColumnsCount, setColumnWidth } = useEditor();
 
   return (
-    <div className="flex flex-col gap-5">
+    <div className="edt-fields">
       <ColorInput
         label="Background"
         value={row.backgroundColor}
@@ -35,10 +35,8 @@ export const LayoutTab = ({ row }: Props) => {
       />
 
       {row.columnsCount > 1 && (
-        <div className="flex flex-col gap-2">
-          <span className="text-xs font-medium text-content2 uppercase tracking-caps font-flodesk">
-            Column widths
-          </span>
+        <div>
+          <span className="edt-field__group-label">Column widths</span>
           {row.columnWidths.map((w, i) => (
             <NumberField
               key={i}

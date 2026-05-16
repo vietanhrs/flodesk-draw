@@ -6,13 +6,11 @@ export const PageTab = () => {
   const { page, updatePage } = useEditor();
 
   return (
-    <div className="flex flex-col gap-5">
+    <div className="edt-fields">
       <ColorInput
         label="Background"
         value={page.backgroundColor}
-        onChange={(c) =>
-          updatePage({ backgroundColor: c }, "page-bg")
-        }
+        onChange={(c) => updatePage({ backgroundColor: c }, "page-bg")}
       />
       <NumberField
         label="Horizontal padding"
@@ -20,9 +18,7 @@ export const PageTab = () => {
         min={0}
         max={200}
         unit="px"
-        onChange={(v) =>
-          updatePage({ paddingX: v }, "page-padding-x")
-        }
+        onChange={(v) => updatePage({ paddingX: v }, "page-padding-x")}
       />
       <NumberField
         label="Vertical padding"
@@ -30,9 +26,7 @@ export const PageTab = () => {
         min={0}
         max={200}
         unit="px"
-        onChange={(v) =>
-          updatePage({ paddingY: v }, "page-padding-y")
-        }
+        onChange={(v) => updatePage({ paddingY: v }, "page-padding-y")}
       />
     </div>
   );

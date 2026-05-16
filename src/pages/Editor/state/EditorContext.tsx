@@ -510,6 +510,17 @@ export const EditorProvider = ({ templateId, children }: ProviderProps) => {
   }, [templateId]);
 
   useEffect(() => {
+    try {
+      localStorage.setItem(
+        storageKey(templateId),
+        JSON.stringify(state.history.present)
+      );
+    } catch {
+      // ignore
+    }
+  }, [state.history.present, templateId]);
+
+  useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       const target = e.target as HTMLElement | null;
       const isEditableTarget =

@@ -2,6 +2,7 @@ import { useState } from "react";
 
 import { useParams } from "react-router-dom";
 
+import "./editor.css";
 import { BuildModal } from "./components/BuildModal";
 import { Canvas } from "./components/Canvas/Canvas";
 import { ConfigPane } from "./components/ConfigPane/ConfigPane";
@@ -46,9 +47,9 @@ const EditorShell = () => {
   };
 
   return (
-    <div className="h-screen w-full flex flex-col bg-background2 font-flodesk">
+    <div className="edt-shell">
       <Header onBuild={handleBuild} isBuilding={build.status === "building" && build.isOpen} />
-      <div className="flex-1 min-h-0 flex">
+      <div className="edt-body">
         <ElementMenu />
         <Canvas />
         <ConfigPane />

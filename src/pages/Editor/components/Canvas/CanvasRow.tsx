@@ -99,7 +99,7 @@ export const CanvasRow = ({
 
   return (
     <div
-      className="group/row relative"
+      className="edt-row"
       style={{ marginTop: row.marginY, marginBottom: row.marginY }}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
@@ -126,10 +126,10 @@ export const CanvasRow = ({
       )}
 
       {edgeIndicator === "above" && (
-        <div className="absolute -top-0.5 left-0 right-0 h-1 bg-blue9 z-10 pointer-events-none" />
+        <div className="edt-row__edge edt-row__edge--top" />
       )}
       {edgeIndicator === "below" && (
-        <div className="absolute -bottom-0.5 left-0 right-0 h-1 bg-blue9 z-10 pointer-events-none" />
+        <div className="edt-row__edge edt-row__edge--bottom" />
       )}
 
       <div
@@ -138,14 +138,14 @@ export const CanvasRow = ({
         onDragEnd={handleRowDragEnd}
         onClick={handleSelectRow}
         aria-label={`Row ${rowIndex + 1}`}
-        className={[
-          "relative cursor-move",
-          showRowChrome
-            ? "outline-2 outline-blue9 outline-dashed -outline-offset-2"
+        className={
+          "edt-row__inner" +
+          (showRowChrome
+            ? " edt-row__inner--active"
             : isHovered
-            ? "outline outline-blue7 outline-dashed -outline-offset-2"
-            : "",
-        ].join(" ")}
+            ? " edt-row__inner--hover"
+            : "")
+        }
         style={{
           backgroundColor: row.backgroundColor,
           paddingLeft: row.paddingX,
@@ -196,15 +196,12 @@ export const CanvasRow = ({
                     setSelection({ kind: "row", rowId: row.id });
                   }
                 }}
-                className={[
-                  "min-h-15 flex flex-col gap-4 transition-colors",
-                  isColumnDrop ? "bg-overlay" : "",
-                ].join(" ")}
+                className={
+                  "edt-column" + (isColumnDrop ? " edt-column--drop" : "")
+                }
               >
                 {column.length === 0 && (
-                  <div className="flex-1 flex items-center justify-center text-content3 text-xs uppercase tracking-caps font-flodesk py-6 border border-dashed border-border2 rounded-sm">
-                    Drop element
-                  </div>
+                  <div className="edt-column__placeholder">Drop element</div>
                 )}
                 {column.map((element) => {
                   const isSelected =
@@ -242,12 +239,10 @@ export const CanvasRow = ({
                       role="button"
                       aria-label={`${element.type} element`}
                       aria-pressed={isSelected}
-                      className={[
-                        "relative cursor-pointer outline-none",
-                        isSelected
-                          ? "ring-2 ring-blue9 ring-offset-2 ring-offset-transparent"
-                          : "hover:ring-1 hover:ring-blue7",
-                      ].join(" ")}
+                      className={
+                        "edt-element" +
+                        (isSelected ? " edt-element--selected" : "")
+                      }
                     >
                       <ElementRenderer element={element} />
                     </div>

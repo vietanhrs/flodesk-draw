@@ -41,37 +41,28 @@ export const ConfigPane = () => {
   }
 
   return (
-    <aside
-      aria-label="Configuration"
-      className="flex-none w-80 border-l border-border bg-background flex flex-col min-h-0"
-    >
-      <div className="px-3 pt-3 border-b border-border">
+    <aside aria-label="Configuration" className="edt-config">
+      <div className="edt-config__tabs">
         <TabGroup hasFullWidth>
           <Tab isActive={tab === "page"} onClick={() => setTab("page")}>
             Page
           </Tab>
-          <Tab
-            isActive={tab === "layout"}
-            onClick={() => setTab("layout")}
-          >
+          <Tab isActive={tab === "layout"} onClick={() => setTab("layout")}>
             Layout
           </Tab>
-          <Tab
-            isActive={tab === "element"}
-            onClick={() => setTab("element")}
-          >
+          <Tab isActive={tab === "element"} onClick={() => setTab("element")}>
             Element
           </Tab>
         </TabGroup>
       </div>
 
-      <div className="flex-1 min-h-0 overflow-y-auto p-4 font-flodesk">
+      <div className="edt-config__body">
         {tab === "page" && <PageTab />}
         {tab === "layout" &&
           (selectedRow ? (
             <LayoutTab row={selectedRow} />
           ) : (
-            <p className="text-content2 text-sm m-0">
+            <p className="edt-config__empty">
               Select a row in the canvas to configure its layout.
             </p>
           ))}
@@ -82,7 +73,7 @@ export const ConfigPane = () => {
               element={selectedElement}
             />
           ) : (
-            <p className="text-content2 text-sm m-0">
+            <p className="edt-config__empty">
               Select an element in the canvas to configure it.
             </p>
           ))}

@@ -33,23 +33,12 @@ export const ColorInput = ({
   const swatchColor = isTransparent ? "#ffffff" : value;
 
   return (
-    <label className="flex flex-col gap-1.5 font-flodesk text-shade13">
-      <span className="text-xs font-medium text-content2 uppercase tracking-caps">
-        {label}
-      </span>
-      <div className="flex items-stretch gap-2">
-        <div className="relative w-9 h-9 rounded-md border border-border overflow-hidden">
+    <label className="edt-field">
+      <span className="edt-field__label">{label}</span>
+      <div className="edt-color">
+        <div className="edt-color__swatch">
           {isTransparent && (
-            <div
-              aria-hidden="true"
-              className="absolute inset-0"
-              style={{
-                backgroundImage:
-                  "linear-gradient(45deg, #ccc 25%, transparent 25%), linear-gradient(-45deg, #ccc 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #ccc 75%), linear-gradient(-45deg, transparent 75%, #ccc 75%)",
-                backgroundSize: "8px 8px",
-                backgroundPosition: "0 0, 0 4px, 4px -4px, -4px 0px",
-              }}
-            />
+            <div aria-hidden="true" className="edt-color__check" />
           )}
           <input
             type="color"
@@ -59,11 +48,11 @@ export const ColorInput = ({
               setText(e.target.value);
               onChange(e.target.value);
             }}
-            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+            className="edt-color__picker"
           />
           <div
             aria-hidden="true"
-            className="absolute inset-0 pointer-events-none"
+            className="edt-color__fill"
             style={{
               backgroundColor: isTransparent ? "transparent" : value,
             }}
@@ -84,7 +73,7 @@ export const ColorInput = ({
               (e.target as HTMLInputElement).blur();
             }
           }}
-          className="flex-1 h-9 px-2 rounded-md border border-border bg-background text-shade13 text-sm font-flodesk"
+          className="edt-color__text"
         />
         {allowTransparent && (
           <button
@@ -92,7 +81,7 @@ export const ColorInput = ({
             onClick={() => onChange("transparent")}
             title="Set transparent"
             aria-label="Set transparent"
-            className="px-2 h-9 text-xs uppercase tracking-caps font-flodesk border border-border rounded-md text-content2 hover:text-shade13"
+            className="edt-color__none"
           >
             None
           </button>

@@ -17,9 +17,9 @@ export const BuildModal = ({ isOpen, status, message, onClose }: Props) => {
       title="Build & export"
       disableCloseHandler={status === "building"}
     >
-      <div className="flex flex-col items-center gap-4 py-4 font-flodesk text-shade13">
+      <div className="edt-build">
         {status === "building" && <Spinner />}
-        <p className="text-body m-0 text-center">{message}</p>
+        <p>{message}</p>
       </div>
     </Modal>
   );

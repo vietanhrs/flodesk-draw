@@ -17,14 +17,12 @@ export const SegmentedField = <T extends string | number>({
   onChange,
 }: Props<T>) => {
   return (
-    <div className="flex flex-col gap-1.5 font-flodesk text-shade13">
-      <span className="text-xs font-medium text-content2 uppercase tracking-caps">
-        {label}
-      </span>
+    <div className="edt-field">
+      <span className="edt-field__label">{label}</span>
       <div
         role="radiogroup"
         aria-label={label}
-        className="inline-flex rounded-md overflow-hidden border border-border self-start"
+        className="edt-segmented"
       >
         {options.map((opt) => {
           const isActive = opt.value === value;
@@ -35,12 +33,10 @@ export const SegmentedField = <T extends string | number>({
               role="radio"
               aria-checked={isActive}
               onClick={() => onChange(opt.value)}
-              className={[
-                "px-3 h-8 inline-flex items-center justify-center gap-1.5 text-sm not-last:border-r not-last:border-border",
-                isActive
-                  ? "bg-shade13 text-shade1"
-                  : "bg-background text-content2 hover:text-shade13 hover:bg-shade1",
-              ].join(" ")}
+              className={
+                "edt-segmented__btn" +
+                (isActive ? " edt-segmented__btn--active" : "")
+              }
             >
               {opt.label}
             </button>

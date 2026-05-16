@@ -61,7 +61,7 @@ export const ElementTab = ({ rowId, element }: Props) => {
   switch (element.type) {
     case "heading":
       return (
-        <div className="flex flex-col gap-5">
+        <div className="edt-fields">
           <TextField
             label="Text"
             value={element.text}
@@ -135,7 +135,7 @@ export const ElementTab = ({ rowId, element }: Props) => {
       );
     case "paragraph":
       return (
-        <div className="flex flex-col gap-5">
+        <div className="edt-fields">
           <TextField
             label="Text"
             value={element.text}
@@ -199,7 +199,7 @@ export const ElementTab = ({ rowId, element }: Props) => {
       );
     case "quote":
       return (
-        <div className="flex flex-col gap-5">
+        <div className="edt-fields">
           <TextField
             label="Quote"
             value={element.text}
@@ -251,7 +251,7 @@ export const ElementTab = ({ rowId, element }: Props) => {
       );
     case "button":
       return (
-        <div className="flex flex-col gap-5">
+        <div className="edt-fields">
           <TextField
             label="Label"
             value={element.label}
@@ -363,7 +363,7 @@ export const ElementTab = ({ rowId, element }: Props) => {
       );
     case "image":
       return (
-        <div className="flex flex-col gap-5">
+        <div className="edt-fields">
           <TextField
             label="Image URL"
             value={element.src}
@@ -414,7 +414,7 @@ export const ElementTab = ({ rowId, element }: Props) => {
       );
     case "divider":
       return (
-        <div className="flex flex-col gap-5">
+        <div className="edt-fields">
           <ColorInput
             label="Color"
             value={element.color}
@@ -452,7 +452,7 @@ export const ElementTab = ({ rowId, element }: Props) => {
       );
     case "spacer":
       return (
-        <div className="flex flex-col gap-5">
+        <div className="edt-fields">
           <NumberField
             label="Height"
             value={element.height}
@@ -470,7 +470,7 @@ export const ElementTab = ({ rowId, element }: Props) => {
       );
     case "video":
       return (
-        <div className="flex flex-col gap-5">
+        <div className="edt-fields">
           <TextField
             label="Embed URL"
             value={element.url}
@@ -502,7 +502,7 @@ export const ElementTab = ({ rowId, element }: Props) => {
         setProp<typeof element>({ links }, debounceKey(`link-${index}`));
       };
       return (
-        <div className="flex flex-col gap-5">
+        <div className="edt-fields">
           <ColorInput
             label="Icon color"
             value={element.color}
@@ -536,10 +536,8 @@ export const ElementTab = ({ rowId, element }: Props) => {
             options={alignOptions}
             onChange={(v) => setProp<typeof element>({ align: v })}
           />
-          <div className="flex flex-col gap-3">
-            <span className="text-xs font-medium text-content2 uppercase tracking-caps font-flodesk">
-              Links
-            </span>
+          <div className="edt-fields">
+            <span className="edt-field__group-label">Links</span>
             {element.links.map((link, i) => (
               <TextField
                 key={`${link.platform}-${i}`}

@@ -29,7 +29,6 @@ export const Header = ({ onBuild, isBuilding }: Props) => {
     redo,
     viewport,
     setViewport,
-    saveToStorage,
   } = useEditor();
 
   const [title, setTitle] = useState(page.title);
@@ -43,28 +42,25 @@ export const Header = ({ onBuild, isBuilding }: Props) => {
     if (title !== page.title) {
       updatePage({ title });
     }
-    saveToStorage();
   };
 
   return (
-    <header className="flex items-center justify-between gap-4 px-4 h-14 border-b border-border bg-background flex-none">
-      <div className="flex items-center gap-3 min-w-0">
+    <header className="edt-header">
+      <div className="edt-header__left">
         <Link
           to="/templates"
           aria-label="Back to templates"
           title="Back to templates"
-          className="w-8 h-8 inline-flex items-center justify-center rounded-md text-shade13 hover:bg-shade2 no-underline"
+          className="edt-back-link"
         >
           <IconArrowLeft width={18} height={18} />
         </Link>
         <form
-          className="min-w-0 flex-1"
+          className="edt-title-form"
           onSubmit={(e) => {
             e.preventDefault();
             commitTitle();
-            (e.target as HTMLFormElement)
-              .querySelector("input")
-              ?.blur();
+            (e.target as HTMLFormElement).querySelector("input")?.blur();
           }}
         >
           <TextInput
@@ -78,19 +74,15 @@ export const Header = ({ onBuild, isBuilding }: Props) => {
         </form>
       </div>
 
-      <div className="flex items-center gap-2">
-        <div
-          role="toolbar"
-          aria-label="History"
-          className="inline-flex items-center rounded-md border border-border overflow-hidden"
-        >
+      <div className="edt-header__right">
+        <div role="toolbar" aria-label="History" className="edt-toolbar">
           <button
             type="button"
             aria-label="Undo"
             title="Undo (Ctrl/Cmd+Z)"
             disabled={!canUndo}
             onClick={undo}
-            className="w-9 h-9 inline-flex items-center justify-center text-shade13 hover:bg-shade2 disabled:opacity-40 disabled:cursor-not-allowed border-r border-border"
+            className="edt-toolbar-btn"
           >
             <IconUndo width={16} height={16} />
           </button>
@@ -100,7 +92,7 @@ export const Header = ({ onBuild, isBuilding }: Props) => {
             title="Redo (Ctrl/Cmd+Shift+Z)"
             disabled={!canRedo}
             onClick={redo}
-            className="w-9 h-9 inline-flex items-center justify-center text-shade13 hover:bg-shade2 disabled:opacity-40 disabled:cursor-not-allowed"
+            className="edt-toolbar-btn"
           >
             <IconRedo width={16} height={16} />
           </button>
@@ -109,7 +101,7 @@ export const Header = ({ onBuild, isBuilding }: Props) => {
         <div
           role="radiogroup"
           aria-label="Viewport"
-          className="inline-flex items-center rounded-md border border-border overflow-hidden"
+          className="edt-toolbar"
         >
           <button
             type="button"
@@ -118,12 +110,7 @@ export const Header = ({ onBuild, isBuilding }: Props) => {
             aria-label="Desktop view"
             title="Desktop view"
             onClick={() => setViewport("desktop")}
-            className={[
-              "w-9 h-9 inline-flex items-center justify-center border-r border-border",
-              viewport === "desktop"
-                ? "bg-shade13 text-shade1"
-                : "text-shade13 hover:bg-shade2",
-            ].join(" ")}
+            className="edt-toolbar-btn"
           >
             <IconMonitor width={16} height={16} />
           </button>
@@ -134,12 +121,7 @@ export const Header = ({ onBuild, isBuilding }: Props) => {
             aria-label="Mobile view"
             title="Mobile view"
             onClick={() => setViewport("mobile")}
-            className={[
-              "w-9 h-9 inline-flex items-center justify-center",
-              viewport === "mobile"
-                ? "bg-shade13 text-shade1"
-                : "text-shade13 hover:bg-shade2",
-            ].join(" ")}
+            className="edt-toolbar-btn"
           >
             <IconPhone width={16} height={16} />
           </button>

@@ -17,26 +17,22 @@ export const TextField = ({
 }: Props) => {
   if (multiline) {
     return (
-      <label className="flex flex-col gap-1.5 font-flodesk text-shade13">
-        <span className="text-xs font-medium text-content2 uppercase tracking-caps">
-          {label}
-        </span>
+      <label className="edt-field">
+        <span className="edt-field__label">{label}</span>
         <textarea
           value={value}
           placeholder={placeholder}
           onChange={(e) => onChange(e.target.value)}
           aria-label={label}
           rows={3}
-          className="rounded-md border border-border bg-background px-2.5 py-2 text-shade13 text-sm font-flodesk resize-y min-h-15"
+          className="edt-textarea"
         />
       </label>
     );
   }
   return (
-    <label className="flex flex-col gap-1.5 font-flodesk text-shade13">
-      <span className="text-xs font-medium text-content2 uppercase tracking-caps">
-        {label}
-      </span>
+    <label className="edt-field">
+      <span className="edt-field__label">{label}</span>
       <TextInput
         value={value}
         onChange={(e) => onChange(e.target.value)}

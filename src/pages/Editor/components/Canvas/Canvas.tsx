@@ -44,11 +44,11 @@ export const Canvas = () => {
 
   return (
     <div
-      className="flex-1 min-w-0 min-h-0 overflow-auto bg-background2 py-8"
+      className="edt-canvas-scroll"
       onClick={() => setSelection(null)}
     >
       <div
-        className="mx-auto bg-background shadow-l transition-[max-width] duration-300"
+        className="edt-canvas-paper"
         style={{
           maxWidth: VIEWPORT_WIDTH[viewport],
           backgroundColor: page.backgroundColor,
@@ -65,15 +65,12 @@ export const Canvas = () => {
               if (dragHasNewElement(e.dataTransfer)) e.preventDefault();
             }}
             onDrop={handleEmptyCanvasDrop}
-            className="min-h-50 m-8 border border-dashed border-border2 rounded-md flex items-center justify-center text-content2 font-flodesk text-body"
+            className="edt-canvas-empty"
           >
-            Click <kbd className="mx-1 px-1.5 py-0.5 bg-shade2 rounded">+</kbd>{" "}
-            or drop an element to start your page.
-            <button
-              type="button"
-              onClick={() => addRowAt(0)}
-              className="ml-3 inline-flex items-center justify-center px-3 py-1.5 rounded-md bg-shade13 text-shade1 text-sm"
-            >
+            <span>
+              Click <kbd>+</kbd> or drop an element to start your page.
+            </span>
+            <button type="button" onClick={() => addRowAt(0)}>
               Add row
             </button>
           </div>

@@ -38,11 +38,9 @@ export const NumberField = ({
   };
 
   return (
-    <label className="flex flex-col gap-1.5 font-flodesk text-shade13">
-      <span className="text-xs font-medium text-content2 uppercase tracking-caps">
-        {label}
-      </span>
-      <div className="flex items-center gap-2">
+    <label className="edt-field">
+      <span className="edt-field__label">{label}</span>
+      <div className="edt-field__row">
         <input
           type="range"
           min={min}
@@ -51,28 +49,23 @@ export const NumberField = ({
           value={value}
           onChange={(e) => onChange(Number(e.target.value))}
           aria-label={`${label} slider`}
-          className="flex-1 accent-blue9"
+          className="edt-field__range"
         />
-        <div className="flex items-center gap-1">
-          <input
-            type="number"
-            min={min}
-            max={max}
-            step={step}
-            value={text}
-            onChange={(e) => setText(e.target.value)}
-            onBlur={(e) => commit(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter")
-                (e.target as HTMLInputElement).blur();
-            }}
-            aria-label={label}
-            className="w-16 h-8 px-2 rounded-md border border-border bg-background text-shade13 text-sm font-flodesk"
-          />
-          {unit && (
-            <span className="text-xs text-content2 font-flodesk">{unit}</span>
-          )}
-        </div>
+        <input
+          type="number"
+          min={min}
+          max={max}
+          step={step}
+          value={text}
+          onChange={(e) => setText(e.target.value)}
+          onBlur={(e) => commit(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") (e.target as HTMLInputElement).blur();
+          }}
+          aria-label={label}
+          className="edt-field__numeric"
+        />
+        {unit && <span className="edt-field__unit">{unit}</span>}
       </div>
     </label>
   );
