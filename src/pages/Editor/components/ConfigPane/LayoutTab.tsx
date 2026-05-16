@@ -1,0 +1,98 @@
+import { ColorInput } from "./controls/ColorInput";
+import { NumberField } from "./controls/NumberField";
+import { SegmentedField } from "./controls/SegmentedField";
+import { useEditor } from "../../state/EditorContext";
+import type { PageRow } from "../../state/types";
+
+interface Props {
+  row: PageRow;
+}
+
+export const LayoutTab = ({ row }: Props) => {
+  const { updateRow, setRowColumnsCount, setColumnWidth } = useEditor();
+
+  return (
+    <div className="flex flex-col gap-5">
+      <ColorInput
+        label="Background"
+        value={row.backgroundColor}
+        allowTransparent
+        onChange={(c) =>
+          updateRow(row.id, { backgroundColor: c }, `row-bg-${row.id}`)
+        }
+      />
+
+      <SegmentedField<1 | 2 | 3 | 4>
+        label="Columns"
+        value={row.columnsCount}
+        options={[
+          { value: 1, label: "1" },
+          { value: 2, label: "2" },
+          { value: 3, label: "3" },
+          { value: 4, label: "4" },
+        ]}
+        onChange={(c) => setRowColumnsCount(row.id, c)}
+      />
+
+      {row.columnsCount > 1 && (
+        <div className="flex flex-col gap-2">
+          <span className="text-xs font-medium text-content2 uppercase tracking-caps font-flodesk">
+            Column widths
+          </span>
+          {row.columnWidths.map((w, i) => (
+            <NumberField
+              key={i}
+              label={`Column ${i + 1} weight`}
+              value={Math.round(w * 100) / 100}
+              min={0.1}
+              max={10}
+              step={0.1}
+              onChange={(next) => setColumnWidth(row.id, i, next)}
+            />
+          ))}
+        </div>
+      )}
+
+      <NumberField
+        label="Column gap"
+        value={row.columnGap}
+        min={0}
+        max={200}
+        unit="px"
+        onChange={(v) =>
+          updateRow(row.id, { columnGap: v }, `row-gap-${row.id}`)
+        }
+      />
+      <NumberField
+        label="Horizontal padding"
+        value={row.paddingX}
+        min={0}
+        max={200}
+        unit="px"
+        onChange={(v) =>
+          updateRow(row.id, { paddingX: v }, `row-paddingx-${row.id}`)
+        }
+      />
+      <NumberField
+        label="Vertical padding"
+        value={row.paddingY}
+        min={0}
+        max={200}
+        unit="px"
+        onChange={(v) =>
+          updateRow(row.id, { paddingY: v }, `row-paddingy-${row.id}`)
+        }
+      />
+      <NumberField
+        label="Vertical margin"
+        value={row.marginY}
+        min={0}
+        max={200}
+        unit="px"
+        onChange={(v) =>
+          updateRow(row.id, { marginY: v }, `row-marginy-${row.id}`)
+        }
+      />
+    </div>
+  );
+};

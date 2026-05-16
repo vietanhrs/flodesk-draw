@@ -9,6 +9,10 @@ const Templates = lazy(() =>
   import("./pages/Templates").then((m) => ({ default: m.Templates }))
 );
 
+const Editor = lazy(() =>
+  import("./pages/Editor").then((m) => ({ default: m.Editor }))
+);
+
 export const router = createBrowserRouter([
   {
     path: "/",
@@ -22,6 +26,22 @@ export const router = createBrowserRouter([
         element: (
           <SuspenseRoute>
             <Templates />
+          </SuspenseRoute>
+        ),
+      },
+      {
+        path: "templates/:templateId",
+        element: (
+          <SuspenseRoute>
+            <Editor />
+          </SuspenseRoute>
+        ),
+      },
+      {
+        path: "editor",
+        element: (
+          <SuspenseRoute>
+            <Editor />
           </SuspenseRoute>
         ),
       },
