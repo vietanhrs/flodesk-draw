@@ -1,9 +1,13 @@
 import { useMemo, useState } from "react";
 
 import {
+  Arrange,
+  Box,
+  Flex,
   IconChevronLeft,
   IconChevronRight,
   IconSearch,
+  Text,
   TextInput,
 } from "@flodesk/grain";
 
@@ -37,6 +41,15 @@ const ElementCard = ({ def }: { def: ElementDefinition }) => {
   );
 };
 
+const menuShellProps = {
+  flex: "0 0 auto" as const,
+  minHeight: 0,
+  backgroundColor: "background" as const,
+  borderColor: "border" as const,
+  borderWidth: "1px" as const,
+  borderSide: "right" as const,
+};
+
 export const ElementMenu = () => {
   const { isElementMenuOpen, toggleMenu } = useEditor();
   const [search, setSearch] = useState("");
@@ -57,7 +70,14 @@ export const ElementMenu = () => {
 
   if (!isElementMenuOpen) {
     return (
-      <div className="edt-menu edt-menu--collapsed">
+      <Flex
+        direction="column"
+        wrap="nowrap"
+        alignItems="center"
+        width="36px"
+        paddingTop="s2"
+        {...menuShellProps}
+      >
         <button
           type="button"
           aria-label="Open element menu"
@@ -67,14 +87,30 @@ export const ElementMenu = () => {
         >
           <IconChevronRight width={16} height={16} />
         </button>
-      </div>
+      </Flex>
     );
   }
 
   return (
-    <aside aria-label="Element menu" className="edt-menu">
-      <div className="edt-menu__header">
-        <div className="edt-menu__search">
+    <Flex
+      tag="aside"
+      aria-label="Element menu"
+      direction="column"
+      wrap="nowrap"
+      alignItems="stretch"
+      width="288px"
+      {...menuShellProps}
+    >
+      <Flex
+        wrap="nowrap"
+        alignItems="center"
+        gap="s"
+        padding="s2"
+        borderColor="border"
+        borderWidth="1px"
+        borderSide="bottom"
+      >
+        <Box flex="1 1 auto">
           <TextInput
             value={search}
             onChange={(e) => setSearch(e.target.value)}
@@ -83,7 +119,7 @@ export const ElementMenu = () => {
             icon={<IconSearch width={16} height={16} />}
             size="m"
           />
-        </div>
+        </Box>
         <button
           type="button"
           aria-label="Collapse element menu"
@@ -93,11 +129,24 @@ export const ElementMenu = () => {
         >
           <IconChevronLeft width={16} height={16} />
         </button>
-      </div>
+      </Flex>
 
-      <div className="edt-menu__columns">
-        <nav aria-label="Element categories" className="edt-menu__categories">
-          <ul>
+      <Arrange
+        columns="120px 1fr"
+        gap={0}
+        alignItems="stretch"
+        flex="1 1 auto"
+        minHeight={0}
+      >
+        <Box
+          tag="nav"
+          aria-label="Element categories"
+          overflowY="auto"
+          borderColor="border"
+          borderWidth="1px"
+          borderSide="right"
+        >
+          <Box tag="ul" margin={0} padding={0} style={{ listStyle: "none" }}>
             {elementCategories.map((cat) => {
               const isActive = !search && cat.id === categoryId;
               return (
@@ -119,21 +168,27 @@ export const ElementMenu = () => {
                 </li>
               );
             })}
-          </ul>
-        </nav>
+          </Box>
+        </Box>
 
-        <div className="edt-menu__grid-wrap">
+        <Box overflowY="auto" padding="s2">
           {filtered.length === 0 ? (
-            <p className="edt-menu__empty">No elements match.</p>
+            <Text size="s" color="content2">
+              No elements match.
+            </Text>
           ) : (
-            <div className="edt-menu__grid">
+            <Arrange
+              columns="repeat(2, minmax(0, 1fr))"
+              columnGap="s"
+              rowGap="s"
+            >
               {filtered.map((def) => (
                 <ElementCard key={def.type} def={def} />
               ))}
-            </div>
+            </Arrange>
           )}
-        </div>
-      </div>
-    </aside>
+        </Box>
+      </Arrange>
+    </Flex>
   );
 };

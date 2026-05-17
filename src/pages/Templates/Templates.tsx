@@ -1,5 +1,6 @@
 import { useMemo } from "react";
 
+import { Arrange, Text } from "@flodesk/grain";
 import { useSearchParams } from "react-router-dom";
 
 import { ALL_CATEGORY_ID, categories } from "@src/data/categories";
@@ -31,17 +32,35 @@ export const Templates = () => {
         <MobileHeader activeCategoryId={activeCategoryId} />
 
         {visibleTemplates.length === 0 ? (
-          <p className="tpl-section__empty">
+          <Text
+            tag="p"
+            size="m"
+            color="content2"
+            className="tpl-section__empty"
+          >
             No templates in this category yet.
-          </p>
+          </Text>
         ) : (
-          <ul role="list" className="tpl-grid">
+          <Arrange
+            tag="ul"
+            role="list"
+            columns={{
+              default: "repeat(2, min-content)",
+              tablet: "repeat(2, minmax(0, 1fr))",
+              mobile: "1fr",
+            }}
+            columnGap="72px"
+            rowGap="60px"
+            padding={0}
+            margin={0}
+            style={{ listStyle: "none" }}
+          >
             {visibleTemplates.map((template) => (
               <li key={template.id}>
                 <TemplateCard template={template} />
               </li>
             ))}
-          </ul>
+          </Arrange>
         )}
       </section>
     </main>

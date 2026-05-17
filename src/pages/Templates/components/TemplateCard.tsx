@@ -1,3 +1,4 @@
+import { Stack, Text } from "@flodesk/grain";
 import { Link } from "react-router-dom";
 
 import { getCategoryLabel } from "@src/data/categories";
@@ -13,7 +14,7 @@ interface TemplateCardProps {
 
 export const TemplateCard = ({ template }: TemplateCardProps) => {
   return (
-    <article className="tpl-card">
+    <Stack tag="article" gap="l" className="tpl-card">
       <div className="tpl-card__preview">
         <iframe
           title={`${template.title} preview`}
@@ -36,12 +37,20 @@ export const TemplateCard = ({ template }: TemplateCardProps) => {
         </Link>
       </div>
 
-      <div className="tpl-card__meta">
-        <p className="tpl-card__category">
+      <Stack gap="xs">
+        <Text
+          tag="p"
+          size="s"
+          color="content2"
+          textTransform="uppercase"
+          letterSpacing="0.06em"
+        >
           {getCategoryLabel(template.categoryId)}
-        </p>
-        <h3 className="tpl-card__title">{template.title}</h3>
-      </div>
-    </article>
+        </Text>
+        <Text tag="h3" size="l" weight="medium" color="shade13">
+          {template.title}
+        </Text>
+      </Stack>
+    </Stack>
   );
 };

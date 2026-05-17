@@ -6,7 +6,7 @@ import { router } from "./routes";
 
 function App() {
   return (
-    <GrainProvider>
+    <GrainProvider breakpoints={{ mobile: 768, tablet: 1280 }}>
       <RouterProvider router={router} />
     </GrainProvider>
   );

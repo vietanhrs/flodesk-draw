@@ -2,6 +2,8 @@ import {
   IconTextAlignCenter,
   IconTextAlignLeft,
   IconTextAlignRight,
+  Stack,
+  Text,
 } from "@flodesk/grain";
 
 import { ColorInput } from "./controls/ColorInput";
@@ -61,7 +63,7 @@ export const ElementTab = ({ rowId, element }: Props) => {
   switch (element.type) {
     case "heading":
       return (
-        <div className="edt-fields">
+        <Stack gap="20px">
           <TextField
             label="Text"
             value={element.text}
@@ -131,11 +133,11 @@ export const ElementTab = ({ rowId, element }: Props) => {
             options={alignOptions}
             onChange={(v) => setProp<typeof element>({ align: v })}
           />
-        </div>
+        </Stack>
       );
     case "paragraph":
       return (
-        <div className="edt-fields">
+        <Stack gap="20px">
           <TextField
             label="Text"
             value={element.text}
@@ -195,11 +197,11 @@ export const ElementTab = ({ rowId, element }: Props) => {
             options={alignOptions}
             onChange={(v) => setProp<typeof element>({ align: v })}
           />
-        </div>
+        </Stack>
       );
     case "quote":
       return (
-        <div className="edt-fields">
+        <Stack gap="20px">
           <TextField
             label="Quote"
             value={element.text}
@@ -247,11 +249,11 @@ export const ElementTab = ({ rowId, element }: Props) => {
             options={alignOptions}
             onChange={(v) => setProp<typeof element>({ align: v })}
           />
-        </div>
+        </Stack>
       );
     case "button":
       return (
-        <div className="edt-fields">
+        <Stack gap="20px">
           <TextField
             label="Label"
             value={element.label}
@@ -359,11 +361,11 @@ export const ElementTab = ({ rowId, element }: Props) => {
             options={alignOptions}
             onChange={(v) => setProp<typeof element>({ align: v })}
           />
-        </div>
+        </Stack>
       );
     case "image":
       return (
-        <div className="edt-fields">
+        <Stack gap="20px">
           <TextField
             label="Image URL"
             value={element.src}
@@ -410,11 +412,11 @@ export const ElementTab = ({ rowId, element }: Props) => {
             options={alignOptions}
             onChange={(v) => setProp<typeof element>({ align: v })}
           />
-        </div>
+        </Stack>
       );
     case "divider":
       return (
-        <div className="edt-fields">
+        <Stack gap="20px">
           <ColorInput
             label="Color"
             value={element.color}
@@ -448,11 +450,11 @@ export const ElementTab = ({ rowId, element }: Props) => {
               )
             }
           />
-        </div>
+        </Stack>
       );
     case "spacer":
       return (
-        <div className="edt-fields">
+        <Stack gap="20px">
           <NumberField
             label="Height"
             value={element.height}
@@ -466,11 +468,11 @@ export const ElementTab = ({ rowId, element }: Props) => {
               )
             }
           />
-        </div>
+        </Stack>
       );
     case "video":
       return (
-        <div className="edt-fields">
+        <Stack gap="20px">
           <TextField
             label="Embed URL"
             value={element.url}
@@ -492,7 +494,7 @@ export const ElementTab = ({ rowId, element }: Props) => {
               )
             }
           />
-        </div>
+        </Stack>
       );
     case "social": {
       const updateLinkUrl = (index: number, url: string) => {
@@ -502,7 +504,7 @@ export const ElementTab = ({ rowId, element }: Props) => {
         setProp<typeof element>({ links }, debounceKey(`link-${index}`));
       };
       return (
-        <div className="edt-fields">
+        <Stack gap="20px">
           <ColorInput
             label="Icon color"
             value={element.color}
@@ -536,8 +538,10 @@ export const ElementTab = ({ rowId, element }: Props) => {
             options={alignOptions}
             onChange={(v) => setProp<typeof element>({ align: v })}
           />
-          <div className="edt-fields">
-            <span className="edt-field__group-label">Links</span>
+          <Stack gap="xs">
+            <Text tag="span" variant="caps" color="content2">
+              Links
+            </Text>
             {element.links.map((link, i) => (
               <TextField
                 key={`${link.platform}-${i}`}
@@ -546,8 +550,8 @@ export const ElementTab = ({ rowId, element }: Props) => {
                 onChange={(v) => updateLinkUrl(i, v)}
               />
             ))}
-          </div>
-        </div>
+          </Stack>
+        </Stack>
       );
     }
   }

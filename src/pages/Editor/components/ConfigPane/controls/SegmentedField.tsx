@@ -1,3 +1,5 @@
+import { Stack, Text } from "@flodesk/grain";
+
 interface Option<T extends string | number> {
   value: T;
   label: React.ReactNode;
@@ -17,8 +19,10 @@ export const SegmentedField = <T extends string | number>({
   onChange,
 }: Props<T>) => {
   return (
-    <div className="edt-field">
-      <span className="edt-field__label">{label}</span>
+    <Stack gap="xs">
+      <Text tag="span" variant="caps" color="content2">
+        {label}
+      </Text>
       <div
         role="radiogroup"
         aria-label={label}
@@ -43,6 +47,6 @@ export const SegmentedField = <T extends string | number>({
           );
         })}
       </div>
-    </div>
+    </Stack>
   );
 };

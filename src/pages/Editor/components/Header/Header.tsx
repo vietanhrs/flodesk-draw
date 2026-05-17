@@ -2,6 +2,7 @@ import { useState } from "react";
 
 import {
   Button,
+  Flex,
   IconArrowLeft,
   IconDownload,
   IconMonitor,
@@ -45,8 +46,27 @@ export const Header = ({ onBuild, isBuilding }: Props) => {
   };
 
   return (
-    <header className="edt-header">
-      <div className="edt-header__left">
+    <Flex
+      tag="header"
+      wrap="nowrap"
+      alignItems="center"
+      justifyContent="space-between"
+      gap="m"
+      paddingX="m"
+      height="56px"
+      backgroundColor="background"
+      borderColor="border"
+      borderWidth="1px"
+      borderSide="bottom"
+      flex="0 0 auto"
+    >
+      <Flex
+        wrap="nowrap"
+        alignItems="center"
+        gap="s2"
+        minWidth={0}
+        flex="1 1 auto"
+      >
         <Link
           to="/templates"
           aria-label="Back to templates"
@@ -72,9 +92,9 @@ export const Header = ({ onBuild, isBuilding }: Props) => {
             size="m"
           />
         </form>
-      </div>
+      </Flex>
 
-      <div className="edt-header__right">
+      <Flex wrap="nowrap" alignItems="center" gap="s">
         <div role="toolbar" aria-label="History" className="edt-toolbar">
           <button
             type="button"
@@ -98,11 +118,7 @@ export const Header = ({ onBuild, isBuilding }: Props) => {
           </button>
         </div>
 
-        <div
-          role="radiogroup"
-          aria-label="Viewport"
-          className="edt-toolbar"
-        >
+        <div role="radiogroup" aria-label="Viewport" className="edt-toolbar">
           <button
             type="button"
             role="radio"
@@ -137,7 +153,7 @@ export const Header = ({ onBuild, isBuilding }: Props) => {
         >
           {isBuilding ? "Building…" : "Build & export"}
         </Button>
-      </div>
-    </header>
+      </Flex>
+    </Flex>
   );
 };

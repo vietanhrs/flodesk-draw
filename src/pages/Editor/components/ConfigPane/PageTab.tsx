@@ -1,3 +1,5 @@
+import { Stack } from "@flodesk/grain";
+
 import { ColorInput } from "./controls/ColorInput";
 import { NumberField } from "./controls/NumberField";
 import { useEditor } from "../../state/EditorContext";
@@ -6,7 +8,7 @@ export const PageTab = () => {
   const { page, updatePage } = useEditor();
 
   return (
-    <div className="edt-fields">
+    <Stack gap="20px">
       <ColorInput
         label="Background"
         value={page.backgroundColor}
@@ -28,6 +30,6 @@ export const PageTab = () => {
         unit="px"
         onChange={(v) => updatePage({ paddingY: v }, "page-padding-y")}
       />
-    </div>
+    </Stack>
   );
 };

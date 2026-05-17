@@ -1,5 +1,6 @@
 import { useState } from "react";
 
+import { Flex } from "@flodesk/grain";
 import { useParams } from "react-router-dom";
 
 import "./editor.css";
@@ -47,20 +48,27 @@ const EditorShell = () => {
   };
 
   return (
-    <div className="edt-shell">
+    <Flex
+      direction="column"
+      wrap="nowrap"
+      alignItems="stretch"
+      height="100vh"
+      width="100%"
+      backgroundColor="background2"
+    >
       <Header onBuild={handleBuild} isBuilding={build.status === "building" && build.isOpen} />
-      <div className="edt-body">
+      <Flex wrap="nowrap" alignItems="stretch" flex="1 1 auto" minHeight={0}>
         <ElementMenu />
         <Canvas />
         <ConfigPane />
-      </div>
+      </Flex>
       <BuildModal
         isOpen={build.isOpen}
         status={build.status}
         message={build.message}
         onClose={() => setBuild((b) => ({ ...b, isOpen: false }))}
       />
-    </div>
+    </Flex>
   );
 };
 
