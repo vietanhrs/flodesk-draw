@@ -411,6 +411,32 @@ describe("Editor — config pane", () => {
     ).toBeInTheDocument();
   });
 
+  it("commits a valid hex value live as the user types — no blur required", async () => {
+    const user = userEvent.setup();
+    const { container } = renderEditor("bold-sale-announcement");
+
+    const hexInput = screen.getByLabelText("Background value");
+    await user.clear(hexInput);
+    await user.type(hexInput, "#654321");
+
+    // No blur fired yet — the canvas should already reflect the typed value.
+    expect(getCanvasPaper(container).style.backgroundColor).toBe(
+      "rgb(101, 67, 33)"
+    );
+  });
+
+  it("commits a valid in-range number live as the user types — no blur required", async () => {
+    const user = userEvent.setup();
+    const { container } = renderEditor("bold-sale-announcement");
+
+    const hPadding = screen.getByLabelText("Horizontal padding");
+    await user.clear(hPadding);
+    await user.type(hPadding, "48");
+
+    expect(getCanvasPaper(container).style.paddingLeft).toBe("48px");
+    expect(getCanvasPaper(container).style.paddingRight).toBe("48px");
+  });
+
   it("changing page properties updates the canvas paper inline styles", async () => {
     const user = userEvent.setup();
     const { container } = renderEditor("bold-sale-announcement");
@@ -613,5 +639,44 @@ describe("Editor — build & export", () => {
     const blob = createObjectURL.mock.calls[0][0] as Blob;
     expect(blob.type).toMatch(/text\/html/);
     expect(anchorClick).toHaveBeenCalled();
+  });
+
+  it("keeps the close button inert while the export is in progress", async () => {
+    const user = userEvent.setup();
+
+    // Use a never-resolving showSaveFilePicker to pin the modal at the
+    // "building" status — that's the state where the X must be inert.
+    Object.defineProperty(window, "showSaveFilePicker", {
+      configurable: true,
+      writable: true,
+      value: () => new Promise<never>(() => {}),
+    });
+
+    try {
+      renderEditor("bold-sale-announcement");
+
+      await user.click(
+        screen.getByRole("button", { name: /Build & export/i })
+      );
+
+      // We're stuck at "Preparing your page…" while the picker promise hangs.
+      const buildingMessage = await screen.findByText(
+        /Preparing your page/i
+      );
+      expect(buildingMessage).toBeInTheDocument();
+
+      // The close X is rendered (FocusTrap needs a focusable target) but is
+      // explicitly inert: aria-disabled set and an onClick that calls
+      // e.preventDefault() instead of firing the modal's onClose.
+      const closeButton = screen.getByRole("button", { name: "Close" });
+      expect(closeButton).toHaveAttribute("aria-disabled", "true");
+
+      await user.click(closeButton);
+
+      // Modal must still be open (still showing the "building" status).
+      expect(screen.getByText(/Preparing your page/i)).toBeInTheDocument();
+    } finally {
+      Reflect.deleteProperty(window, "showSaveFilePicker");
+    }
   });
 });

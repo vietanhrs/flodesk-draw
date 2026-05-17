@@ -66,7 +66,16 @@ export const ColorInput = ({
           type="text"
           aria-label={`${label} value`}
           value={text}
-          onChange={(e) => setText(e.target.value)}
+          onChange={(e) => {
+            const next = e.target.value;
+            setText(next);
+            // Live-commit as soon as the typed value parses as a valid hex
+            // so the canvas reflects the change without waiting for blur.
+            // Invalid intermediate strings (e.g. "#ab") are kept local until
+            // either a valid value is reached or onBlur reverts the field.
+            const normalized = normalizeHex(next);
+            if (normalized) onChange(normalized);
+          }}
           onBlur={() => {
             const normalized = normalizeHex(text);
             if (normalized) onChange(normalized);

@@ -61,7 +61,18 @@ export const NumberField = ({
           max={max}
           step={step}
           value={text}
-          onChange={(e) => setText(e.target.value)}
+          onChange={(e) => {
+            const raw = e.target.value;
+            setText(raw);
+            // Live-commit when the typed value is a finite, in-range number
+            // so the canvas reflects the change without waiting for blur.
+            // Out-of-range or non-numeric input stays local until blur, which
+            // clamps via `commit()`.
+            const parsed = Number(raw);
+            if (Number.isFinite(parsed) && parsed >= min && parsed <= max) {
+              onChange(parsed);
+            }
+          }}
           onBlur={(e) => commit(e.target.value)}
           onKeyDown={(e) => {
             if (e.key === "Enter") (e.target as HTMLInputElement).blur();

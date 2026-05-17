@@ -25,7 +25,7 @@ export const TemplateCard = ({ template }: TemplateCardProps) => {
           style={{
             width: `${TEMPLATE_PREVIEW_WIDTH}px`,
             height: `${TEMPLATE_PREVIEW_HEIGHT}px`,
-            transform: `scale(calc(100cqw / ${TEMPLATE_PREVIEW_WIDTH}))`,
+            transform: `scale(calc(100cqw / ${TEMPLATE_PREVIEW_WIDTH}px))`,
           }}
         />
         <Link
