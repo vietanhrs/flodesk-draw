@@ -1,6 +1,19 @@
 /// <reference types="node" />
 import "@testing-library/jest-dom";
 
+// @headlessui/react's Dialog (used inside Grain's Modal) reaches for
+// ResizeObserver during mount; jsdom doesn't ship one. A no-op stub is enough
+// for our assertions, which only inspect rendered markup.
+if (!("ResizeObserver" in globalThis)) {
+  class ResizeObserverStub {
+    observe() {}
+    unobserve() {}
+    disconnect() {}
+  }
+  (globalThis as unknown as { ResizeObserver: typeof ResizeObserverStub })
+    .ResizeObserver = ResizeObserverStub;
+}
+
 // @headlessui/react's Transition emits setTimeout(NaN) under jsdom (the
 // computed-style transition duration is NaN), which Node surfaces as
 // TimeoutNaNWarning. The behaviour is harmless in tests, so silence just that
