@@ -8,7 +8,7 @@ export default defineConfig({
       "@src": path.resolve(__dirname, "./src"),
       "@test": path.resolve(__dirname, "./test"),
     },
-    mainFields: ["module", "browser", "main", "jsnext:main"],
+    mainFields: ["browser", "module", "jsnext:main", "main"],
   },
   plugins: [react()],
   test: {
