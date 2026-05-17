@@ -1,4 +1,4 @@
-import { TextInput } from "@flodesk/grain";
+import { Stack, Text, TextInput } from "@flodesk/grain";
 
 interface Props {
   label: string;
@@ -15,10 +15,12 @@ export const TextField = ({
   placeholder,
   multiline,
 }: Props) => {
-  if (multiline) {
-    return (
-      <label className="edt-field">
-        <span className="edt-field__label">{label}</span>
+  return (
+    <Stack tag="label" gap="xs">
+      <Text tag="span" variant="caps" color="content2">
+        {label}
+      </Text>
+      {multiline ? (
         <textarea
           value={value}
           placeholder={placeholder}
@@ -27,19 +29,15 @@ export const TextField = ({
           rows={3}
           className="edt-textarea"
         />
-      </label>
-    );
-  }
-  return (
-    <label className="edt-field">
-      <span className="edt-field__label">{label}</span>
-      <TextInput
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        placeholder={placeholder}
-        aria-label={label}
-        size="m"
-      />
-    </label>
+      ) : (
+        <TextInput
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          placeholder={placeholder}
+          aria-label={label}
+          size="m"
+        />
+      )}
+    </Stack>
   );
 };

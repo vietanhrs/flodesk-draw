@@ -1,4 +1,6 @@
-/* Templates page — no Tailwind. Uses @flodesk/grain CSS variables for colour. */
+/* Templates page — responsive bits that Grain breakpoints (mobile/tablet only)
+   don't cover, plus hover/sticky behaviour. Structural layout (flex / stack /
+   grid) lives in JSX via @flodesk/grain layout components. */
 
 .tpl-page {
   min-height: 100vh;
@@ -15,24 +17,6 @@
 
 .tpl-section__empty {
   margin-top: 40px;
-  color: var(--grn-color-content2);
-  font-size: 14px;
-}
-
-.tpl-grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  column-gap: 72px;
-  row-gap: 60px;
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-@media (min-width: 768px) {
-  .tpl-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
 }
 
 @media (min-width: 1280px) {
@@ -45,9 +29,6 @@
   }
   .tpl-section {
     padding-top: 136px;
-  }
-  .tpl-grid {
-    grid-template-columns: repeat(2, min-content);
   }
 }
 
@@ -81,9 +62,6 @@
 }
 
 .tpl-sidebar__inner {
-  display: flex;
-  flex-direction: column;
-  gap: 40px;
   margin-left: 68px;
   margin-right: 40px;
 }
@@ -96,24 +74,8 @@
 }
 
 .tpl-sidebar__heading {
-  margin: 12px 0 0;
-  color: var(--grn-color-shade13);
+  margin-top: 12px;
   line-height: 1.15;
-  font-family: "Flodesk Sans", "Helvetica Neue", Arial, sans-serif;
-}
-
-.tpl-sidebar__nav {
-  margin: 0;
-  padding: 0;
-}
-
-.tpl-sidebar__list {
-  margin: 0;
-  padding: 0;
-  list-style: none;
-  display: flex;
-  flex-direction: column;
-  row-gap: var(--grn-space-s);
 }
 
 .tpl-sidebar__link {
@@ -136,27 +98,7 @@
   font-weight: 500;
 }
 
-/* ─── Mobile header (below xl) ──────────────────────────────────────────── */
-
-.tpl-mobile {
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-}
-
-.tpl-mobile__logo {
-  align-self: flex-start;
-  padding-bottom: 40px;
-}
-
-.tpl-mobile__heading {
-  margin: 0;
-  font-family: "Flodesk Sans", "Helvetica Neue", Arial, sans-serif;
-  color: var(--grn-color-shade13);
-  font-size: 30px;
-  font-weight: 500;
-  line-height: 1.15;
-}
+/* ─── Mobile filter (below xl) ──────────────────────────────────────────── */
 
 .tpl-mobile__filter {
   position: sticky;
@@ -177,9 +119,6 @@
 /* ─── Template card ─────────────────────────────────────────────────────── */
 
 .tpl-card {
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
   width: 100%;
 }
 
@@ -242,28 +181,5 @@
   padding: 0 16px;
   height: 40px;
   border: 1px solid var(--grn-color-border);
-  font-family: "Flodesk Sans", "Helvetica Neue", Arial, sans-serif;
-}
-
-.tpl-card__meta {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  font-family: "Flodesk Sans", "Helvetica Neue", Arial, sans-serif;
-}
-
-.tpl-card__category {
-  margin: 0;
-  color: var(--grn-color-content2);
-  font-size: 12px;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-}
-
-.tpl-card__title {
-  margin: 0;
-  color: var(--grn-color-shade13);
-  font-size: 18px;
-  font-weight: 500;
-  line-height: 1.3;
+  font-family: inherit;
 }

@@ -1,4 +1,4 @@
-import { Modal, Spinner } from "@flodesk/grain";
+import { Flex, Modal, Spinner, Text } from "@flodesk/grain";
 
 interface Props {
   isOpen: boolean;
@@ -17,10 +17,17 @@ export const BuildModal = ({ isOpen, status, message, onClose }: Props) => {
       title="Build & export"
       disableCloseHandler={status === "building"}
     >
-      <div className="edt-build">
+      <Flex
+        direction="column"
+        alignItems="center"
+        gap="m"
+        paddingY="m"
+      >
         {status === "building" && <Spinner />}
-        <p>{message}</p>
-      </div>
+        <Text size="m" color="shade13" align="center">
+          {message}
+        </Text>
+      </Flex>
     </Modal>
   );
 };

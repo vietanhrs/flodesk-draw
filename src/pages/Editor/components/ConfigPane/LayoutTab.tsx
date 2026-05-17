@@ -1,3 +1,5 @@
+import { Stack, Text } from "@flodesk/grain";
+
 import { ColorInput } from "./controls/ColorInput";
 import { NumberField } from "./controls/NumberField";
 import { SegmentedField } from "./controls/SegmentedField";
@@ -12,7 +14,7 @@ export const LayoutTab = ({ row }: Props) => {
   const { updateRow, setRowColumnsCount, setColumnWidth } = useEditor();
 
   return (
-    <div className="edt-fields">
+    <Stack gap="20px">
       <ColorInput
         label="Background"
         value={row.backgroundColor}
@@ -35,8 +37,10 @@ export const LayoutTab = ({ row }: Props) => {
       />
 
       {row.columnsCount > 1 && (
-        <div>
-          <span className="edt-field__group-label">Column widths</span>
+        <Stack gap="xs">
+          <Text tag="span" variant="caps" color="content2">
+            Column widths
+          </Text>
           {row.columnWidths.map((w, i) => (
             <NumberField
               key={i}
@@ -48,7 +52,7 @@ export const LayoutTab = ({ row }: Props) => {
               onChange={(next) => setColumnWidth(row.id, i, next)}
             />
           ))}
-        </div>
+        </Stack>
       )}
 
       <NumberField
@@ -91,6 +95,6 @@ export const LayoutTab = ({ row }: Props) => {
           updateRow(row.id, { marginY: v }, `row-marginy-${row.id}`)
         }
       />
-    </div>
+    </Stack>
   );
 };

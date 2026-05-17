@@ -1,4 +1,4 @@
-import { Select } from "@flodesk/grain";
+import { Box, Select, Stack, Text } from "@flodesk/grain";
 import { useNavigate } from "react-router-dom";
 
 import { ALL_CATEGORY_ID, categories } from "@src/data/categories";
@@ -19,10 +19,14 @@ export const MobileHeader = ({ activeCategoryId }: MobileHeaderProps) => {
 
   return (
     <>
-      <div className="tpl-mobile">
-        <FlodeskLogo className="tpl-mobile__logo" />
-        <h2 className="tpl-mobile__heading">What's your goal?</h2>
-      </div>
+      <Stack gap="l" className="tpl-mobile">
+        <Box alignSelf="start" paddingBottom="xl">
+          <FlodeskLogo />
+        </Box>
+        <Text tag="h2" size="xxl" weight="medium" color="shade13">
+          What's your goal?
+        </Text>
+      </Stack>
       <div className="tpl-mobile__filter">
         <Select
           aria-label="Filter templates by category"

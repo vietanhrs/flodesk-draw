@@ -1,5 +1,7 @@
 import { useCallback } from "react";
 
+import { Box, Flex } from "@flodesk/grain";
+
 import { CanvasRow } from "./CanvasRow";
 import { useEditor } from "../../state/EditorContext";
 import {
@@ -43,12 +45,19 @@ export const Canvas = () => {
   };
 
   return (
-    <div
-      className="edt-canvas-scroll"
+    <Box
+      flex="1 1 auto"
+      minWidth={0}
+      minHeight={0}
+      overflow="auto"
+      backgroundColor="background2"
+      paddingY="l2"
       onClick={() => setSelection(null)}
     >
-      <div
-        className="edt-canvas-paper"
+      <Box
+        marginX="auto"
+        backgroundColor="background"
+        shadow="l"
         style={{
           maxWidth: VIEWPORT_WIDTH[viewport],
           backgroundColor: page.backgroundColor,
@@ -56,16 +65,25 @@ export const Canvas = () => {
           paddingBottom: page.paddingY,
           paddingLeft: page.paddingX,
           paddingRight: page.paddingX,
+          transition: "max-width 260ms ease",
         }}
         onClick={(e) => e.stopPropagation()}
       >
         {page.rows.length === 0 ? (
-          <div
+          <Flex
+            wrap="wrap"
+            alignItems="center"
+            justifyContent="center"
+            gap="s2"
+            margin="l2"
+            minHeight="200px"
+            padding="m"
+            radius="m"
+            className="edt-canvas-empty"
             onDragOver={(e) => {
               if (dragHasNewElement(e.dataTransfer)) e.preventDefault();
             }}
             onDrop={handleEmptyCanvasDrop}
-            className="edt-canvas-empty"
           >
             <span>
               Click <kbd>+</kbd> or drop an element to start your page.
@@ -73,7 +91,7 @@ export const Canvas = () => {
             <button type="button" onClick={() => addRowAt(0)}>
               Add row
             </button>
-          </div>
+          </Flex>
         ) : (
           page.rows.map((row, index) => (
             <CanvasRow
@@ -87,7 +105,7 @@ export const Canvas = () => {
             />
           ))
         )}
-      </div>
-    </div>
+      </Box>
+    </Box>
   );
 };

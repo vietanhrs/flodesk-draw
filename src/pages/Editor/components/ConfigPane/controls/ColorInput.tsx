@@ -1,5 +1,7 @@
 import { useState } from "react";
 
+import { Flex, Stack, Text } from "@flodesk/grain";
+
 interface Props {
   label: string;
   value: string;
@@ -33,9 +35,11 @@ export const ColorInput = ({
   const swatchColor = isTransparent ? "#ffffff" : value;
 
   return (
-    <label className="edt-field">
-      <span className="edt-field__label">{label}</span>
-      <div className="edt-color">
+    <Stack tag="label" gap="xs">
+      <Text tag="span" variant="caps" color="content2">
+        {label}
+      </Text>
+      <Flex wrap="nowrap" alignItems="stretch" gap="s">
         <div className="edt-color__swatch">
           {isTransparent && (
             <div aria-hidden="true" className="edt-color__check" />
@@ -86,7 +90,7 @@ export const ColorInput = ({
             None
           </button>
         )}
-      </div>
-    </label>
+      </Flex>
+    </Stack>
   );
 };

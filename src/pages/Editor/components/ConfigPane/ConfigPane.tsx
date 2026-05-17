@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 
-import { Tab, TabGroup } from "@flodesk/grain";
+import { Box, Flex, Tab, TabGroup, Text } from "@flodesk/grain";
 
 import { ElementTab } from "./ElementTab";
 import { LayoutTab } from "./LayoutTab";
@@ -41,8 +41,27 @@ export const ConfigPane = () => {
   }
 
   return (
-    <aside aria-label="Configuration" className="edt-config">
-      <div className="edt-config__tabs">
+    <Flex
+      tag="aside"
+      aria-label="Configuration"
+      direction="column"
+      wrap="nowrap"
+      alignItems="stretch"
+      flex="0 0 auto"
+      width="320px"
+      minHeight={0}
+      backgroundColor="background"
+      borderColor="border"
+      borderWidth="1px"
+      borderSide="left"
+    >
+      <Box
+        paddingX="s2"
+        paddingTop="s2"
+        borderColor="border"
+        borderWidth="1px"
+        borderSide="bottom"
+      >
         <TabGroup hasFullWidth>
           <Tab isActive={tab === "page"} onClick={() => setTab("page")}>
             Page
@@ -54,17 +73,17 @@ export const ConfigPane = () => {
             Element
           </Tab>
         </TabGroup>
-      </div>
+      </Box>
 
-      <div className="edt-config__body">
+      <Box flex="1 1 auto" minHeight={0} overflowY="auto" padding="m">
         {tab === "page" && <PageTab />}
         {tab === "layout" &&
           (selectedRow ? (
             <LayoutTab row={selectedRow} />
           ) : (
-            <p className="edt-config__empty">
+            <Text tag="p" size="s" color="content2">
               Select a row in the canvas to configure its layout.
-            </p>
+            </Text>
           ))}
         {tab === "element" &&
           (selectedElement && selection?.kind === "element" ? (
@@ -73,11 +92,11 @@ export const ConfigPane = () => {
               element={selectedElement}
             />
           ) : (
-            <p className="edt-config__empty">
+            <Text tag="p" size="s" color="content2">
               Select an element in the canvas to configure it.
-            </p>
+            </Text>
           ))}
-      </div>
-    </aside>
+      </Box>
+    </Flex>
   );
 };

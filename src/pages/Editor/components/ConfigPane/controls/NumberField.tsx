@@ -1,5 +1,7 @@
 import { useState } from "react";
 
+import { Flex, Stack, Text } from "@flodesk/grain";
+
 interface Props {
   label: string;
   value: number;
@@ -38,9 +40,11 @@ export const NumberField = ({
   };
 
   return (
-    <label className="edt-field">
-      <span className="edt-field__label">{label}</span>
-      <div className="edt-field__row">
+    <Stack tag="label" gap="xs">
+      <Text tag="span" variant="caps" color="content2">
+        {label}
+      </Text>
+      <Flex wrap="nowrap" alignItems="center" gap="s">
         <input
           type="range"
           min={min}
@@ -65,8 +69,12 @@ export const NumberField = ({
           aria-label={label}
           className="edt-field__numeric"
         />
-        {unit && <span className="edt-field__unit">{unit}</span>}
-      </div>
-    </label>
+        {unit && (
+          <Text tag="span" size="s" color="content2">
+            {unit}
+          </Text>
+        )}
+      </Flex>
+    </Stack>
   );
 };
