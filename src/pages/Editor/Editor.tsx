@@ -56,7 +56,10 @@ const EditorShell = () => {
       width="100%"
       backgroundColor="background2"
     >
-      <Header onBuild={handleBuild} isBuilding={build.status === "building" && build.isOpen} />
+      <Header
+        onBuild={handleBuild}
+        isBuilding={build.status === "building" && build.isOpen}
+      />
       <Flex wrap="nowrap" alignItems="stretch" flex="1 1 auto" minHeight={0}>
         <ElementMenu />
         <Canvas />

@@ -30,8 +30,8 @@ export const ConfigPane = () => {
     selection?.kind === "element"
       ? "element"
       : selection?.kind === "row"
-      ? "layout"
-      : "page";
+        ? "layout"
+        : "page";
 
   const [tab, setTab] = useState<TabKey>(defaultTab);
   const [prevDefault, setPrevDefault] = useState<TabKey>(defaultTab);
@@ -87,10 +87,7 @@ export const ConfigPane = () => {
           ))}
         {tab === "element" &&
           (selectedElement && selection?.kind === "element" ? (
-            <ElementTab
-              rowId={selection.rowId}
-              element={selectedElement}
-            />
+            <ElementTab rowId={selection.rowId} element={selectedElement} />
           ) : (
             <Text tag="p" size="s" color="content2">
               Select an element in the canvas to configure it.

@@ -29,8 +29,7 @@ export const ColorInput = ({
     setText(value);
   }
 
-  const isTransparent =
-    value === "transparent" || value === "rgba(0,0,0,0)";
+  const isTransparent = value === "transparent" || value === "rgba(0,0,0,0)";
 
   const swatchColor = isTransparent ? "#ffffff" : value;
 

@@ -23,11 +23,7 @@ export const SegmentedField = <T extends string | number>({
       <Text tag="span" variant="caps" color="content2">
         {label}
       </Text>
-      <div
-        role="radiogroup"
-        aria-label={label}
-        className="edt-segmented"
-      >
+      <div role="radiogroup" aria-label={label} className="edt-segmented">
         {options.map((opt) => {
           const isActive = opt.value === value;
           return (

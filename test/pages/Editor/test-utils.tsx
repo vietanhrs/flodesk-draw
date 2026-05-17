@@ -1,12 +1,7 @@
 /* eslint-disable react-refresh/only-export-components */
 import { GrainProvider } from "@flodesk/grain";
 import { fireEvent, render } from "@testing-library/react";
-import {
-  MemoryRouter,
-  Route,
-  Routes,
-  useLocation,
-} from "react-router-dom";
+import { MemoryRouter, Route, Routes, useLocation } from "react-router-dom";
 
 import { Editor } from "@src/pages/Editor";
 

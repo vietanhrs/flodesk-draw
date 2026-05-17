@@ -31,13 +31,13 @@ bun install            # or `bun install --frozen-lockfile` to match CI exactly
 
 ## Scripts
 
-| Command            | What it does                                                      |
-| ------------------ | ----------------------------------------------------------------- |
-| `bun run dev`      | Start the Vite dev server (HMR) at `http://localhost:5173`.       |
-| `bun run build`    | Type-check (`tsc -b`) and produce a production build in `dist/`.  |
-| `bun run preview`  | Serve the production build locally.                               |
-| `bun run lint`     | Run ESLint over the source tree.                                  |
-| `bun run test`     | Run Vitest in watch mode. Append `--run` for a single pass.       |
+| Command            | What it does                                                             |
+| ------------------ | ------------------------------------------------------------------------ |
+| `bun run dev`      | Start the Vite dev server (HMR) at `http://localhost:5173`.              |
+| `bun run build`    | Type-check (`tsc -b`) and produce a production build in `dist/`.         |
+| `bun run preview`  | Serve the production build locally.                                      |
+| `bun run lint`     | Run ESLint over the source tree.                                         |
+| `bun run test`     | Run Vitest in watch mode. Append `--run` for a single pass.              |
 | `bun run coverage` | Run the test suite once with v8 coverage; report written to `coverage/`. |
 
 ## Project layout

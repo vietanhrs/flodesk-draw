@@ -101,10 +101,7 @@ export const ElementTab = ({ rowId, element }: Props) => {
             max={200}
             unit="px"
             onChange={(v) =>
-              setProp<typeof element>(
-                { fontSize: v },
-                debounceKey("fontSize")
-              )
+              setProp<typeof element>({ fontSize: v }, debounceKey("fontSize"))
             }
           />
           <NumberField
@@ -114,10 +111,7 @@ export const ElementTab = ({ rowId, element }: Props) => {
             max={20}
             step={0.5}
             onChange={(v) =>
-              setProp<typeof element>(
-                { letterSpacing: v },
-                debounceKey("ls")
-              )
+              setProp<typeof element>({ letterSpacing: v }, debounceKey("ls"))
             }
           />
           <ColorInput
@@ -165,10 +159,7 @@ export const ElementTab = ({ rowId, element }: Props) => {
             max={64}
             unit="px"
             onChange={(v) =>
-              setProp<typeof element>(
-                { fontSize: v },
-                debounceKey("fontSize")
-              )
+              setProp<typeof element>({ fontSize: v }, debounceKey("fontSize"))
             }
           />
           <NumberField
@@ -178,10 +169,7 @@ export const ElementTab = ({ rowId, element }: Props) => {
             max={3}
             step={0.05}
             onChange={(v) =>
-              setProp<typeof element>(
-                { lineHeight: v },
-                debounceKey("lh")
-              )
+              setProp<typeof element>({ lineHeight: v }, debounceKey("lh"))
             }
           />
           <ColorInput
@@ -230,10 +218,7 @@ export const ElementTab = ({ rowId, element }: Props) => {
             max={80}
             unit="px"
             onChange={(v) =>
-              setProp<typeof element>(
-                { fontSize: v },
-                debounceKey("fontSize")
-              )
+              setProp<typeof element>({ fontSize: v }, debounceKey("fontSize"))
             }
           />
           <ColorInput
@@ -274,10 +259,7 @@ export const ElementTab = ({ rowId, element }: Props) => {
             value={element.backgroundColor}
             allowTransparent
             onChange={(c) =>
-              setProp<typeof element>(
-                { backgroundColor: c },
-                debounceKey("bg")
-              )
+              setProp<typeof element>({ backgroundColor: c }, debounceKey("bg"))
             }
           />
           <ColorInput
@@ -297,10 +279,7 @@ export const ElementTab = ({ rowId, element }: Props) => {
             max={32}
             unit="px"
             onChange={(v) =>
-              setProp<typeof element>(
-                { fontSize: v },
-                debounceKey("fontSize")
-              )
+              setProp<typeof element>({ fontSize: v }, debounceKey("fontSize"))
             }
           />
           <NumberField
@@ -310,10 +289,7 @@ export const ElementTab = ({ rowId, element }: Props) => {
             max={80}
             unit="px"
             onChange={(v) =>
-              setProp<typeof element>(
-                { paddingX: v },
-                debounceKey("padx")
-              )
+              setProp<typeof element>({ paddingX: v }, debounceKey("padx"))
             }
           />
           <NumberField
@@ -323,10 +299,7 @@ export const ElementTab = ({ rowId, element }: Props) => {
             max={60}
             unit="px"
             onChange={(v) =>
-              setProp<typeof element>(
-                { paddingY: v },
-                debounceKey("pady")
-              )
+              setProp<typeof element>({ paddingY: v }, debounceKey("pady"))
             }
           />
           <NumberField
@@ -336,10 +309,7 @@ export const ElementTab = ({ rowId, element }: Props) => {
             max={50}
             unit="px"
             onChange={(v) =>
-              setProp<typeof element>(
-                { radius: v },
-                debounceKey("radius")
-              )
+              setProp<typeof element>({ radius: v }, debounceKey("radius"))
             }
           />
           <NumberField
@@ -349,10 +319,7 @@ export const ElementTab = ({ rowId, element }: Props) => {
             max={10}
             step={0.5}
             onChange={(v) =>
-              setProp<typeof element>(
-                { letterSpacing: v },
-                debounceKey("ls")
-              )
+              setProp<typeof element>({ letterSpacing: v }, debounceKey("ls"))
             }
           />
           <SegmentedField<TextAlign>
@@ -387,10 +354,7 @@ export const ElementTab = ({ rowId, element }: Props) => {
             max={100}
             unit="%"
             onChange={(v) =>
-              setProp<typeof element>(
-                { widthPct: v },
-                debounceKey("width")
-              )
+              setProp<typeof element>({ widthPct: v }, debounceKey("width"))
             }
           />
           <NumberField
@@ -400,10 +364,7 @@ export const ElementTab = ({ rowId, element }: Props) => {
             max={50}
             unit="px"
             onChange={(v) =>
-              setProp<typeof element>(
-                { radius: v },
-                debounceKey("radius")
-              )
+              setProp<typeof element>({ radius: v }, debounceKey("radius"))
             }
           />
           <SegmentedField<TextAlign>
@@ -444,10 +405,7 @@ export const ElementTab = ({ rowId, element }: Props) => {
             max={100}
             unit="%"
             onChange={(v) =>
-              setProp<typeof element>(
-                { widthPct: v },
-                debounceKey("width")
-              )
+              setProp<typeof element>({ widthPct: v }, debounceKey("width"))
             }
           />
         </Stack>
@@ -462,10 +420,7 @@ export const ElementTab = ({ rowId, element }: Props) => {
             max={400}
             unit="px"
             onChange={(v) =>
-              setProp<typeof element>(
-                { height: v },
-                debounceKey("height")
-              )
+              setProp<typeof element>({ height: v }, debounceKey("height"))
             }
           />
         </Stack>
@@ -488,10 +443,7 @@ export const ElementTab = ({ rowId, element }: Props) => {
             max={100}
             unit="%"
             onChange={(v) =>
-              setProp<typeof element>(
-                { widthPct: v },
-                debounceKey("width")
-              )
+              setProp<typeof element>({ widthPct: v }, debounceKey("width"))
             }
           />
         </Stack>

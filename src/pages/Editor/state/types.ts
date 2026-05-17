@@ -85,7 +85,13 @@ export interface QuoteElement extends BaseElement {
 }
 
 export interface SocialLink {
-  platform: "instagram" | "twitter" | "facebook" | "youtube" | "email" | "website";
+  platform:
+    | "instagram"
+    | "twitter"
+    | "facebook"
+    | "youtube"
+    | "email"
+    | "website";
   url: string;
 }
 

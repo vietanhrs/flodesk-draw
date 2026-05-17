@@ -20,22 +20,11 @@ interface Props {
   onRowDropAt: (fromRowId: string, placeAfter: boolean) => void;
 }
 
-export const CanvasRow = ({
-  row,
-  rowIndex,
-  totalRows,
-  onRowDropAt,
-}: Props) => {
-  const {
-    selection,
-    setSelection,
-    addRowAt,
-    addElement,
-    deleteElement,
-  } = useEditor();
+export const CanvasRow = ({ row, rowIndex, totalRows, onRowDropAt }: Props) => {
+  const { selection, setSelection, addRowAt, addElement, deleteElement } =
+    useEditor();
 
-  const isRowSelected =
-    selection?.kind === "row" && selection.rowId === row.id;
+  const isRowSelected = selection?.kind === "row" && selection.rowId === row.id;
   const hasSelectedChild =
     selection?.kind === "element" && selection.rowId === row.id;
   const showRowChrome = isRowSelected || hasSelectedChild;
@@ -143,8 +132,8 @@ export const CanvasRow = ({
           (showRowChrome
             ? " edt-row__inner--active"
             : isHovered
-            ? " edt-row__inner--hover"
-            : "")
+              ? " edt-row__inner--hover"
+              : "")
         }
         style={{
           backgroundColor: row.backgroundColor,

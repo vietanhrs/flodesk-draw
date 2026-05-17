@@ -759,7 +759,9 @@ const templateBuilders: Record<string, () => PageData> = {
   "quick-update": quickUpdate,
 };
 
-export const buildPageForTemplate = (templateId: string | undefined): PageData => {
+export const buildPageForTemplate = (
+  templateId: string | undefined
+): PageData => {
   if (!templateId) return createEmptyPage();
   const builder = templateBuilders[templateId];
   if (builder) return builder();
