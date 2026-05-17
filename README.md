@@ -1,73 +1,96 @@
-# React + TypeScript + Vite
+# flodesk-draw
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A browser-based page builder where non-technical users pick a starting template, customise it block-by-block, and export the result as a static HTML document with inline styles — no toolchain required to view it. Referenced media (images, video embeds, link targets) keeps its original URLs.
 
-Currently, two official plugins are available:
+Built as a take-home around Flodesk's [Grain](https://grain.flodesk.com/) design system.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Features
 
-## React Compiler
+- **Templates page** — browse built-in templates (sale announcement, welcome note, newsletter, thank-you note, …), filter by goal.
+- **Editor** — drag-and-drop rows and elements (heading, paragraph, button, image, divider, spacer, quote, video, social), live preview, undo/redo with history merging.
+- **Configuration pane** — page-, layout- (per-row), and element-level controls that reflect changes immediately on the canvas.
+- **Viewport toggle** — switch the preview between desktop (1080px) and mobile (390px).
+- **Export** — produce a single `.html` document with inline HTML/CSS. Images (`<img src>`), video embeds (YouTube `<iframe src>`), and link targets (button/social `href`) remain URL-referenced. Uses the File System Access API where supported, otherwise a regular blob download.
+- **Local persistence** — your in-progress page is stashed in `localStorage` per template, so a refresh doesn't lose work.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Prerequisites
 
-## Expanding the ESLint configuration
+- [Bun](https://bun.sh) `1.3.10` — version pinned in [`.bun-version`](./.bun-version). Install via the official installer or any version manager (`proto`, `asdf`, `mise`) that reads `.bun-version`.
+- A modern browser (Chromium / Firefox / Safari current releases). The File System Access API enhances export but isn't required — the fallback download works everywhere.
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+> Bun handles installs and script execution; tests themselves run on Vitest. No separate Node install is needed.
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+## Setup
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+```bash
+git clone git@github.com:vietanhrs/flodesk-draw.git
+cd flodesk-draw
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+bun install            # or `bun install --frozen-lockfile` to match CI exactly
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## Scripts
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+| Command            | What it does                                                      |
+| ------------------ | ----------------------------------------------------------------- |
+| `bun run dev`      | Start the Vite dev server (HMR) at `http://localhost:5173`.       |
+| `bun run build`    | Type-check (`tsc -b`) and produce a production build in `dist/`.  |
+| `bun run preview`  | Serve the production build locally.                               |
+| `bun run lint`     | Run ESLint over the source tree.                                  |
+| `bun run test`     | Run Vitest in watch mode. Append `--run` for a single pass.       |
+| `bun run coverage` | Run the test suite once with v8 coverage; report written to `coverage/`. |
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+## Project layout
+
 ```
+flodesk-draw/
+├── .github/workflows/ci.yml         GitHub Actions: lint → test → build on every PR + push to main
+├── .bun-version                     Pinned Bun version
+├── index.html                       Vite entry
+├── vite.config.ts                   Vite + Vitest config (jsdom env, path aliases)
+├── eslint.config.js                 ESLint flat config (TS, React Hooks, import order)
+├── tsconfig.{json,app,node}.json    TypeScript project references
+│
+├── public/                          Static assets served as-is (fonts, etc.)
+│
+├── src/
+│   ├── main.tsx                     React 19 root + GrainProvider
+│   ├── App.tsx                      Router shell
+│   ├── routes.tsx                   Route table (lazy-loaded pages)
+│   ├── index.css / App.css          Global resets and Grain CSS variables
+│   │
+│   ├── data/                        Static catalogues (template metadata, category labels)
+│   ├── shared/                      Cross-page primitives (logo, error boundary, suspense route)
+│   └── pages/
+│       ├── Templates/               Template gallery — sidebar, mobile header, card grid
+│       └── Editor/
+│           ├── Editor.tsx           Shell composition (header + body + modal)
+│           ├── components/
+│           │   ├── Canvas/          Paper, rows, drop zones, floating row menu
+│           │   ├── ConfigPane/      Page / Layout / Element tabs + controls
+│           │   ├── ElementMenu/     Draggable element palette with category + search
+│           │   ├── Header/          Title, history, viewport toggle, build button
+│           │   └── BuildModal.tsx   Export progress + status dialog
+│           ├── exporter/            Page → static HTML and download orchestration
+│           ├── state/               EditorContext (reducer + history), types, element catalog
+│           └── utils/               Drag dataTransfer helpers, id generator
+│
+└── test/
+    ├── setup.ts                     Vitest setup — jest-dom matchers, jsdom shims, log filters
+    └── pages/
+        ├── Editor/                  Editor integration tests + buildHtml unit tests + helpers
+        └── Templates/               Templates page integration tests
+```
+
+## Tech stack
+
+- **React 19** + **TypeScript 6** + **Vite 8**
+- **@flodesk/grain** as the design system and styling foundation (no Tailwind / MUI / Bootstrap by design)
+- **React Router 7** for navigation
+- **Vitest 4** + **@testing-library/react** + **jsdom** for tests
+- **ESLint 10** (flat config) with `typescript-eslint`, `eslint-plugin-react-hooks`, `eslint-plugin-import-x`
+- **Bun** for installs and script execution (the `test` script invokes Vitest, not `bun test`)
+
+## Continuous integration
+
+Every pull request and every push to `main` runs `bun install --frozen-lockfile` → `lint` → `test --run` → `build` on Ubuntu via GitHub Actions ([`.github/workflows/ci.yml`](./.github/workflows/ci.yml)).
