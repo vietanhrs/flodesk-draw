@@ -8,12 +8,18 @@ export default defineConfig({
       "@src": path.resolve(__dirname, "./src"),
       "@test": path.resolve(__dirname, "./test"),
     },
+    mainFields: ["browser", "module", "jsnext:main", "main"],
   },
   plugins: [react()],
   test: {
     globals: true,
     environment: "jsdom",
     setupFiles: "./test/setup.ts",
+    server: {
+      deps: {
+        inline: [/@flodesk\/grain/],
+      },
+    },
     coverage: {
       provider: "v8",
       reporter: ["text", "lcov"],
