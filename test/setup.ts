@@ -1,6 +1,19 @@
 /// <reference types="node" />
 import "@testing-library/jest-dom";
 
+// @headlessui/react's Dialog (used inside Grain's Modal) reaches for
+// ResizeObserver during mount; jsdom doesn't ship one. A no-op stub is enough
+// for our assertions, which only inspect rendered markup.
+if (!("ResizeObserver" in globalThis)) {
+  class ResizeObserverStub {
+    observe() {}
+    unobserve() {}
+    disconnect() {}
+  }
+  (globalThis as unknown as { ResizeObserver: typeof ResizeObserverStub })
+    .ResizeObserver = ResizeObserverStub;
+}
+
 // @headlessui/react's Transition emits setTimeout(NaN) under jsdom (the
 // computed-style transition duration is NaN), which Node surfaces as
 // TimeoutNaNWarning. The behaviour is harmless in tests, so silence just that
@@ -17,6 +30,7 @@ process.on("warning", (warning) => {
 // console.error for each one. Filter just those warnings — anything else
 // (legit errors, prop-types, etc.) still surfaces.
 const originalError = console.error;
+const originalWarn = console.warn;
 const THIRD_PARTY_NOISE = [
   // @headlessui/react Listbox + Grain Select schedule state updates on later
   // ticks; userEvent's act() boundary has already closed by then.
@@ -24,14 +38,23 @@ const THIRD_PARTY_NOISE = [
   // headless-ui still reads element.ref to forward refs the React-18 way;
   // React 19 emits this deprecation notice for every render.
   /Accessing element\.ref was removed in React 19/,
+  // The build modal opens in a "building" state with no close button and only
+  // a spinner + paragraph inside, so @headlessui/react's FocusTrap has nothing
+  // focusable to trap. Harmless in tests.
+  /There are no focusable elements inside the <FocusTrap \/>/,
 ];
-console.error = (...args: unknown[]) => {
+const isNoise = (args: unknown[]): boolean => {
   const first = args[0];
-  if (
+  return (
     typeof first === "string" &&
     THIRD_PARTY_NOISE.some((pattern) => pattern.test(first))
-  ) {
-    return;
-  }
+  );
+};
+console.error = (...args: unknown[]) => {
+  if (isNoise(args)) return;
   originalError(...args);
+};
+console.warn = (...args: unknown[]) => {
+  if (isNoise(args)) return;
+  originalWarn(...args);
 };

@@ -1,0 +1,617 @@
+import { fireEvent, screen, waitFor, within } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+
+import {
+  DROP_ABOVE,
+  DROP_BELOW,
+  FakeDataTransfer,
+  fireDragEvent,
+  renderEditor,
+} from "./test-utils";
+
+beforeEach(() => {
+  // EditorProvider persists the working page to localStorage on every commit,
+  // so a leftover value from a previous test would short-circuit
+  // `buildPageForTemplate(...)` and load stale rows instead of the fresh
+  // template fixture. Clear it before each test.
+  localStorage.clear();
+});
+
+afterEach(() => {
+  vi.restoreAllMocks();
+});
+
+/**
+ * The CanvasRow's inner `<div>` is the draggable, has aria-label "Row N",
+ * carries the row's inline styles, and is wrapped by an outer `.edt-row` that
+ * holds the drop handlers.
+ */
+const getRowInner = (n: number): HTMLElement =>
+  screen.getByLabelText(`Row ${n}`);
+
+const getRowOuter = (n: number): HTMLElement => {
+  const outer = getRowInner(n).closest(".edt-row");
+  if (!(outer instanceof HTMLElement))
+    throw new Error(`Could not find .edt-row wrapper for Row ${n}`);
+  return outer;
+};
+
+const getCanvasPaper = (container: HTMLElement): HTMLElement => {
+  // The viewport-aware canvas paper is the only div whose inline style sets
+  // an explicit max-width (either 1080 for desktop or 390 for mobile).
+  const paper = container.querySelector<HTMLElement>(
+    'div[style*="max-width"]'
+  );
+  if (!paper) throw new Error("Canvas paper not found");
+  return paper;
+};
+
+describe("Editor — template loading", () => {
+  it("loads the canvas data for a known templateId", () => {
+    renderEditor("bold-sale-announcement");
+
+    // Two rows live on this template (bold-sale-announcement in initialData).
+    expect(screen.getByLabelText("Row 1")).toBeInTheDocument();
+    expect(screen.getByLabelText("Row 2")).toBeInTheDocument();
+    expect(screen.queryByLabelText("Row 3")).not.toBeInTheDocument();
+
+    // Content from the template comes through unchanged.
+    expect(within(getRowInner(1)).getByText("BLACK FRIDAY")).toBeInTheDocument();
+    expect(within(getRowInner(1)).getByText("70% OFF")).toBeInTheDocument();
+    expect(
+      within(getRowInner(1)).getByText(/Our biggest sale of the year/)
+    ).toBeInTheDocument();
+    expect(
+      within(getRowInner(2)).getByText("Use code BLACK70 at checkout")
+    ).toBeInTheDocument();
+
+    // The page title from the template is shown in the header.
+    expect(screen.getByLabelText("Page title")).toHaveValue(
+      "Bold sale announcement"
+    );
+  });
+
+  it("falls back to the blank empty page when no templateId is given", () => {
+    renderEditor();
+
+    // createEmptyPage seeds one row with these elements:
+    expect(screen.getByText("Build something beautiful")).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        /Drop elements from the menu on the left to start your page\./
+      )
+    ).toBeInTheDocument();
+    expect(screen.getByText("Get started")).toBeInTheDocument();
+    expect(screen.getByLabelText("Page title")).toHaveValue("Untitled page");
+  });
+});
+
+describe("Editor — row operations", () => {
+  it("moves a row up and down via the floating menu", () => {
+    renderEditor("bold-sale-announcement");
+
+    // Selecting Row 2 reveals its floating action menu (chrome only shows when
+    // a row is selected or contains the selection).
+    fireEvent.click(getRowInner(2));
+
+    fireEvent.click(screen.getByRole("button", { name: "Move row up" }));
+
+    // After the up-move, the content previously in Row 2 should now be in Row 1.
+    expect(
+      within(getRowInner(1)).getByText("Use code BLACK70 at checkout")
+    ).toBeInTheDocument();
+    expect(within(getRowInner(2)).getByText("BLACK FRIDAY")).toBeInTheDocument();
+
+    // Re-select the moved row and push it back down.
+    fireEvent.click(getRowInner(1));
+    fireEvent.click(screen.getByRole("button", { name: "Move row down" }));
+
+    expect(within(getRowInner(1)).getByText("BLACK FRIDAY")).toBeInTheDocument();
+    expect(
+      within(getRowInner(2)).getByText("Use code BLACK70 at checkout")
+    ).toBeInTheDocument();
+  });
+
+  it("duplicates the selected row", () => {
+    renderEditor("bold-sale-announcement");
+
+    fireEvent.click(getRowInner(1));
+    fireEvent.click(screen.getByRole("button", { name: "Duplicate row" }));
+
+    // A duplicate is inserted immediately after the source row, so we should
+    // now have a third row and Row 2 should mirror Row 1's content.
+    expect(screen.getByLabelText("Row 3")).toBeInTheDocument();
+    expect(within(getRowInner(1)).getByText("BLACK FRIDAY")).toBeInTheDocument();
+    expect(within(getRowInner(2)).getByText("BLACK FRIDAY")).toBeInTheDocument();
+    expect(within(getRowInner(2)).getByText("70% OFF")).toBeInTheDocument();
+  });
+
+  it("deletes the selected row", () => {
+    renderEditor("bold-sale-announcement");
+
+    fireEvent.click(getRowInner(1));
+    fireEvent.click(screen.getByRole("button", { name: "Delete row" }));
+
+    // Row 1 is gone; only the original Row 2 remains, re-indexed as Row 1.
+    expect(screen.queryByLabelText("Row 2")).not.toBeInTheDocument();
+    expect(
+      within(getRowInner(1)).getByText("Use code BLACK70 at checkout")
+    ).toBeInTheDocument();
+    expect(screen.queryByText("BLACK FRIDAY")).not.toBeInTheDocument();
+  });
+
+  it("reorders rows via drag and drop", () => {
+    renderEditor("bold-sale-announcement");
+
+    const dt = new FakeDataTransfer();
+    fireDragEvent("dragstart", getRowInner(1), { dataTransfer: dt });
+    fireDragEvent("dragover", getRowOuter(2), {
+      dataTransfer: dt,
+      clientY: DROP_BELOW,
+    });
+    fireDragEvent("drop", getRowOuter(2), {
+      dataTransfer: dt,
+      clientY: DROP_BELOW,
+    });
+
+    // Drag Row 1 below the midpoint of Row 2 → Row 1 should now sit at the
+    // bottom. The Canvas handler subtracts one from toIndex when moving
+    // forward, so the new order is [originalRow2, originalRow1].
+    expect(
+      within(getRowInner(1)).getByText("Use code BLACK70 at checkout")
+    ).toBeInTheDocument();
+    expect(within(getRowInner(2)).getByText("BLACK FRIDAY")).toBeInTheDocument();
+  });
+
+  it("drag-drops above the midpoint to place the dragged row before the target", () => {
+    renderEditor("bold-sale-announcement");
+
+    const dt = new FakeDataTransfer();
+    fireDragEvent("dragstart", getRowInner(2), { dataTransfer: dt });
+    fireDragEvent("dragover", getRowOuter(1), {
+      dataTransfer: dt,
+      clientY: DROP_ABOVE,
+    });
+    fireDragEvent("drop", getRowOuter(1), {
+      dataTransfer: dt,
+      clientY: DROP_ABOVE,
+    });
+
+    expect(
+      within(getRowInner(1)).getByText("Use code BLACK70 at checkout")
+    ).toBeInTheDocument();
+    expect(within(getRowInner(2)).getByText("BLACK FRIDAY")).toBeInTheDocument();
+  });
+
+  it("adds a new row by clicking the plus button on an existing row", () => {
+    renderEditor("bold-sale-announcement");
+
+    // Reveal the AddRowButtons by selecting a row (chrome is gated on
+    // selection/hover, and selection is more reliable in jsdom).
+    fireEvent.click(getRowInner(1));
+    fireEvent.click(
+      screen.getByRole("button", { name: "Add row below" })
+    );
+
+    expect(screen.getByLabelText("Row 3")).toBeInTheDocument();
+    // The new row keeps the original Row 1 in place and pushes the rest down.
+    expect(within(getRowInner(1)).getByText("BLACK FRIDAY")).toBeInTheDocument();
+    expect(
+      within(getRowInner(3)).getByText("Use code BLACK70 at checkout")
+    ).toBeInTheDocument();
+  });
+});
+
+describe("Editor — element menu", () => {
+  // "Layout" appears as both an element category button and a config-pane tab
+  // button, so we narrow category lookups to the element-menu aside.
+  const getCategoryButton = (label: string) =>
+    within(screen.getByLabelText("Element menu")).getByRole("button", {
+      name: label,
+    });
+
+  it("renders every element category and shows only the active category's elements", async () => {
+    const user = userEvent.setup();
+    renderEditor();
+
+    // Every category is rendered as a clickable button inside the element menu.
+    for (const label of ["Text", "Media", "Buttons", "Layout", "Social"]) {
+      expect(getCategoryButton(label)).toBeInTheDocument();
+    }
+
+    // The first category ("Text") is selected by default.
+    expect(getCategoryButton("Text")).toHaveAttribute("aria-current", "page");
+    expect(
+      screen.getByRole("button", { name: "Drag to add Heading" })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Drag to add Paragraph" })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Drag to add Quote" })
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "Drag to add Image" })
+    ).not.toBeInTheDocument();
+
+    // Click "Media" → the card list swaps to Media-category elements.
+    await user.click(getCategoryButton("Media"));
+
+    expect(
+      screen.getByRole("button", { name: "Drag to add Image" })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Drag to add Video" })
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "Drag to add Heading" })
+    ).not.toBeInTheDocument();
+
+    // Click "Layout" → Divider + Spacer.
+    await user.click(getCategoryButton("Layout"));
+    expect(
+      screen.getByRole("button", { name: "Drag to add Divider" })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Drag to add Spacer" })
+    ).toBeInTheDocument();
+  });
+
+  it("filters elements by the search query across all categories", async () => {
+    const user = userEvent.setup();
+    renderEditor();
+
+    await user.type(screen.getByLabelText("Search elements"), "head");
+
+    // "head" matches "Heading" — every other element disappears.
+    expect(
+      screen.getByRole("button", { name: "Drag to add Heading" })
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "Drag to add Paragraph" })
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "Drag to add Image" })
+    ).not.toBeInTheDocument();
+
+    // While searching, no category is highlighted as active.
+    expect(getCategoryButton("Text")).not.toHaveAttribute(
+      "aria-current",
+      "page"
+    );
+
+    // A query with no matches surfaces the empty state.
+    await user.clear(screen.getByLabelText("Search elements"));
+    await user.type(screen.getByLabelText("Search elements"), "zzzzz");
+    expect(screen.getByText("No elements match.")).toBeInTheDocument();
+  });
+
+  it("drops a new element into an existing column on the canvas", async () => {
+    const user = userEvent.setup();
+    const { container } = renderEditor("bold-sale-announcement");
+
+    // The "Divider" card lives in the Layout category — switch to it first.
+    await user.click(getCategoryButton("Layout"));
+
+    // The CanvasRow column is the inner drop zone for new elements; pick the
+    // first one (Row 1, Column 0).
+    const column = container.querySelector<HTMLElement>(".edt-column");
+    if (!column) throw new Error("expected a canvas column to be present");
+
+    const dividerCard = screen.getByRole("button", {
+      name: "Drag to add Divider",
+    });
+
+    const dt = new FakeDataTransfer();
+    fireDragEvent("dragstart", dividerCard, { dataTransfer: dt });
+    fireDragEvent("dragover", column, { dataTransfer: dt });
+    fireDragEvent("drop", column, { dataTransfer: dt });
+
+    // The dropped element is auto-selected, which switches the config pane to
+    // the Element tab — its "Thickness" field confirms a divider was added.
+    expect(screen.getByLabelText("Thickness")).toBeInTheDocument();
+    expect(screen.getByLabelText("Thickness slider")).toBeInTheDocument();
+
+    // The divider also renders into the canvas as an <hr>.
+    expect(container.querySelectorAll("hr").length).toBeGreaterThan(0);
+  });
+
+  it("drops a new element on an empty canvas via the empty-state drop zone", () => {
+    renderEditor("bold-sale-announcement");
+
+    // Delete the existing rows so the canvas falls into its empty state.
+    fireEvent.click(getRowInner(1));
+    fireEvent.click(screen.getByRole("button", { name: "Delete row" }));
+    fireEvent.click(getRowInner(1));
+    fireEvent.click(screen.getByRole("button", { name: "Delete row" }));
+    expect(screen.queryByLabelText("Row 1")).not.toBeInTheDocument();
+
+    const emptyZone = document.querySelector<HTMLElement>(".edt-canvas-empty");
+    if (!emptyZone) throw new Error("expected empty-state drop zone");
+
+    const headingCard = screen.getByRole("button", {
+      name: "Drag to add Heading",
+    });
+    const dt = new FakeDataTransfer();
+    fireDragEvent("dragstart", headingCard, { dataTransfer: dt });
+    fireDragEvent("dragover", emptyZone, { dataTransfer: dt });
+    fireDragEvent("drop", emptyZone, { dataTransfer: dt });
+
+    // A row containing the new heading is created. The heading text shows up
+    // both as the rendered <h2> in the canvas and as the value of the Text
+    // textarea in the auto-opened Element tab, so we look for the heading
+    // role specifically.
+    expect(screen.getByLabelText("Row 1")).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: "Headline text" })
+    ).toBeInTheDocument();
+  });
+
+  it("collapses and reopens via the chevron toggles", async () => {
+    const user = userEvent.setup();
+    renderEditor();
+
+    expect(screen.getByLabelText("Search elements")).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "Collapse element menu" }));
+    expect(screen.queryByLabelText("Search elements")).not.toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "Open element menu" }));
+    expect(screen.getByLabelText("Search elements")).toBeInTheDocument();
+  });
+});
+
+describe("Editor — config pane", () => {
+  it("switches to the Layout tab when a row is selected and the Element tab when an element is", () => {
+    const { container } = renderEditor("bold-sale-announcement");
+
+    // No selection → Page tab. PageTab uniquely renders "Horizontal padding".
+    expect(screen.getByLabelText("Horizontal padding")).toBeInTheDocument();
+
+    // Click on a row's inner div (must be the click target itself, not a child).
+    fireEvent.click(getRowInner(1));
+
+    // Layout tab content shows row-specific fields. "Columns" with options 1-4
+    // is unique to LayoutTab.
+    expect(screen.getByRole("radiogroup", { name: "Columns" })).toBeInTheDocument();
+    expect(screen.getByLabelText("Column gap")).toBeInTheDocument();
+
+    // Now click an actual element child (a heading) inside the row.
+    const heading = container.querySelector("h1");
+    if (!heading) throw new Error("expected a rendered heading in row 1");
+    const elementWrapper = heading.closest(".edt-element") as HTMLElement;
+    fireEvent.click(elementWrapper);
+
+    // Element tab content for heading exposes a "Level" radiogroup.
+    expect(screen.getByRole("radiogroup", { name: "Level" })).toBeInTheDocument();
+  });
+
+  it("shows a hint when the Layout or Element tab is opened without a selection", async () => {
+    const user = userEvent.setup();
+    renderEditor("bold-sale-announcement");
+
+    // "Layout" also exists as an element-menu category, so scope tab clicks
+    // to the configuration aside.
+    const configAside = screen.getByLabelText("Configuration");
+
+    // Switch tabs manually from the default Page tab.
+    await user.click(
+      within(configAside).getByRole("button", { name: "Layout" })
+    );
+    expect(
+      screen.getByText("Select a row in the canvas to configure its layout.")
+    ).toBeInTheDocument();
+
+    await user.click(
+      within(configAside).getByRole("button", { name: "Element" })
+    );
+    expect(
+      screen.getByText("Select an element in the canvas to configure it.")
+    ).toBeInTheDocument();
+  });
+
+  it("changing page properties updates the canvas paper inline styles", async () => {
+    const user = userEvent.setup();
+    const { container } = renderEditor("bold-sale-announcement");
+
+    // The page-tab Background field is a hex input next to a colour swatch.
+    const hexInput = screen.getByLabelText("Background value");
+    await user.clear(hexInput);
+    await user.type(hexInput, "#abcdef");
+    fireEvent.blur(hexInput);
+
+    expect(getCanvasPaper(container).style.backgroundColor).toBe(
+      "rgb(171, 205, 239)"
+    );
+
+    // The horizontal and vertical padding sliders write directly to page state
+    // (commit-on-change), so the inline style flips immediately.
+    const hPaddingSlider = screen.getByLabelText("Horizontal padding slider");
+    fireEvent.change(hPaddingSlider, { target: { value: "48" } });
+    expect(getCanvasPaper(container).style.paddingLeft).toBe("48px");
+    expect(getCanvasPaper(container).style.paddingRight).toBe("48px");
+
+    const vPaddingSlider = screen.getByLabelText("Vertical padding slider");
+    fireEvent.change(vPaddingSlider, { target: { value: "24" } });
+    expect(getCanvasPaper(container).style.paddingTop).toBe("24px");
+    expect(getCanvasPaper(container).style.paddingBottom).toBe("24px");
+  });
+
+  it("changing layout properties updates the row inner styles", async () => {
+    const user = userEvent.setup();
+    renderEditor("bold-sale-announcement");
+
+    fireEvent.click(getRowInner(1));
+    // Layout tab is now active.
+
+    // Bump vertical padding via its slider input (range fires onChange directly).
+    fireEvent.change(screen.getByLabelText("Vertical padding slider"), {
+      target: { value: "120" },
+    });
+    expect(getRowInner(1).style.paddingTop).toBe("120px");
+    expect(getRowInner(1).style.paddingBottom).toBe("120px");
+
+    // Vertical margin writes to the outer .edt-row.
+    fireEvent.change(screen.getByLabelText("Vertical margin slider"), {
+      target: { value: "30" },
+    });
+    expect(getRowOuter(1).style.marginTop).toBe("30px");
+    expect(getRowOuter(1).style.marginBottom).toBe("30px");
+
+    // Switching to 2 columns rebuilds the row with two .edt-column children.
+    await user.click(screen.getByRole("radio", { name: "2" }));
+    expect(getRowInner(1).querySelectorAll(".edt-column").length).toBe(2);
+  });
+
+  it("changing element properties updates the rendered element styles", () => {
+    const { container } = renderEditor("bold-sale-announcement");
+
+    // Pick the H1 (70% OFF) and select it.
+    const heading = container.querySelector("h1");
+    if (!heading) throw new Error("expected an h1 in the canvas");
+    fireEvent.click(heading.closest(".edt-element") as HTMLElement);
+
+    // Verify pre-state from the template.
+    expect(heading.style.fontSize).toBe("132px");
+
+    // Change Font size via its range slider.
+    fireEvent.change(screen.getByLabelText("Font size slider"), {
+      target: { value: "80" },
+    });
+
+    // ElementRenderer re-renders the heading with the new fontSize.
+    const headingAfter = container.querySelector("h1");
+    expect(headingAfter?.style.fontSize).toBe("80px");
+
+    // Change colour via the hex input.
+    const hex = screen.getByLabelText("Color value");
+    fireEvent.change(hex, { target: { value: "#112233" } });
+    fireEvent.blur(hex);
+    expect(container.querySelector("h1")?.style.color).toBe(
+      "rgb(17, 34, 51)"
+    );
+  });
+});
+
+describe("Editor — undo / redo", () => {
+  it("undoes and redoes a page-property change", async () => {
+    const user = userEvent.setup();
+    const { container } = renderEditor("bold-sale-announcement");
+
+    // Baseline.
+    expect(getCanvasPaper(container).style.backgroundColor).toBe(
+      "rgb(26, 20, 17)"
+    );
+
+    // Commit a change.
+    const hex = screen.getByLabelText("Background value");
+    await user.clear(hex);
+    await user.type(hex, "#abcdef");
+    fireEvent.blur(hex);
+    expect(getCanvasPaper(container).style.backgroundColor).toBe(
+      "rgb(171, 205, 239)"
+    );
+
+    // Undo via the header button.
+    await user.click(screen.getByRole("button", { name: "Undo" }));
+    expect(getCanvasPaper(container).style.backgroundColor).toBe(
+      "rgb(26, 20, 17)"
+    );
+
+    // Redo via the header button.
+    await user.click(screen.getByRole("button", { name: "Redo" }));
+    expect(getCanvasPaper(container).style.backgroundColor).toBe(
+      "rgb(171, 205, 239)"
+    );
+  });
+
+  it("disables Undo when there is no history and Redo when there is no future", async () => {
+    const user = userEvent.setup();
+    renderEditor("bold-sale-announcement");
+
+    expect(screen.getByRole("button", { name: "Undo" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Redo" })).toBeDisabled();
+
+    // Make one change to populate the past stack.
+    const hex = screen.getByLabelText("Background value");
+    await user.clear(hex);
+    await user.type(hex, "#111111");
+    fireEvent.blur(hex);
+
+    expect(screen.getByRole("button", { name: "Undo" })).toBeEnabled();
+    expect(screen.getByRole("button", { name: "Redo" })).toBeDisabled();
+
+    await user.click(screen.getByRole("button", { name: "Undo" }));
+    expect(screen.getByRole("button", { name: "Undo" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Redo" })).toBeEnabled();
+  });
+});
+
+describe("Editor — viewport", () => {
+  it("toggles the canvas paper max-width between desktop and mobile", async () => {
+    const user = userEvent.setup();
+    const { container } = renderEditor("bold-sale-announcement");
+
+    // Desktop is the default.
+    expect(getCanvasPaper(container).style.maxWidth).toBe("1080px");
+
+    await user.click(screen.getByRole("radio", { name: "Mobile view" }));
+    expect(getCanvasPaper(container).style.maxWidth).toBe("390px");
+
+    await user.click(screen.getByRole("radio", { name: "Desktop view" }));
+    expect(getCanvasPaper(container).style.maxWidth).toBe("1080px");
+  });
+
+  it("marks the active viewport via aria-checked", async () => {
+    const user = userEvent.setup();
+    renderEditor("bold-sale-announcement");
+
+    const desktop = screen.getByRole("radio", { name: "Desktop view" });
+    const mobile = screen.getByRole("radio", { name: "Mobile view" });
+
+    expect(desktop).toHaveAttribute("aria-checked", "true");
+    expect(mobile).toHaveAttribute("aria-checked", "false");
+
+    await user.click(mobile);
+    expect(desktop).toHaveAttribute("aria-checked", "false");
+    expect(mobile).toHaveAttribute("aria-checked", "true");
+  });
+});
+
+describe("Editor — build & export", () => {
+  it("opens the build modal, runs the export, and lands on the done message", async () => {
+    const user = userEvent.setup();
+
+    // The exporter falls back to URL.createObjectURL + an `<a>` click when the
+    // browser doesn't expose `showSaveFilePicker`. jsdom doesn't, so we just
+    // need to make sure those primitives don't crash.
+    const createObjectURL = vi
+      .spyOn(URL, "createObjectURL")
+      .mockReturnValue("blob:fake");
+    vi.spyOn(URL, "revokeObjectURL").mockImplementation(() => {});
+    // Anchors get a real `.click()` in jsdom, but it would try to navigate;
+    // stub it so the test doesn't attempt to fetch the blob: URL.
+    const anchorClick = vi
+      .spyOn(HTMLAnchorElement.prototype, "click")
+      .mockImplementation(() => {});
+
+    renderEditor("bold-sale-announcement");
+
+    await user.click(
+      screen.getByRole("button", { name: /Build & export/i })
+    );
+
+    // The "done" message shows after the exporter resolves.
+    await waitFor(() => {
+      expect(
+        screen.getByText("Your page has been exported as an HTML file.")
+      ).toBeInTheDocument();
+    });
+
+    expect(createObjectURL).toHaveBeenCalledTimes(1);
+    const blob = createObjectURL.mock.calls[0][0] as Blob;
+    expect(blob.type).toMatch(/text\/html/);
+    expect(anchorClick).toHaveBeenCalled();
+  });
+});
