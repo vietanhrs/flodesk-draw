@@ -31,11 +31,7 @@ const ElementCard = ({ def }: { def: ElementDefinition }) => {
       title={`Drag to add ${def.name}`}
       className="edt-element-card"
     >
-      <Icon
-        width={24}
-        height={24}
-        className="edt-element-card__icon"
-      />
+      <Icon width={24} height={24} className="edt-element-card__icon" />
       <span className="edt-element-card__label">{def.name}</span>
     </div>
   );
@@ -53,9 +49,7 @@ const menuShellProps = {
 export const ElementMenu = () => {
   const { isElementMenuOpen, toggleMenu } = useEditor();
   const [search, setSearch] = useState("");
-  const [categoryId, setCategoryId] = useState<string>(
-    elementCategories[0].id
-  );
+  const [categoryId, setCategoryId] = useState<string>(elementCategories[0].id);
 
   const filtered = useMemo(() => {
     const query = search.trim().toLowerCase();

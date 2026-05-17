@@ -16,7 +16,7 @@ import { Link } from "react-router-dom";
 import { useEditor } from "../../state/EditorContext";
 
 interface Props {
-  onBuild: () => void;
+  onBuild: () => Promise<void>;
   isBuilding: boolean;
 }
 
@@ -80,7 +80,7 @@ export const Header = ({ onBuild, isBuilding }: Props) => {
           onSubmit={(e) => {
             e.preventDefault();
             commitTitle();
-            (e.target as HTMLFormElement).querySelector("input")?.blur();
+            e.currentTarget.querySelector("input")?.blur();
           }}
         >
           <TextInput
@@ -149,7 +149,9 @@ export const Header = ({ onBuild, isBuilding }: Props) => {
           icon={<IconDownload width={14} height={14} />}
           isDisabled={isBuilding}
           hasSpinner={isBuilding}
-          onClick={onBuild}
+          onClick={() => {
+            void onBuild();
+          }}
         >
           {isBuilding ? "Building…" : "Build & export"}
         </Button>

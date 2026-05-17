@@ -39,7 +39,8 @@ const alignStyle = (align: "left" | "center" | "right"): CSSProperties => ({
 export const ElementRenderer = ({ element }: RendererProps) => {
   switch (element.type) {
     case "heading": {
-      const Tag = (`h${element.level}` as "h1" | "h2" | "h3");
+      const Tag =
+        element.level === 1 ? "h1" : element.level === 2 ? "h2" : "h3";
       return (
         <Tag
           style={{
@@ -109,8 +110,8 @@ export const ElementRenderer = ({ element }: RendererProps) => {
         element.align === "left"
           ? "flex-start"
           : element.align === "right"
-          ? "flex-end"
-          : "center";
+            ? "flex-end"
+            : "center";
       const hasBorder =
         element.backgroundColor === "transparent" ||
         element.backgroundColor === "rgba(0,0,0,0)";
@@ -144,8 +145,8 @@ export const ElementRenderer = ({ element }: RendererProps) => {
         element.align === "left"
           ? "flex-start"
           : element.align === "right"
-          ? "flex-end"
-          : "center";
+            ? "flex-end"
+            : "center";
       return (
         <div style={{ display: "flex", justifyContent: justify }}>
           <img
@@ -215,8 +216,8 @@ export const ElementRenderer = ({ element }: RendererProps) => {
         element.align === "left"
           ? "flex-start"
           : element.align === "right"
-          ? "flex-end"
-          : "center";
+            ? "flex-end"
+            : "center";
       return (
         <div
           style={{

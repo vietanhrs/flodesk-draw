@@ -177,9 +177,7 @@ describe("buildHtml", () => {
 
     // Row + grid scaffolding (fractions are normalised to a percentage of the
     // total weight; JS division leaves a long tail of repeating digits).
-    expect(html).toMatch(
-      /grid-template-columns:66\.6+\d?fr 33\.3+\d?fr/
-    );
+    expect(html).toMatch(/grid-template-columns:66\.6+\d?fr 33\.3+\d?fr/);
     expect(html).toContain("gap:24px");
     expect(html).toContain("background-color:#fafafa");
     expect(html).toContain("margin-top:8px");
@@ -214,9 +212,7 @@ describe("buildHtml", () => {
     );
 
     // Video.
-    expect(html).toContain(
-      'src="https://www.youtube.com/embed/abc"'
-    );
+    expect(html).toContain('src="https://www.youtube.com/embed/abc"');
     expect(html).toContain("padding-bottom:56.25%");
 
     // Social — IG icon + email icon.
@@ -224,9 +220,7 @@ describe("buildHtml", () => {
       'href="https://instagram.com/x" aria-label="Instagram"'
     );
     expect(html).toContain(">IG</a>");
-    expect(html).toContain(
-      'href="mailto:hi@example.com" aria-label="Email"'
-    );
+    expect(html).toContain('href="mailto:hi@example.com" aria-label="Email"');
     expect(html).toContain(">@</a>");
   });
 

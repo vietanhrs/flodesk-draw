@@ -116,7 +116,9 @@
   color: var(--grn-color-shade13);
   text-align: center;
   cursor: grab;
-  transition: border-color 120ms ease, box-shadow 120ms ease;
+  transition:
+    border-color 120ms ease,
+    box-shadow 120ms ease;
 }
 .edt-element-card:hover {
   border-color: var(--grn-color-blue9);
@@ -192,8 +194,12 @@
   z-index: 10;
   pointer-events: none;
 }
-.edt-row__edge--top { top: -2px; }
-.edt-row__edge--bottom { bottom: -2px; }
+.edt-row__edge--top {
+  top: -2px;
+}
+.edt-row__edge--bottom {
+  bottom: -2px;
+}
 
 .edt-add-row-btn {
   position: absolute;
@@ -217,8 +223,12 @@
 .edt-add-row-btn:hover {
   background: var(--grn-color-shade12);
 }
-.edt-add-row-btn--top { top: -14px; }
-.edt-add-row-btn--bottom { bottom: -14px; }
+.edt-add-row-btn--top {
+  top: -14px;
+}
+.edt-add-row-btn--bottom {
+  bottom: -14px;
+}
 
 .edt-row-menu {
   position: absolute;
@@ -337,7 +347,11 @@
     linear-gradient(45deg, transparent 75%, #ccc 75%),
     linear-gradient(-45deg, transparent 75%, #ccc 75%);
   background-size: 8px 8px;
-  background-position: 0 0, 0 4px, 4px -4px, -4px 0;
+  background-position:
+    0 0,
+    0 4px,
+    4px -4px,
+    -4px 0;
 }
 .edt-color__picker {
   position: absolute;

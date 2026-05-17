@@ -34,11 +34,11 @@ export const MobileHeader = ({ activeCategoryId }: MobileHeaderProps) => {
           value={activeCategoryId}
           onChange={(option) => {
             if (option.value === SCRATCH_VALUE) {
-              navigate("/editor");
+              void navigate("/editor");
             } else if (option.value === ALL_CATEGORY_ID) {
-              navigate("/templates");
+              void navigate("/templates");
             } else {
-              navigate(`/templates?category=${option.value}`);
+              void navigate(`/templates?category=${option.value}`);
             }
           }}
         />

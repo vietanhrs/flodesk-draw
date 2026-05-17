@@ -40,9 +40,7 @@ const getRowOuter = (n: number): HTMLElement => {
 const getCanvasPaper = (container: HTMLElement): HTMLElement => {
   // The viewport-aware canvas paper is the only div whose inline style sets
   // an explicit max-width (either 1080 for desktop or 390 for mobile).
-  const paper = container.querySelector<HTMLElement>(
-    'div[style*="max-width"]'
-  );
+  const paper = container.querySelector<HTMLElement>('div[style*="max-width"]');
   if (!paper) throw new Error("Canvas paper not found");
   return paper;
 };
@@ -57,7 +55,9 @@ describe("Editor — template loading", () => {
     expect(screen.queryByLabelText("Row 3")).not.toBeInTheDocument();
 
     // Content from the template comes through unchanged.
-    expect(within(getRowInner(1)).getByText("BLACK FRIDAY")).toBeInTheDocument();
+    expect(
+      within(getRowInner(1)).getByText("BLACK FRIDAY")
+    ).toBeInTheDocument();
     expect(within(getRowInner(1)).getByText("70% OFF")).toBeInTheDocument();
     expect(
       within(getRowInner(1)).getByText(/Our biggest sale of the year/)
@@ -101,13 +101,17 @@ describe("Editor — row operations", () => {
     expect(
       within(getRowInner(1)).getByText("Use code BLACK70 at checkout")
     ).toBeInTheDocument();
-    expect(within(getRowInner(2)).getByText("BLACK FRIDAY")).toBeInTheDocument();
+    expect(
+      within(getRowInner(2)).getByText("BLACK FRIDAY")
+    ).toBeInTheDocument();
 
     // Re-select the moved row and push it back down.
     fireEvent.click(getRowInner(1));
     fireEvent.click(screen.getByRole("button", { name: "Move row down" }));
 
-    expect(within(getRowInner(1)).getByText("BLACK FRIDAY")).toBeInTheDocument();
+    expect(
+      within(getRowInner(1)).getByText("BLACK FRIDAY")
+    ).toBeInTheDocument();
     expect(
       within(getRowInner(2)).getByText("Use code BLACK70 at checkout")
     ).toBeInTheDocument();
@@ -122,8 +126,12 @@ describe("Editor — row operations", () => {
     // A duplicate is inserted immediately after the source row, so we should
     // now have a third row and Row 2 should mirror Row 1's content.
     expect(screen.getByLabelText("Row 3")).toBeInTheDocument();
-    expect(within(getRowInner(1)).getByText("BLACK FRIDAY")).toBeInTheDocument();
-    expect(within(getRowInner(2)).getByText("BLACK FRIDAY")).toBeInTheDocument();
+    expect(
+      within(getRowInner(1)).getByText("BLACK FRIDAY")
+    ).toBeInTheDocument();
+    expect(
+      within(getRowInner(2)).getByText("BLACK FRIDAY")
+    ).toBeInTheDocument();
     expect(within(getRowInner(2)).getByText("70% OFF")).toBeInTheDocument();
   });
 
@@ -161,7 +169,9 @@ describe("Editor — row operations", () => {
     expect(
       within(getRowInner(1)).getByText("Use code BLACK70 at checkout")
     ).toBeInTheDocument();
-    expect(within(getRowInner(2)).getByText("BLACK FRIDAY")).toBeInTheDocument();
+    expect(
+      within(getRowInner(2)).getByText("BLACK FRIDAY")
+    ).toBeInTheDocument();
   });
 
   it("drag-drops above the midpoint to place the dragged row before the target", () => {
@@ -181,7 +191,9 @@ describe("Editor — row operations", () => {
     expect(
       within(getRowInner(1)).getByText("Use code BLACK70 at checkout")
     ).toBeInTheDocument();
-    expect(within(getRowInner(2)).getByText("BLACK FRIDAY")).toBeInTheDocument();
+    expect(
+      within(getRowInner(2)).getByText("BLACK FRIDAY")
+    ).toBeInTheDocument();
   });
 
   it("adds a new row by clicking the plus button on an existing row", () => {
@@ -190,13 +202,13 @@ describe("Editor — row operations", () => {
     // Reveal the AddRowButtons by selecting a row (chrome is gated on
     // selection/hover, and selection is more reliable in jsdom).
     fireEvent.click(getRowInner(1));
-    fireEvent.click(
-      screen.getByRole("button", { name: "Add row below" })
-    );
+    fireEvent.click(screen.getByRole("button", { name: "Add row below" }));
 
     expect(screen.getByLabelText("Row 3")).toBeInTheDocument();
     // The new row keeps the original Row 1 in place and pushes the rest down.
-    expect(within(getRowInner(1)).getByText("BLACK FRIDAY")).toBeInTheDocument();
+    expect(
+      within(getRowInner(1)).getByText("BLACK FRIDAY")
+    ).toBeInTheDocument();
     expect(
       within(getRowInner(3)).getByText("Use code BLACK70 at checkout")
     ).toBeInTheDocument();
@@ -354,7 +366,9 @@ describe("Editor — element menu", () => {
 
     expect(screen.getByLabelText("Search elements")).toBeInTheDocument();
 
-    await user.click(screen.getByRole("button", { name: "Collapse element menu" }));
+    await user.click(
+      screen.getByRole("button", { name: "Collapse element menu" })
+    );
     expect(screen.queryByLabelText("Search elements")).not.toBeInTheDocument();
 
     await user.click(screen.getByRole("button", { name: "Open element menu" }));
@@ -374,7 +388,9 @@ describe("Editor — config pane", () => {
 
     // Layout tab content shows row-specific fields. "Columns" with options 1-4
     // is unique to LayoutTab.
-    expect(screen.getByRole("radiogroup", { name: "Columns" })).toBeInTheDocument();
+    expect(
+      screen.getByRole("radiogroup", { name: "Columns" })
+    ).toBeInTheDocument();
     expect(screen.getByLabelText("Column gap")).toBeInTheDocument();
 
     // Now click an actual element child (a heading) inside the row.
@@ -384,7 +400,9 @@ describe("Editor — config pane", () => {
     fireEvent.click(elementWrapper);
 
     // Element tab content for heading exposes a "Level" radiogroup.
-    expect(screen.getByRole("radiogroup", { name: "Level" })).toBeInTheDocument();
+    expect(
+      screen.getByRole("radiogroup", { name: "Level" })
+    ).toBeInTheDocument();
   });
 
   it("shows a hint when the Layout or Element tab is opened without a selection", async () => {
@@ -514,9 +532,7 @@ describe("Editor — config pane", () => {
     const hex = screen.getByLabelText("Color value");
     fireEvent.change(hex, { target: { value: "#112233" } });
     fireEvent.blur(hex);
-    expect(container.querySelector("h1")?.style.color).toBe(
-      "rgb(17, 34, 51)"
-    );
+    expect(container.querySelector("h1")?.style.color).toBe("rgb(17, 34, 51)");
   });
 });
 
@@ -624,9 +640,7 @@ describe("Editor — build & export", () => {
 
     renderEditor("bold-sale-announcement");
 
-    await user.click(
-      screen.getByRole("button", { name: /Build & export/i })
-    );
+    await user.click(screen.getByRole("button", { name: /Build & export/i }));
 
     // The "done" message shows after the exporter resolves.
     await waitFor(() => {
@@ -655,14 +669,10 @@ describe("Editor — build & export", () => {
     try {
       renderEditor("bold-sale-announcement");
 
-      await user.click(
-        screen.getByRole("button", { name: /Build & export/i })
-      );
+      await user.click(screen.getByRole("button", { name: /Build & export/i }));
 
       // We're stuck at "Preparing your page…" while the picker promise hangs.
-      const buildingMessage = await screen.findByText(
-        /Preparing your page/i
-      );
+      const buildingMessage = await screen.findByText(/Preparing your page/i);
       expect(buildingMessage).toBeInTheDocument();
 
       // The close X is rendered (FocusTrap needs a focusable target) but is

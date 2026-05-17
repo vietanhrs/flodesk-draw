@@ -16,7 +16,9 @@ const escapeHtml = (s: string): string =>
 
 const escapeAttr = escapeHtml;
 
-const styleString = (rules: Record<string, string | number | undefined>): string => {
+const styleString = (
+  rules: Record<string, string | number | undefined>
+): string => {
   const parts: string[] = [];
   for (const [key, value] of Object.entries(rules)) {
     if (value === undefined || value === null || value === "") continue;
@@ -141,8 +143,7 @@ const renderElement = (el: PageElement): string => {
       )}" alt="${escapeAttr(el.alt)}" style="${img}" /></div>`;
     }
     case "divider": {
-      const margin =
-        el.widthPct >= 100 ? "0" : `0 ${(100 - el.widthPct) / 2}%`;
+      const margin = el.widthPct >= 100 ? "0" : `0 ${(100 - el.widthPct) / 2}%`;
       const style = styleString({
         border: 0,
         height: `${el.thickness}px`,

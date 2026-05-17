@@ -335,9 +335,10 @@ export const EditorProvider = ({ templateId, children }: ProviderProps) => {
     ) => {
       const current = stateRef.current.history.present;
       commit(
-        replaceElement(current, rowId, elementId, (el) =>
-          ({ ...el, ...patch } as PageElement)
-        ),
+        replaceElement(current, rowId, elementId, (el) => ({
+          ...el,
+          ...patch,
+        })),
         debounceKey
       );
     },
