@@ -11,8 +11,8 @@ export const BuildModal = ({ isOpen, status, message, onClose }: Props) => {
   return (
     <Modal
       isOpen={isOpen}
-      onClose={status === "building" ? undefined : onClose}
-      hasCloseButton={status !== "building"}
+      onClose={onClose}
+      hasCloseButton
       cardMaxWidth="narrow"
       title="Build & export"
       disableCloseHandler={status === "building"}

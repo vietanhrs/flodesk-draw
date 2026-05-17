@@ -38,10 +38,6 @@ const THIRD_PARTY_NOISE = [
   // headless-ui still reads element.ref to forward refs the React-18 way;
   // React 19 emits this deprecation notice for every render.
   /Accessing element\.ref was removed in React 19/,
-  // The build modal opens in a "building" state with no close button and only
-  // a spinner + paragraph inside, so @headlessui/react's FocusTrap has nothing
-  // focusable to trap. Harmless in tests.
-  /There are no focusable elements inside the <FocusTrap \/>/,
 ];
 const isNoise = (args: unknown[]): boolean => {
   const first = args[0];
