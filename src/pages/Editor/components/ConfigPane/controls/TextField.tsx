@@ -16,7 +16,7 @@ export const TextField = ({
   multiline,
 }: Props) => {
   return (
-    <Stack tag="label" gap="xs">
+    <Stack tag="label" gap="xs" style={{ display: "block" }}>
       <Text tag="span" variant="caps" color="content2">
         {label}
       </Text>

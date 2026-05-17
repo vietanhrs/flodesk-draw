@@ -35,7 +35,7 @@ export const ColorInput = ({
   const swatchColor = isTransparent ? "#ffffff" : value;
 
   return (
-    <Stack tag="label" gap="xs">
+    <Stack tag="label" gap="xs" style={{ display: "block" }}>
       <Text tag="span" variant="caps" color="content2">
         {label}
       </Text>
