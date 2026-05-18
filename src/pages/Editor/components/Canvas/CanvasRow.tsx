@@ -89,6 +89,7 @@ export const CanvasRow = ({ row, rowIndex, totalRows, onRowDropAt }: Props) => {
 
   return (
     <div
+      data-testid="canvas-row"
       className="edt-row"
       style={{ marginTop: row.marginY, marginBottom: row.marginY }}
       onMouseEnter={() => setIsHovered(true)}
@@ -123,6 +124,7 @@ export const CanvasRow = ({ row, rowIndex, totalRows, onRowDropAt }: Props) => {
       )}
 
       <div
+        data-testid={`canvas-row-${rowIndex + 1}`}
         draggable
         onDragStart={handleRowDragStart}
         onDragEnd={handleRowDragEnd}
@@ -158,6 +160,7 @@ export const CanvasRow = ({ row, rowIndex, totalRows, onRowDropAt }: Props) => {
             const isColumnDrop = dropColumnIdx === columnIndex;
             return (
               <div
+                data-testid={`canvas-column-${rowIndex + 1}-${columnIndex + 1}`}
                 key={columnIndex}
                 onDragOver={(e) => {
                   if (!dragHasNewElement(e.dataTransfer)) return;
