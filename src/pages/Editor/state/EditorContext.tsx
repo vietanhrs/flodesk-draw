@@ -9,18 +9,12 @@ import {
   useRef,
 } from "react";
 
+import type { ElementType, PageElement } from "@src/pages/Editor/elements";
 import { createId } from "@src/pages/Editor/utils/ids";
 
 import { findElementDefinition } from "./elementCatalog";
 import { buildPageForTemplate } from "./initialData";
-import type {
-  ElementType,
-  PageData,
-  PageElement,
-  PageRow,
-  Selection,
-  Viewport,
-} from "./types";
+import type { PageData, PageRow, Selection, Viewport } from "./types";
 
 const STORAGE_PREFIX = "flodesk-draw:editor:";
 const HISTORY_LIMIT = 100;
