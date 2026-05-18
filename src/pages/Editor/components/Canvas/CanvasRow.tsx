@@ -126,6 +126,7 @@ export const CanvasRow = ({ row, rowIndex, totalRows, onRowDropAt }: Props) => {
       )}
 
       <div
+        // This complements the outer canvas-row test id above.
         data-testid={`canvas-row-${rowIndex + 1}`}
         draggable
         onDragStart={handleRowDragStart}
