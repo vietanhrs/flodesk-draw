@@ -16,6 +16,7 @@ import {
 } from "@src/pages/Editor/utils/dragData";
 
 import { AddRowButton } from "./AddRowButton";
+import { ElementFloatingMenu } from "./ElementFloatingMenu";
 import { ElementRenderer } from "./ElementRenderer";
 import { RowFloatingMenu } from "./RowFloatingMenu";
 
@@ -304,6 +305,15 @@ export const CanvasRow = ({ row, rowIndex, totalRows, onRowDropAt }: Props) => {
                       (isGhost ? " edt-element--ghost" : "")
                     }
                   >
+                    {isSelected && (
+                      <ElementFloatingMenu
+                        rowId={row.id}
+                        columnIndex={columnIndex}
+                        elementId={element.id}
+                        elementIndex={i}
+                        columnLength={column.length}
+                      />
+                    )}
                     <ElementRenderer element={element} />
                   </div>
                 );

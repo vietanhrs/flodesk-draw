@@ -101,6 +101,66 @@ test.describe("Editor elements", () => {
     ).toBeVisible();
   });
 
+  test("the element floating menu moves, duplicates, and deletes the selected element", async ({
+    page,
+  }) => {
+    // Bold sale template has five elements in row 1 column 1, in this order:
+    // BLACK FRIDAY (p), 70% OFF (h1), "Our biggest sale…" (p), spacer, button.
+    await gotoEditor(page, "/templates/bold-sale-announcement");
+
+    const column = firstColumn(page);
+    const heading = canvasElement(page, "heading").first();
+    await heading.click();
+
+    // Toolbar appears next to the selected element.
+    const toolbar = page.getByRole("toolbar", { name: "Element actions" });
+    await expect(toolbar).toBeVisible();
+
+    // Move down — heading should now sit at .edt-element index 2 in the column.
+    await toolbar.getByRole("button", { name: "Move element down" }).click();
+    await expect(
+      column.locator(".edt-element").nth(2).locator("h1")
+    ).toHaveText("70% OFF");
+
+    // Duplicate — there should now be two h1s in the column, and the clone
+    // remains selected so the toolbar is still visible.
+    await toolbar.getByRole("button", { name: "Duplicate element" }).click();
+    await expect(column.locator("h1")).toHaveCount(2);
+    await expect(toolbar).toBeVisible();
+
+    // Delete — the clone disappears and one h1 remains.
+    await toolbar.getByRole("button", { name: "Delete element" }).click();
+    await expect(column.locator("h1")).toHaveCount(1);
+  });
+
+  test("the element floating menu disables Move up on the first element and Move down on the last", async ({
+    page,
+  }) => {
+    await gotoEditor(page, "/templates/bold-sale-announcement");
+
+    const column = firstColumn(page);
+    const elements = column.locator(".edt-element");
+
+    // First element ("BLACK FRIDAY"): up disabled, down enabled.
+    await elements.first().click();
+    const toolbar = page.getByRole("toolbar", { name: "Element actions" });
+    await expect(
+      toolbar.getByRole("button", { name: "Move element up" })
+    ).toBeDisabled();
+    await expect(
+      toolbar.getByRole("button", { name: "Move element down" })
+    ).toBeEnabled();
+
+    // Last element ("Shop the sale" button): up enabled, down disabled.
+    await elements.last().click();
+    await expect(
+      toolbar.getByRole("button", { name: "Move element up" })
+    ).toBeEnabled();
+    await expect(
+      toolbar.getByRole("button", { name: "Move element down" })
+    ).toBeDisabled();
+  });
+
   test("adds, duplicates, moves, and deletes rows", async ({ page }) => {
     await rows(page).first().hover();
     await page.getByRole("button", { name: "Add row below" }).click();
