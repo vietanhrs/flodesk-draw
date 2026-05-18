@@ -1,4 +1,4 @@
-import type { ElementType } from "@src/pages/Editor/state/types";
+import type { ElementType } from "@src/pages/Editor/elements";
 
 const TYPE_NEW_ELEMENT = "application/x-flodesk-draw-element";
 const TYPE_ROW_MOVE = "application/x-flodesk-draw-row";
