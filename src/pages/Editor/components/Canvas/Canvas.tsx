@@ -3,7 +3,10 @@ import { useCallback } from "react";
 import { Box, Flex } from "@flodesk/grain";
 
 import { useEditor } from "@src/pages/Editor/state/EditorContext";
-import { dragHasNewElement, readNewElementDrag } from "@src/pages/Editor/utils/dragData";
+import {
+  dragHasNewElement,
+  readNewElementDrag,
+} from "@src/pages/Editor/utils/dragData";
 
 import { CanvasRow } from "./CanvasRow";
 
