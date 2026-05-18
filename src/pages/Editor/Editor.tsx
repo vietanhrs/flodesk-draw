@@ -10,6 +10,7 @@ import { ConfigPane } from "./components/ConfigPane/ConfigPane";
 import { ElementMenu } from "./components/ElementMenu/ElementMenu";
 import { Header } from "./components/Header/Header";
 import { exportPageAsHtml } from "./exporter/exportFile";
+import { DragProvider } from "./state/DragContext";
 import { EditorProvider, useEditor } from "./state/EditorContext";
 
 const EditorShell = () => {
@@ -79,7 +80,9 @@ export const Editor = () => {
   const params = useParams<{ templateId?: string }>();
   return (
     <EditorProvider templateId={params.templateId}>
-      <EditorShell />
+      <DragProvider>
+        <EditorShell />
+      </DragProvider>
     </EditorProvider>
   );
 };

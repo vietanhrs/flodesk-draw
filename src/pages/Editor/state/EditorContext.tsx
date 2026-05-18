@@ -12,6 +12,7 @@ import {
 import type { ElementType, PageElement } from "@src/pages/Editor/elements";
 import { createId } from "@src/pages/Editor/utils/ids";
 
+import type { DragSource, DropTarget } from "./DragContext";
 import { findElementDefinition } from "./elementCatalog";
 import { buildPageForTemplate } from "./initialData";
 import type { PageData, PageRow, Selection, Viewport } from "./types";
@@ -195,6 +196,7 @@ interface EditorActions {
   ) => void;
   addRowWithElement: (type: ElementType) => void;
   deleteElement: (rowId: string, elementId: string) => void;
+  moveElement: (source: DragSource, target: DropTarget) => void;
   setSelection: (sel: Selection) => void;
   setViewport: (v: Viewport) => void;
   toggleMenu: (open?: boolean) => void;
@@ -471,6 +473,70 @@ export const EditorProvider = ({ templateId, children }: ProviderProps) => {
     [commit]
   );
 
+  const moveElement = useCallback(
+    (source: DragSource, target: DropTarget) => {
+      const current = stateRef.current.history.present;
+      const srcRow = current.rows.find((r) => r.id === source.rowId);
+      if (!srcRow) return;
+      const srcCol = srcRow.columns[source.columnIndex];
+      if (!srcCol) return;
+      const srcElIdx = srcCol.findIndex((el) => el.id === source.elementId);
+      if (srcElIdx < 0) return;
+      const element = srcCol[srcElIdx];
+
+      const isSameColumn =
+        source.rowId === target.rowId &&
+        source.columnIndex === target.columnIndex;
+
+      let adjustedInsert = target.insertIndex;
+      if (isSameColumn && adjustedInsert > srcElIdx) adjustedInsert -= 1;
+      if (isSameColumn && adjustedInsert === srcElIdx) return;
+
+      const nextRows = current.rows.map((row) => {
+        if (row.id !== source.rowId && row.id !== target.rowId) return row;
+        const columns = row.columns.map((col, idx) => {
+          let next = col;
+          if (
+            row.id === source.rowId &&
+            idx === source.columnIndex &&
+            !(isSameColumn && idx === target.columnIndex)
+          ) {
+            next = next.filter((el) => el.id !== source.elementId);
+          }
+          if (
+            row.id === source.rowId &&
+            isSameColumn &&
+            idx === source.columnIndex
+          ) {
+            const without = next.filter((el) => el.id !== source.elementId);
+            return insertAt(without, element, adjustedInsert);
+          }
+          if (
+            row.id === target.rowId &&
+            idx === target.columnIndex &&
+            !isSameColumn
+          ) {
+            return insertAt(next, element, adjustedInsert);
+          }
+          return next;
+        });
+        return { ...row, columns };
+      });
+
+      commit({ ...current, rows: nextRows });
+      dispatch({
+        type: "SELECT",
+        payload: {
+          kind: "element",
+          rowId: target.rowId,
+          columnIndex: target.columnIndex,
+          elementId: element.id,
+        },
+      });
+    },
+    [commit]
+  );
+
   const setSelection = useCallback(
     (sel: Selection) => dispatch({ type: "SELECT", payload: sel }),
     []
@@ -561,6 +627,7 @@ export const EditorProvider = ({ templateId, children }: ProviderProps) => {
       addElement,
       addRowWithElement,
       deleteElement,
+      moveElement,
       setSelection,
       setViewport,
       toggleMenu,
@@ -589,6 +656,7 @@ export const EditorProvider = ({ templateId, children }: ProviderProps) => {
       addElement,
       addRowWithElement,
       deleteElement,
+      moveElement,
       setSelection,
       setViewport,
       toggleMenu,
