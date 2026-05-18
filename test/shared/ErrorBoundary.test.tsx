@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { ErrorBoundary } from "@src/shared/ErrorBoundary";
 
@@ -10,11 +10,15 @@ const Boom = ({ message = "test failure" }: { message?: string }) => {
   throw new Error(message);
 };
 
-beforeEach(() => {
-  // React logs caught render errors via console.error. Silence just that during
-  // these tests — anything else still surfaces.
+/**
+ * React logs caught render errors via console.error. Call this from tests that
+ * intentionally throw inside an ErrorBoundary child so the captured log
+ * doesn't pollute test output. Scoped per-test rather than file-wide so any
+ * unexpected console.error in the non-throwing tests still surfaces.
+ */
+const silenceReactCaughtErrorLog = () => {
   vi.spyOn(console, "error").mockImplementation(() => {});
-});
+};
 
 afterEach(() => {
   vi.restoreAllMocks();
@@ -31,6 +35,7 @@ describe("ErrorBoundary", () => {
   });
 
   it("renders the default fallback when a child throws", () => {
+    silenceReactCaughtErrorLog();
     render(
       <ErrorBoundary>
         <Boom />
@@ -42,6 +47,7 @@ describe("ErrorBoundary", () => {
   });
 
   it("renders a custom fallback when provided, passing the error and retry", () => {
+    silenceReactCaughtErrorLog();
     const fallback = vi.fn<
       (error: Error | null, retry: () => void) => ReactNode
     >((error) => <p>custom: {error?.message}</p>);
@@ -60,6 +66,7 @@ describe("ErrorBoundary", () => {
   });
 
   it("clears the error state when the refresh link is clicked", async () => {
+    silenceReactCaughtErrorLog();
     const user = userEvent.setup();
     let shouldThrow = true;
     const Toggleable = () => {

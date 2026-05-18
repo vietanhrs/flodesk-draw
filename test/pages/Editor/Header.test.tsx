@@ -102,17 +102,21 @@ describe("Editor — Header build flow", () => {
 
   it("hides the modal and shows nothing when export returns false (user cancelled)", async () => {
     const user = userEvent.setup();
-    vi.spyOn(exporter, "exportPageAsHtml").mockResolvedValue(false);
+    const exportSpy = vi
+      .spyOn(exporter, "exportPageAsHtml")
+      .mockResolvedValue(false);
 
     renderEditor();
     await user.click(screen.getByRole("button", { name: "Build & export" }));
 
-    // The modal closes itself when export returns false (no file picker accepted).
-    await waitFor(() =>
-      expect(
-        screen.queryByText(/Your page has been exported/)
-      ).not.toBeInTheDocument()
-    );
+    // Wait until the build flow has actually run before asserting absence —
+    // otherwise queryByText returning null could just mean we sampled the DOM
+    // before the modal updated.
+    await waitFor(() => expect(exportSpy).toHaveBeenCalledTimes(1));
+
+    expect(
+      screen.queryByText(/Your page has been exported/)
+    ).not.toBeInTheDocument();
     expect(
       screen.queryByText(/Something went wrong while exporting/)
     ).not.toBeInTheDocument();
