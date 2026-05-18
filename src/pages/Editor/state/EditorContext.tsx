@@ -195,6 +195,11 @@ interface EditorActions {
     insertIndex?: number
   ) => void;
   addRowWithElement: (type: ElementType) => void;
+  duplicateElement: (
+    rowId: string,
+    columnIndex: number,
+    elementId: string
+  ) => void;
   deleteElement: (rowId: string, elementId: string) => void;
   moveElement: (source: DragSource, target: DropTarget) => void;
   setSelection: (sel: Selection) => void;
@@ -458,6 +463,36 @@ export const EditorProvider = ({ templateId, children }: ProviderProps) => {
     [commit]
   );
 
+  const duplicateElement = useCallback(
+    (rowId: string, columnIndex: number, elementId: string) => {
+      const current = stateRef.current.history.present;
+      const row = current.rows.find((r) => r.id === rowId);
+      if (!row) return;
+      const col = row.columns[columnIndex];
+      if (!col) return;
+      const elIdx = col.findIndex((el) => el.id === elementId);
+      if (elIdx < 0) return;
+      const clone = { ...col[elIdx], id: createId("el") };
+      const next = replaceRow(current, rowId, (r) => ({
+        ...r,
+        columns: r.columns.map((c, i) =>
+          i === columnIndex ? insertAt(c, clone, elIdx + 1) : c
+        ),
+      }));
+      commit(next);
+      dispatch({
+        type: "SELECT",
+        payload: {
+          kind: "element",
+          rowId,
+          columnIndex,
+          elementId: clone.id,
+        },
+      });
+    },
+    [commit]
+  );
+
   const deleteElement = useCallback(
     (rowId: string, elementId: string) => {
       const current = stateRef.current.history.present;
@@ -626,6 +661,7 @@ export const EditorProvider = ({ templateId, children }: ProviderProps) => {
       deleteRow,
       addElement,
       addRowWithElement,
+      duplicateElement,
       deleteElement,
       moveElement,
       setSelection,
@@ -655,6 +691,7 @@ export const EditorProvider = ({ templateId, children }: ProviderProps) => {
       deleteRow,
       addElement,
       addRowWithElement,
+      duplicateElement,
       deleteElement,
       moveElement,
       setSelection,
