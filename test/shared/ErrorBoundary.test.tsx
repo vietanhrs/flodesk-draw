@@ -1,3 +1,5 @@
+import type { ReactNode } from "react";
+
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
@@ -40,9 +42,9 @@ describe("ErrorBoundary", () => {
   });
 
   it("renders a custom fallback when provided, passing the error and retry", () => {
-    const fallback = vi.fn((error: Error | null) => (
-      <p>custom: {error?.message}</p>
-    ));
+    const fallback = vi.fn<
+      (error: Error | null, retry: () => void) => ReactNode
+    >((error) => <p>custom: {error?.message}</p>);
 
     render(
       <ErrorBoundary fallback={fallback}>
