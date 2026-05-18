@@ -237,9 +237,7 @@ export const CanvasRow = ({ row, rowIndex, totalRows, onRowDropAt }: Props) => {
               endDrag();
             };
 
-            const dropLine = (
-              <div key="drop-line" className="edt-drop-line" />
-            );
+            const dropLine = <div key="drop-line" className="edt-drop-line" />;
 
             const renderedChildren: React.ReactNode[] = [];
             for (let i = 0; i <= column.length; i++) {

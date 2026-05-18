@@ -503,11 +503,19 @@ export const EditorProvider = ({ templateId, children }: ProviderProps) => {
           ) {
             next = next.filter((el) => el.id !== source.elementId);
           }
-          if (row.id === source.rowId && isSameColumn && idx === source.columnIndex) {
+          if (
+            row.id === source.rowId &&
+            isSameColumn &&
+            idx === source.columnIndex
+          ) {
             const without = next.filter((el) => el.id !== source.elementId);
             return insertAt(without, element, adjustedInsert);
           }
-          if (row.id === target.rowId && idx === target.columnIndex && !isSameColumn) {
+          if (
+            row.id === target.rowId &&
+            idx === target.columnIndex &&
+            !isSameColumn
+          ) {
             return insertAt(next, element, adjustedInsert);
           }
           return next;
