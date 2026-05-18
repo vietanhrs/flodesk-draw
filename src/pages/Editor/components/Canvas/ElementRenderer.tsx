@@ -1,6 +1,6 @@
 import type { CSSProperties } from "react";
 
-import type { PageElement, SocialLink } from "../../state/types";
+import type { PageElement, SocialLink } from "@src/pages/Editor/state/types";
 
 const socialLabel: Record<SocialLink["platform"], string> = {
   instagram: "Instagram",

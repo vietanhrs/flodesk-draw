@@ -1,17 +1,18 @@
 import { useMemo, useState } from "react";
 
-import { AddRowButton } from "./AddRowButton";
-import { ElementRenderer } from "./ElementRenderer";
-import { RowFloatingMenu } from "./RowFloatingMenu";
-import { useEditor } from "../../state/EditorContext";
-import type { PageRow } from "../../state/types";
+import { useEditor } from "@src/pages/Editor/state/EditorContext";
+import type { PageRow } from "@src/pages/Editor/state/types";
 import {
   dragHasNewElement,
   dragHasRow,
   readNewElementDrag,
   readRowDrag,
   setRowDrag,
-} from "../../utils/dragData";
+} from "@src/pages/Editor/utils/dragData";
+
+import { AddRowButton } from "./AddRowButton";
+import { ElementRenderer } from "./ElementRenderer";
+import { RowFloatingMenu } from "./RowFloatingMenu";
 
 interface Props {
   row: PageRow;

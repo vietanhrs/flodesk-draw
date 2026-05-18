@@ -1,5 +1,6 @@
+import type { PageData } from "@src/pages/Editor/state/types";
+
 import { buildHtml } from "./buildHtml";
-import type { PageData } from "../state/types";
 
 const slugify = (s: string): string =>
   s

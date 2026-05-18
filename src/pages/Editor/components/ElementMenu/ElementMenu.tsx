@@ -11,13 +11,13 @@ import {
   TextInput,
 } from "@flodesk/grain";
 
-import { useEditor } from "../../state/EditorContext";
+import { useEditor } from "@src/pages/Editor/state/EditorContext";
 import {
   elementCategories,
   elementDefinitions,
   type ElementDefinition,
-} from "../../state/elementCatalog";
-import { setNewElementDrag } from "../../utils/dragData";
+} from "@src/pages/Editor/state/elementCatalog";
+import { setNewElementDrag } from "@src/pages/Editor/utils/dragData";
 
 const ElementCard = ({ def }: { def: ElementDefinition }) => {
   const Icon = def.icon;

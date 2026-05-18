@@ -1,10 +1,11 @@
 import { Stack, Text } from "@flodesk/grain";
 
+import { useEditor } from "@src/pages/Editor/state/EditorContext";
+import type { PageRow } from "@src/pages/Editor/state/types";
+
 import { ColorInput } from "./controls/ColorInput";
 import { NumberField } from "./controls/NumberField";
 import { SegmentedField } from "./controls/SegmentedField";
-import { useEditor } from "../../state/EditorContext";
-import type { PageRow } from "../../state/types";
 
 interface Props {
   row: PageRow;

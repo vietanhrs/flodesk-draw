@@ -6,12 +6,13 @@ import {
   Text,
 } from "@flodesk/grain";
 
+import { useEditor } from "@src/pages/Editor/state/EditorContext";
+import type { PageElement, TextAlign } from "@src/pages/Editor/state/types";
+
 import { ColorInput } from "./controls/ColorInput";
 import { NumberField } from "./controls/NumberField";
 import { SegmentedField } from "./controls/SegmentedField";
 import { TextField } from "./controls/TextField";
-import { useEditor } from "../../state/EditorContext";
-import type { PageElement, TextAlign } from "../../state/types";
 
 interface Props {
   rowId: string;

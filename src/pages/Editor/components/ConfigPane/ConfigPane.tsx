@@ -2,10 +2,11 @@ import { useMemo, useState } from "react";
 
 import { Box, Flex, Tab, TabGroup, Text } from "@flodesk/grain";
 
+import { useEditor } from "@src/pages/Editor/state/EditorContext";
+
 import { ElementTab } from "./ElementTab";
 import { LayoutTab } from "./LayoutTab";
 import { PageTab } from "./PageTab";
-import { useEditor } from "../../state/EditorContext";
 
 type TabKey = "page" | "layout" | "element";
 
