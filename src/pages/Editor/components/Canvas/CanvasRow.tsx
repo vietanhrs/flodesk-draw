@@ -88,7 +88,10 @@ export const CanvasRow = ({ row, rowIndex, totalRows, onRowDropAt }: Props) => {
   };
 
   return (
+    // The outer id is for counting rows; the inner id targets the draggable
+    // surface because row chrome is positioned as a sibling.
     <div
+      data-testid="canvas-row"
       className="edt-row"
       style={{ marginTop: row.marginY, marginBottom: row.marginY }}
       onMouseEnter={() => setIsHovered(true)}
@@ -123,6 +126,8 @@ export const CanvasRow = ({ row, rowIndex, totalRows, onRowDropAt }: Props) => {
       )}
 
       <div
+        // This complements the outer canvas-row test id above.
+        data-testid={`canvas-row-${rowIndex + 1}`}
         draggable
         onDragStart={handleRowDragStart}
         onDragEnd={handleRowDragEnd}
@@ -158,6 +163,7 @@ export const CanvasRow = ({ row, rowIndex, totalRows, onRowDropAt }: Props) => {
             const isColumnDrop = dropColumnIdx === columnIndex;
             return (
               <div
+                data-testid={`canvas-column-${rowIndex + 1}-${columnIndex + 1}`}
                 key={columnIndex}
                 onDragOver={(e) => {
                   if (!dragHasNewElement(e.dataTransfer)) return;

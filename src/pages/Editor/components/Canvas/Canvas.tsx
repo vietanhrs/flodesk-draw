@@ -50,6 +50,7 @@ export const Canvas = () => {
       onClick={() => setSelection(null)}
     >
       <Box
+        data-testid="editor-canvas"
         marginX="auto"
         backgroundColor="background"
         shadow="l"
