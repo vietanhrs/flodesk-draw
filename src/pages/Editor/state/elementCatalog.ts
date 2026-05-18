@@ -11,8 +11,9 @@ import {
   IconType,
 } from "@flodesk/grain";
 
+import { createId } from "@src/pages/Editor/utils/ids";
+
 import type { ElementType, PageElement } from "./types";
-import { createId } from "../utils/ids";
 
 export interface ElementCategory {
   id: string;

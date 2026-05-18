@@ -9,6 +9,8 @@ import {
   useRef,
 } from "react";
 
+import { createId } from "@src/pages/Editor/utils/ids";
+
 import { findElementDefinition } from "./elementCatalog";
 import { buildPageForTemplate } from "./initialData";
 import type {
@@ -19,7 +21,6 @@ import type {
   Selection,
   Viewport,
 } from "./types";
-import { createId } from "../utils/ids";
 
 const STORAGE_PREFIX = "flodesk-draw:editor:";
 const HISTORY_LIMIT = 100;

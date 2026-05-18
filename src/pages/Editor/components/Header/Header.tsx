@@ -13,7 +13,7 @@ import {
 } from "@flodesk/grain";
 import { Link } from "react-router-dom";
 
-import { useEditor } from "../../state/EditorContext";
+import { useEditor } from "@src/pages/Editor/state/EditorContext";
 
 interface Props {
   onBuild: () => Promise<void>;

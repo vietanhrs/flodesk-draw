@@ -4,7 +4,7 @@ import type {
   PageRow,
   SocialLink,
   TextAlign,
-} from "../state/types";
+} from "@src/pages/Editor/state/types";
 
 const escapeHtml = (s: string): string =>
   s

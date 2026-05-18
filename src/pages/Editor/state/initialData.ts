@@ -1,5 +1,6 @@
+import { createId } from "@src/pages/Editor/utils/ids";
+
 import type { PageData, PageRow } from "./types";
-import { createId } from "../utils/ids";
 
 const row = (config: Partial<PageRow> & Pick<PageRow, "columns">): PageRow => ({
   id: createId("row"),

@@ -5,7 +5,7 @@ import {
   IconTrash,
 } from "@flodesk/grain";
 
-import { useEditor } from "../../state/EditorContext";
+import { useEditor } from "@src/pages/Editor/state/EditorContext";
 
 interface Props {
   rowId: string;

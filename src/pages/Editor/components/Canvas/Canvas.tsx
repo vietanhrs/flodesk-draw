@@ -2,9 +2,13 @@ import { useCallback } from "react";
 
 import { Box, Flex } from "@flodesk/grain";
 
+import { useEditor } from "@src/pages/Editor/state/EditorContext";
+import {
+  dragHasNewElement,
+  readNewElementDrag,
+} from "@src/pages/Editor/utils/dragData";
+
 import { CanvasRow } from "./CanvasRow";
-import { useEditor } from "../../state/EditorContext";
-import { dragHasNewElement, readNewElementDrag } from "../../utils/dragData";
 
 const VIEWPORT_WIDTH: Record<"desktop" | "mobile", number> = {
   desktop: 1080,
