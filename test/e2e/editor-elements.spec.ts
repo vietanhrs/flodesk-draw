@@ -59,6 +59,48 @@ test.describe("Editor elements", () => {
     await expect(page.getByText("Join the list")).toBeVisible();
   });
 
+  test("reorders elements within a column by dragging one above another", async ({
+    page,
+  }) => {
+    // Use the bold-sale-announcement template — its first row has five
+    // elements in a deterministic order, so reordering is observable.
+    await gotoEditor(page, "/templates/bold-sale-announcement");
+
+    const column = firstColumn(page);
+    const heading = column.locator(".edt-element").filter({
+      has: page.locator("h1"),
+    });
+    const firstParagraph = column.locator(".edt-element").first();
+
+    // Before: paragraph "BLACK FRIDAY" is first, heading "70% OFF" is second.
+    await expect(firstParagraph).toContainText("BLACK FRIDAY");
+
+    // Drag the heading just above the first paragraph — landing at insert
+    // index 0 in the column.
+    await heading.dragTo(firstParagraph, {
+      targetPosition: { x: 8, y: 2 },
+    });
+
+    // After: the heading is the first .edt-element in the column.
+    await expect(column.locator(".edt-element").first()).toContainText(
+      "70% OFF"
+    );
+  });
+
+  test("shows the selected element's name above the form in the Element tab", async ({
+    page,
+  }) => {
+    const heading = canvasElement(page, "heading").first();
+    await heading.click();
+
+    // The Element tab is auto-selected on element click; the catalog name
+    // "Heading" should appear as a heading above the form.
+    const configAside = page.getByLabel("Configuration");
+    await expect(
+      configAside.getByRole("heading", { name: "Heading" })
+    ).toBeVisible();
+  });
+
   test("adds, duplicates, moves, and deletes rows", async ({ page }) => {
     await rows(page).first().hover();
     await page.getByRole("button", { name: "Add row below" }).click();

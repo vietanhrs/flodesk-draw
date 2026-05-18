@@ -11,6 +11,7 @@ import {
   TextInput,
 } from "@flodesk/grain";
 
+import { useDrag } from "@src/pages/Editor/state/DragContext";
 import { useEditor } from "@src/pages/Editor/state/EditorContext";
 import {
   elementCategories,
@@ -21,12 +22,17 @@ import { setNewElementDrag } from "@src/pages/Editor/utils/dragData";
 
 const ElementCard = ({ def }: { def: ElementDefinition }) => {
   const Icon = def.icon;
+  const { beginDrag, endDrag } = useDrag();
   return (
     <div
       role="button"
       tabIndex={0}
       draggable
-      onDragStart={(e) => setNewElementDrag(e.dataTransfer, def.type)}
+      onDragStart={(e) => {
+        setNewElementDrag(e.dataTransfer, def.type);
+        beginDrag("new-element");
+      }}
+      onDragEnd={endDrag}
       aria-label={`Drag to add ${def.name}`}
       title={`Drag to add ${def.name}`}
       className="edt-element-card"

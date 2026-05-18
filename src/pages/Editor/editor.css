@@ -280,10 +280,14 @@
   display: flex;
   flex-direction: column;
   gap: 16px;
-  transition: background-color 120ms ease;
+  transition:
+    background-color 120ms ease,
+    outline-color 120ms ease;
+  outline: 2px dashed transparent;
+  outline-offset: -2px;
 }
-.edt-column--drop {
-  background: var(--grn-color-overlay);
+.edt-column--drop-zone {
+  outline-color: var(--grn-color-green9);
 }
 
 .edt-column__placeholder {
@@ -300,6 +304,15 @@
   text-transform: uppercase;
 }
 
+.edt-drop-line {
+  height: 3px;
+  background: var(--grn-color-green9);
+  border-radius: 2px;
+  margin: -8px 0;
+  flex-shrink: 0;
+  pointer-events: none;
+}
+
 .edt-element {
   position: relative;
   cursor: pointer;
@@ -310,6 +323,9 @@
 }
 .edt-element--selected {
   box-shadow: 0 0 0 2px var(--grn-color-blue9);
+}
+.edt-element--ghost {
+  opacity: 0.4;
 }
 
 /* ─── Field controls (custom inputs) ────────────────────────────────────── */

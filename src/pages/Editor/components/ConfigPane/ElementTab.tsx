@@ -1,5 +1,7 @@
 import type { ComponentType } from "react";
 
+import { Flex, Text } from "@flodesk/grain";
+
 import {
   registry,
   type ElementFormProps,
@@ -19,8 +21,14 @@ export const ElementTab = ({ rowId, element }: Props) => {
     updateElement<PageElement>(rowId, element.id, patch, debounceKey);
   };
 
-  const Form = registry[element.type].Form as ComponentType<
-    ElementFormProps<PageElement>
-  >;
-  return <Form rowId={rowId} element={element} setProp={setProp} />;
+  const handler = registry[element.type];
+  const Form = handler.Form as ComponentType<ElementFormProps<PageElement>>;
+  return (
+    <Flex direction="column" wrap="nowrap" alignItems="stretch" gap="m">
+      <Text tag="h3" size="m" weight="semibold">
+        {handler.catalog.name}
+      </Text>
+      <Form rowId={rowId} element={element} setProp={setProp} />
+    </Flex>
+  );
 };

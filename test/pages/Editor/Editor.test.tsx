@@ -329,6 +329,88 @@ describe("Editor — element menu", () => {
     expect(container.querySelectorAll("hr").length).toBeGreaterThan(0);
   });
 
+  it("drops a new element into the top of an existing column when the cursor is above all children", async () => {
+    const user = userEvent.setup();
+    const { container } = renderEditor("bold-sale-announcement");
+
+    await user.click(getCategoryButton("Layout"));
+
+    const column = container.querySelector<HTMLElement>(".edt-column");
+    if (!column) throw new Error("expected a canvas column to be present");
+    // jsdom returns zero-rects for every child, so getBoundingClientRect().top
+    // and rect.height / 2 are both 0. A negative clientY (-10) makes
+    // computeInsertIndex pick index 0 (top) on the very first child.
+    const childCountBefore = column.children.length;
+
+    const dividerCard = screen.getByRole("button", {
+      name: "Drag to add Divider",
+    });
+
+    const dt = new FakeDataTransfer();
+    fireDragEvent("dragstart", dividerCard, { dataTransfer: dt });
+    fireDragEvent("dragover", column, { dataTransfer: dt, clientY: -10 });
+    fireDragEvent("drop", column, { dataTransfer: dt, clientY: -10 });
+
+    // The new divider is the first child of the column. The original first
+    // child was a paragraph with "BLACK FRIDAY"; now an <hr> precedes it.
+    expect(column.children.length).toBe(childCountBefore + 1);
+    const firstChild = column.children[0] as HTMLElement;
+    expect(firstChild.querySelector("hr")).toBeTruthy();
+  });
+
+  it("reorders elements within a column via drag and drop", () => {
+    const { container } = renderEditor("bold-sale-announcement");
+
+    const row1Column = container.querySelector<HTMLElement>(
+      '[data-testid="canvas-column-1-1"]'
+    );
+    if (!row1Column) throw new Error("expected row 1 column 1");
+
+    // Row 1 elements in order: BLACK FRIDAY (paragraph), 70% OFF (h1),
+    // "Our biggest sale…", spacer, Shop the sale (button).
+    const headingWrapper = (
+      row1Column.querySelector("h1") as HTMLElement
+    ).closest(".edt-element") as HTMLElement;
+    if (!headingWrapper) throw new Error("expected an h1 wrapper in row 1");
+
+    const dt = new FakeDataTransfer();
+    fireDragEvent("dragstart", headingWrapper, { dataTransfer: dt });
+    fireDragEvent("dragover", row1Column, { dataTransfer: dt, clientY: -10 });
+    fireDragEvent("drop", row1Column, { dataTransfer: dt, clientY: -10 });
+
+    // The h1 (70% OFF) was originally the second child; after dropping with
+    // clientY=-10 (top), it should be the first .edt-element child.
+    const elementChildren = row1Column.querySelectorAll(".edt-element");
+    expect(elementChildren[0].querySelector("h1")?.textContent).toBe("70% OFF");
+  });
+
+  it("moves an element to a different row via drag and drop", () => {
+    const { container } = renderEditor("bold-sale-announcement");
+
+    const row1Column = container.querySelector<HTMLElement>(
+      '[data-testid="canvas-column-1-1"]'
+    );
+    const row2Column = container.querySelector<HTMLElement>(
+      '[data-testid="canvas-column-2-1"]'
+    );
+    if (!row1Column || !row2Column) {
+      throw new Error("expected both row columns to be present");
+    }
+
+    const headingWrapper = (
+      row1Column.querySelector("h1") as HTMLElement
+    ).closest(".edt-element") as HTMLElement;
+
+    const dt = new FakeDataTransfer();
+    fireDragEvent("dragstart", headingWrapper, { dataTransfer: dt });
+    fireDragEvent("dragover", row2Column, { dataTransfer: dt });
+    fireDragEvent("drop", row2Column, { dataTransfer: dt });
+
+    // The h1 disappears from row 1 and appears in row 2.
+    expect(row1Column.querySelector("h1")).toBeNull();
+    expect(row2Column.querySelector("h1")?.textContent).toBe("70% OFF");
+  });
+
   it("drops a new element on an empty canvas via the empty-state drop zone", () => {
     renderEditor("bold-sale-announcement");
 
@@ -402,6 +484,24 @@ describe("Editor — config pane", () => {
     // Element tab content for heading exposes a "Level" radiogroup.
     expect(
       screen.getByRole("radiogroup", { name: "Level" })
+    ).toBeInTheDocument();
+  });
+
+  it("shows the selected element's catalog name above the form in the Element tab", () => {
+    const { container } = renderEditor("bold-sale-announcement");
+
+    // Pick the H1 (70% OFF) which auto-routes the config pane to the
+    // Element tab.
+    const heading = container.querySelector("h1");
+    if (!heading) throw new Error("expected an h1 in the canvas");
+    fireEvent.click(heading.closest(".edt-element") as HTMLElement);
+
+    // "Heading" appears in the configuration aside as the tab heading. The
+    // word also exists in the element-menu category list, so we narrow to
+    // the configuration aside.
+    const configAside = screen.getByLabelText("Configuration");
+    expect(
+      within(configAside).getByRole("heading", { name: "Heading" })
     ).toBeInTheDocument();
   });
 

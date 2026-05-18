@@ -1,12 +1,17 @@
 import { useMemo, useState } from "react";
 
+import { useDrag } from "@src/pages/Editor/state/DragContext";
 import { useEditor } from "@src/pages/Editor/state/EditorContext";
 import type { PageRow } from "@src/pages/Editor/state/types";
 import {
+  dragHasAnyElement,
+  dragHasElementMove,
   dragHasNewElement,
   dragHasRow,
+  readElementMoveDrag,
   readNewElementDrag,
   readRowDrag,
+  setElementMoveDrag,
   setRowDrag,
 } from "@src/pages/Editor/utils/dragData";
 
@@ -21,9 +26,27 @@ interface Props {
   onRowDropAt: (fromRowId: string, placeAfter: boolean) => void;
 }
 
+const computeInsertIndex = (column: HTMLElement, clientY: number): number => {
+  const items = column.querySelectorAll<HTMLElement>("[data-element-index]");
+  for (let i = 0; i < items.length; i++) {
+    const rect = items[i].getBoundingClientRect();
+    const midY = rect.top + rect.height / 2;
+    if (clientY < midY) return i;
+  }
+  return items.length;
+};
+
 export const CanvasRow = ({ row, rowIndex, totalRows, onRowDropAt }: Props) => {
-  const { selection, setSelection, addRowAt, addElement, deleteElement } =
-    useEditor();
+  const {
+    selection,
+    setSelection,
+    addRowAt,
+    addElement,
+    deleteElement,
+    moveElement,
+  } = useEditor();
+  const { dragKind, source, dropTarget, beginDrag, endDrag, setDropTarget } =
+    useDrag();
 
   const isRowSelected = selection?.kind === "row" && selection.rowId === row.id;
   const hasSelectedChild =
@@ -34,7 +57,6 @@ export const CanvasRow = ({ row, rowIndex, totalRows, onRowDropAt }: Props) => {
   const [edgeIndicator, setEdgeIndicator] = useState<"above" | "below" | null>(
     null
   );
-  const [dropColumnIdx, setDropColumnIdx] = useState<number | null>(null);
 
   const totalWidth = useMemo(
     () => row.columnWidths.reduce((a, b) => a + b, 0),
@@ -56,10 +78,11 @@ export const CanvasRow = ({ row, rowIndex, totalRows, onRowDropAt }: Props) => {
       const rect = e.currentTarget.getBoundingClientRect();
       const midpoint = rect.top + rect.height / 2;
       setEdgeIndicator(e.clientY < midpoint ? "above" : "below");
-    } else if (dragHasNewElement(e.dataTransfer)) {
-      e.preventDefault();
-      e.dataTransfer.dropEffect = "copy";
     }
+    // Element drags are handled at the column level. If the cursor is in the
+    // row padding (i.e. the column didn't stopPropagation), we deliberately
+    // do NOT preventDefault — the OS shows a "no-drop" cursor, matching the
+    // requirement that padding/margin is not a valid drop zone.
   };
 
   const handleRowDrop = (e: React.DragEvent) => {
@@ -77,7 +100,6 @@ export const CanvasRow = ({ row, rowIndex, totalRows, onRowDropAt }: Props) => {
   const handleRowDragLeave = (e: React.DragEvent) => {
     if (!e.currentTarget.contains(e.relatedTarget as Node)) {
       setEdgeIndicator(null);
-      setDropColumnIdx(null);
     }
   };
 
@@ -160,90 +182,157 @@ export const CanvasRow = ({ row, rowIndex, totalRows, onRowDropAt }: Props) => {
           }}
         >
           {row.columns.map((column, columnIndex) => {
-            const isColumnDrop = dropColumnIdx === columnIndex;
+            const isColumnDropTarget =
+              dropTarget?.rowId === row.id &&
+              dropTarget.columnIndex === columnIndex;
+            const insertIndex = isColumnDropTarget
+              ? dropTarget.insertIndex
+              : -1;
+
+            const handleColumnDragOver = (e: React.DragEvent) => {
+              if (!dragHasAnyElement(e.dataTransfer)) return;
+              e.preventDefault();
+              e.stopPropagation();
+              e.dataTransfer.dropEffect = dragHasElementMove(e.dataTransfer)
+                ? "move"
+                : "copy";
+              const idx = computeInsertIndex(
+                e.currentTarget as HTMLElement,
+                e.clientY
+              );
+              setDropTarget({ rowId: row.id, columnIndex, insertIndex: idx });
+            };
+
+            const handleColumnDragLeave = (e: React.DragEvent) => {
+              if (e.currentTarget.contains(e.relatedTarget as Node)) return;
+              if (
+                dropTarget?.rowId === row.id &&
+                dropTarget.columnIndex === columnIndex
+              ) {
+                setDropTarget(null);
+              }
+            };
+
+            const handleColumnDrop = (e: React.DragEvent) => {
+              if (!dragHasAnyElement(e.dataTransfer)) return;
+              e.preventDefault();
+              e.stopPropagation();
+              const idx = computeInsertIndex(
+                e.currentTarget as HTMLElement,
+                e.clientY
+              );
+              if (dragHasNewElement(e.dataTransfer)) {
+                const type = readNewElementDrag(e.dataTransfer);
+                if (type) addElement(row.id, columnIndex, type, idx);
+              } else if (dragHasElementMove(e.dataTransfer)) {
+                const src = readElementMoveDrag(e.dataTransfer);
+                if (src) {
+                  moveElement(src, {
+                    rowId: row.id,
+                    columnIndex,
+                    insertIndex: idx,
+                  });
+                }
+              }
+              endDrag();
+            };
+
+            const dropLine = (
+              <div key="drop-line" className="edt-drop-line" />
+            );
+
+            const renderedChildren: React.ReactNode[] = [];
+            for (let i = 0; i <= column.length; i++) {
+              if (insertIndex === i) renderedChildren.push(dropLine);
+              if (i < column.length) {
+                const element = column[i];
+                const isSelected =
+                  selection?.kind === "element" &&
+                  selection.elementId === element.id;
+                const isGhost =
+                  dragKind === "existing-element" &&
+                  source?.elementId === element.id;
+                renderedChildren.push(
+                  <div
+                    key={element.id}
+                    data-element-index={i}
+                    draggable
+                    onDragStart={(e) => {
+                      e.stopPropagation();
+                      setElementMoveDrag(e.dataTransfer, {
+                        rowId: row.id,
+                        columnIndex,
+                        elementId: element.id,
+                      });
+                      beginDrag("existing-element", {
+                        rowId: row.id,
+                        columnIndex,
+                        elementId: element.id,
+                      });
+                    }}
+                    onDragEnd={() => endDrag()}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setSelection({
+                        kind: "element",
+                        rowId: row.id,
+                        columnIndex,
+                        elementId: element.id,
+                      });
+                    }}
+                    onKeyDown={(e) => {
+                      const target = e.target as HTMLElement;
+                      if (
+                        target.tagName === "INPUT" ||
+                        target.tagName === "TEXTAREA" ||
+                        target.isContentEditable
+                      )
+                        return;
+                      if (
+                        isSelected &&
+                        (e.key === "Delete" || e.key === "Backspace")
+                      ) {
+                        e.preventDefault();
+                        deleteElement(row.id, element.id);
+                      }
+                    }}
+                    tabIndex={0}
+                    role="button"
+                    aria-label={`${element.type} element`}
+                    aria-pressed={isSelected}
+                    className={
+                      "edt-element" +
+                      (isSelected ? " edt-element--selected" : "") +
+                      (isGhost ? " edt-element--ghost" : "")
+                    }
+                  >
+                    <ElementRenderer element={element} />
+                  </div>
+                );
+              }
+            }
+
             return (
               <div
                 data-testid={`canvas-column-${rowIndex + 1}-${columnIndex + 1}`}
                 key={columnIndex}
-                onDragOver={(e) => {
-                  if (!dragHasNewElement(e.dataTransfer)) return;
-                  e.preventDefault();
-                  e.stopPropagation();
-                  e.dataTransfer.dropEffect = "copy";
-                  setDropColumnIdx(columnIndex);
-                }}
-                onDragLeave={(e) => {
-                  if (!e.currentTarget.contains(e.relatedTarget as Node)) {
-                    setDropColumnIdx((idx) =>
-                      idx === columnIndex ? null : idx
-                    );
-                  }
-                }}
-                onDrop={(e) => {
-                  if (!dragHasNewElement(e.dataTransfer)) return;
-                  e.preventDefault();
-                  e.stopPropagation();
-                  const type = readNewElementDrag(e.dataTransfer);
-                  setDropColumnIdx(null);
-                  if (type) addElement(row.id, columnIndex, type);
-                }}
+                onDragOver={handleColumnDragOver}
+                onDragLeave={handleColumnDragLeave}
+                onDrop={handleColumnDrop}
                 onClick={(e) => {
                   if (e.target === e.currentTarget) {
                     setSelection({ kind: "row", rowId: row.id });
                   }
                 }}
                 className={
-                  "edt-column" + (isColumnDrop ? " edt-column--drop" : "")
+                  "edt-column" +
+                  (isColumnDropTarget ? " edt-column--drop-zone" : "")
                 }
               >
-                {column.length === 0 && (
+                {column.length === 0 && !isColumnDropTarget && (
                   <div className="edt-column__placeholder">Drop element</div>
                 )}
-                {column.map((element) => {
-                  const isSelected =
-                    selection?.kind === "element" &&
-                    selection.elementId === element.id;
-                  return (
-                    <div
-                      key={element.id}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setSelection({
-                          kind: "element",
-                          rowId: row.id,
-                          columnIndex,
-                          elementId: element.id,
-                        });
-                      }}
-                      onKeyDown={(e) => {
-                        const target = e.target as HTMLElement;
-                        if (
-                          target.tagName === "INPUT" ||
-                          target.tagName === "TEXTAREA" ||
-                          target.isContentEditable
-                        )
-                          return;
-                        if (
-                          isSelected &&
-                          (e.key === "Delete" || e.key === "Backspace")
-                        ) {
-                          e.preventDefault();
-                          deleteElement(row.id, element.id);
-                        }
-                      }}
-                      tabIndex={0}
-                      role="button"
-                      aria-label={`${element.type} element`}
-                      aria-pressed={isSelected}
-                      className={
-                        "edt-element" +
-                        (isSelected ? " edt-element--selected" : "")
-                      }
-                    >
-                      <ElementRenderer element={element} />
-                    </div>
-                  );
-                })}
+                {renderedChildren}
               </div>
             );
           })}
