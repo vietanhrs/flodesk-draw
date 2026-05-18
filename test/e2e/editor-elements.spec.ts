@@ -66,6 +66,7 @@ test.describe("Editor elements", () => {
     await expect(rows(page)).toHaveCount(2);
 
     await firstColumn(page).click();
+    await rows(page).first().hover();
     await page.getByRole("button", { name: "Move row down" }).click();
     await expect(rows(page).nth(1)).toContainText("Build something beautiful");
 

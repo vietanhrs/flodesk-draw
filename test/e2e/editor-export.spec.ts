@@ -10,7 +10,7 @@ test.describe("Editor export", () => {
     });
     await page.goto("/templates/welcome-to-the-family");
     await page.getByLabel("Page title").fill("Welcome E2E Export");
-    await page.keyboard.press("Enter");
+    await page.getByLabel("Page title").blur();
 
     const downloadPromise = page.waitForEvent("download");
     await page.getByRole("button", { name: "Build & export" }).click();
@@ -25,6 +25,7 @@ test.describe("Editor export", () => {
     expect(html).toContain("<title>Welcome E2E Export</title>");
     expect(html).toContain("Hello, lovely friend.");
     expect(html).toContain("Read the journal");
+    expect(html).not.toContain("<title>Untitled page</title>");
 
     await expect(
       page.getByText("Your page has been exported as an HTML file.")

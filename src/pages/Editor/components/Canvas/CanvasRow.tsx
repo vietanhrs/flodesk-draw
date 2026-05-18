@@ -88,6 +88,8 @@ export const CanvasRow = ({ row, rowIndex, totalRows, onRowDropAt }: Props) => {
   };
 
   return (
+    // The outer id is for counting rows; the inner id targets the draggable
+    // surface because row chrome is positioned as a sibling.
     <div
       data-testid="canvas-row"
       className="edt-row"

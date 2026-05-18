@@ -11,7 +11,7 @@ test.describe("Editor basics", () => {
     page,
   }) => {
     await page.getByLabel("Page title").fill("Launch announcement");
-    await page.keyboard.press("Enter");
+    await page.getByLabel("Page title").blur();
 
     await expect(page.getByLabel("Page title")).toHaveValue(
       "Launch announcement"
