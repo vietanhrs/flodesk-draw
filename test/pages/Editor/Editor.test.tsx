@@ -421,7 +421,10 @@ describe("Editor — element menu", () => {
     const user = userEvent.setup();
     renderEditor();
 
-    await user.type(screen.getByLabelText("Search elements"), "head");
+    await user.click(screen.getByRole("button", { name: "Search" }));
+    const searchInput = screen.getByLabelText("Search elements");
+
+    await user.type(searchInput, "head");
 
     // "head" matches "Heading" — every other element disappears.
     expect(
@@ -441,8 +444,8 @@ describe("Editor — element menu", () => {
     );
 
     // A query with no matches surfaces the empty state.
-    await user.clear(screen.getByLabelText("Search elements"));
-    await user.type(screen.getByLabelText("Search elements"), "zzzzz");
+    await user.clear(searchInput);
+    await user.type(searchInput, "zzzzz");
     expect(screen.getByText("No elements match.")).toBeInTheDocument();
   });
 
@@ -458,6 +461,7 @@ describe("Editor — element menu", () => {
 
     expect(searchInput).toHaveFocus();
     expect(searchRoot).toHaveClass("edt-search--open");
+    expect(screen.queryByRole("button", { name: "Search" })).toBeNull();
 
     await user.type(searchInput, "image");
 
@@ -474,6 +478,10 @@ describe("Editor — element menu", () => {
     fireEvent.blur(searchInput);
 
     expect(searchRoot).not.toHaveClass("edt-search--open");
+    expect(
+      screen.queryByRole("textbox", { name: "Search elements" })
+    ).toBeNull();
+    expect(screen.getByRole("button", { name: "Search" })).toBeInTheDocument();
   });
 
   it("drops a new element into an existing column on the canvas", async () => {
@@ -623,15 +631,17 @@ describe("Editor — element menu", () => {
     const user = userEvent.setup();
     renderEditor();
 
-    expect(screen.getByLabelText("Search elements")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Search" })).toBeInTheDocument();
 
     await user.click(
       screen.getByRole("button", { name: "Collapse element menu" })
     );
-    expect(screen.queryByLabelText("Search elements")).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "Search" })
+    ).not.toBeInTheDocument();
 
     await user.click(screen.getByRole("button", { name: "Open element menu" }));
-    expect(screen.getByLabelText("Search elements")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Search" })).toBeInTheDocument();
   });
 });
 

@@ -16,6 +16,7 @@ test.describe("Editor elements", () => {
   test("searches the element menu and adds a heading by drag and drop", async ({
     page,
   }) => {
+    await page.getByRole("button", { name: "Search" }).click();
     await page.getByLabel("Search elements").fill("heading");
 
     await expect(

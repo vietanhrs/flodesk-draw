@@ -80,9 +80,9 @@ const ElementSearch = ({
         }
       }}
     >
-      <div className="edt-search__input-layer">
+      <div className="edt-search__input-layer" aria-hidden={!isOpen}>
         <div className="edt-search__row">
-          <IconSearch width={16} height={16} />
+          <IconSearch width={16} height={16} aria-hidden="true" />
           <input
             ref={inputRef}
             value={value}
@@ -105,7 +105,7 @@ const ElementSearch = ({
           {value && (
             <IconButton
               aria-label="Clear search"
-              icon={<IconCross width={16} height={16} />}
+              icon={<IconCross width={16} height={16} aria-hidden="true" />}
               onClick={() => {
                 onChange("");
                 inputRef.current?.focus();
@@ -114,9 +114,9 @@ const ElementSearch = ({
           )}
         </div>
       </div>
-      <div className="edt-search__button-layer">
+      <div className="edt-search__button-layer" aria-hidden={isOpen}>
         <TextButton
-          icon={<IconSearch width={16} height={16} />}
+          icon={<IconSearch width={16} height={16} aria-hidden="true" />}
           onClick={openSearch}
           tabIndex={isOpen ? -1 : 0}
         >
