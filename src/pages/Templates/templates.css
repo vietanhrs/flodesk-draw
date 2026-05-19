@@ -98,6 +98,14 @@
   font-weight: 500;
 }
 
+.tpl-sidebar__link--action {
+  background: none;
+  border: 0;
+  padding: 0;
+  text-align: left;
+  cursor: pointer;
+}
+
 /* ─── Mobile filter (below xl) ──────────────────────────────────────────── */
 
 .tpl-mobile__filter {

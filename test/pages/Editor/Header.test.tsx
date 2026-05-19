@@ -3,6 +3,8 @@ import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import * as exporter from "@src/pages/Editor/exporter/exportFile";
+import * as flodeskFile from "@src/pages/Editor/exporter/flodeskFile";
+import { createEmptyPage } from "@src/pages/Editor/state/initialData";
 
 import { renderEditor } from "./test-utils";
 
@@ -14,53 +16,81 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
-describe("Editor — Header build flow", () => {
-  it("commits the page title on blur", async () => {
-    const user = userEvent.setup();
+describe("Editor — Header", () => {
+  it("renders the Flodesk logo as a link to /", () => {
     renderEditor();
 
-    const titleInput = screen.getByLabelText("Page title");
-    expect(titleInput).toHaveValue("Untitled page");
-
-    await user.clear(titleInput);
-    await user.type(titleInput, "Launch announcement");
-    // Blur to commit
-    await user.tab();
-
-    // The value persists (the input is controlled by page.title via context).
-    expect(screen.getByLabelText("Page title")).toHaveValue(
-      "Launch announcement"
-    );
+    const logo = screen.getByRole("link", { name: "Flodesk homepage" });
+    expect(logo).toHaveAttribute("href", "/");
   });
 
-  it("commits the page title when the form is submitted", async () => {
-    const user = userEvent.setup();
+  it("renders no filename when no file has been loaded", () => {
     renderEditor();
 
-    const titleInput = screen.getByLabelText("Page title");
-    await user.clear(titleInput);
-    await user.type(titleInput, "Submitted{Enter}");
-
-    expect(screen.getByLabelText("Page title")).toHaveValue("Submitted");
-    // After submit, the input loses focus (form's onSubmit blurs it).
-    expect(titleInput).not.toHaveFocus();
+    expect(screen.queryByLabelText("Current file")).not.toBeInTheDocument();
   });
 
-  it("syncs the title input when page.title changes externally via undo", async () => {
+  it("invokes saveFlodeskFile when the Save button is clicked", async () => {
     const user = userEvent.setup();
+    const saveSpy = vi
+      .spyOn(flodeskFile, "saveFlodeskFile")
+      .mockResolvedValue({ name: "untitled" });
+
     renderEditor();
+    await user.click(screen.getByRole("button", { name: "Save" }));
 
-    const titleInput = screen.getByLabelText("Page title");
-    await user.clear(titleInput);
-    await user.type(titleInput, "First");
-    await user.tab(); // commit "First"
+    await waitFor(() => expect(saveSpy).toHaveBeenCalledTimes(1));
+    // The provider had no initial file → first arg is the page; the handle
+    // arg should be undefined (no FS handle yet).
+    const [, handle] = saveSpy.mock.calls[0];
+    expect(handle).toBeUndefined();
+  });
 
-    // Undo reverts page.title back to "Untitled page".
-    await user.click(screen.getByLabelText("Undo"));
+  it("shows the loaded filename in the header after Save resolves with a name", async () => {
+    const user = userEvent.setup();
+    vi.spyOn(flodeskFile, "saveFlodeskFile").mockResolvedValue({
+      name: "launch-announcement",
+    });
+
+    renderEditor();
+    await user.click(screen.getByRole("button", { name: "Save" }));
 
     await waitFor(() =>
-      expect(screen.getByLabelText("Page title")).toHaveValue("Untitled page")
+      expect(screen.getByLabelText("Current file")).toHaveTextContent(
+        "launch-announcement"
+      )
     );
+  });
+
+  it("labels fallback-origin file saves as a download copy", () => {
+    renderEditor({
+      initialFile: { name: "fallback-draft", page: createEmptyPage() },
+    });
+
+    expect(
+      screen.getByRole("button", { name: "Download copy" })
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "Save" })
+    ).not.toBeInTheDocument();
+  });
+
+  it("shows a danger toast when Save throws", async () => {
+    const user = userEvent.setup();
+    vi.spyOn(flodeskFile, "saveFlodeskFile").mockRejectedValue(
+      new Error("disk full")
+    );
+    const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+
+    renderEditor();
+    await user.click(screen.getByRole("button", { name: "Save" }));
+
+    await waitFor(() => expect(errorSpy).toHaveBeenCalled());
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "Could not save your .flodesk file. Please try again."
+    );
+    // No "Current file" label appears since the save never resolved.
+    expect(screen.queryByLabelText("Current file")).not.toBeInTheDocument();
   });
 
   it("kicks off the build flow and shows the success modal when export resolves", async () => {
@@ -85,7 +115,6 @@ describe("Editor — Header build flow", () => {
     vi.spyOn(exporter, "exportPageAsHtml").mockRejectedValue(
       new Error("disk full")
     );
-    // Editor.handleBuild logs the failure; silence to keep the test output clean.
     vi.spyOn(console, "error").mockImplementation(() => {});
 
     renderEditor();
@@ -109,9 +138,6 @@ describe("Editor — Header build flow", () => {
     renderEditor();
     await user.click(screen.getByRole("button", { name: "Build & export" }));
 
-    // Wait until the build flow has actually run before asserting absence —
-    // otherwise queryByText returning null could just mean we sampled the DOM
-    // before the modal updated.
     await waitFor(() => expect(exportSpy).toHaveBeenCalledTimes(1));
 
     expect(
