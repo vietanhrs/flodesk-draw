@@ -58,7 +58,7 @@ const searchStyles = `
   .edt-search{position:relative;width:87px;max-width:100%;height:var(--grn-clearbutton-height);transition:width var(--grn-transition-slow),min-width var(--grn-transition-slow)}
   .edt-search--open{width:min(240px,100%);min-width:min(240px,100%)}
   .edt-search__input-layer,.edt-search__button-layer{transition:opacity var(--grn-transition-fast)}
-  .edt-search__input-layer{position:absolute;inset:0;opacity:0;pointer-events:none}
+  .edt-search__input-layer{position:absolute;inset:0;opacity:0}
   .edt-search--open .edt-search__input-layer{opacity:1;pointer-events:auto}
   .edt-search--open .edt-search__button-layer{opacity:0;pointer-events:none}
   .edt-search__row{display:grid;grid-template-columns:16px 1fr auto;align-items:center;gap:8px;height:var(--grn-clearbutton-height)}
@@ -99,6 +99,7 @@ const ElementSearch = ({
             ref={inputRef}
             value={value}
             onChange={(event) => onChange(event.target.value)}
+            onFocus={openSearch}
             onKeyDown={(event) => {
               if (event.key === "Escape" && !value) {
                 setIsOpen(false);
@@ -123,7 +124,6 @@ const ElementSearch = ({
       </div>
       <div className="edt-search__button-layer">
         <TextButton
-          aria-label="Search elements"
           icon={<IconSearch width={16} height={16} />}
           onClick={openSearch}
           tabIndex={isOpen ? -1 : 0}
