@@ -29,8 +29,14 @@ describe("Element forms", () => {
       "renders the %s form without crashing",
       (_type, handler) => {
         renderForm(handler as ElementHandler<PageElement>);
-        // At least one labelled control must exist on every form.
-        expect(document.querySelectorAll("label").length).toBeGreaterThan(0);
+        // At least one labelled control must exist on every form. Match both
+        // <label> wrappers (TextField, ColorInput) and bare aria-label
+        // (NumberField uses the latter to avoid hover bleed across its nudge
+        // buttons).
+        const labelled = document.querySelectorAll(
+          "label, [aria-label]"
+        ).length;
+        expect(labelled).toBeGreaterThan(0);
       }
     );
   });
