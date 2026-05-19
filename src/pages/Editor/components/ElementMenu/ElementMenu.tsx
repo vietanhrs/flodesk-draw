@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 
 import {
   Arrange,
@@ -6,9 +6,11 @@ import {
   Flex,
   IconChevronLeft,
   IconChevronRight,
+  IconButton,
+  IconCross,
   IconSearch,
   Text,
-  TextInput,
+  TextButton,
 } from "@flodesk/grain";
 
 import { useDrag } from "@src/pages/Editor/state/DragContext";
@@ -50,6 +52,79 @@ const menuShellProps = {
   borderColor: "border" as const,
   borderWidth: "1px" as const,
   borderSide: "right" as const,
+};
+
+const ElementSearch = ({
+  value,
+  onChange,
+}: {
+  value: string;
+  onChange: (value: string) => void;
+}) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const openSearch = () => {
+    setIsOpen(true);
+    inputRef.current?.focus();
+    // Focus again after the open state applies so quick typing keeps every character.
+    requestAnimationFrame(() => inputRef.current?.focus());
+  };
+
+  return (
+    <div
+      className={"edt-search" + (isOpen ? " edt-search--open" : "")}
+      onBlur={(event) => {
+        if (!value && !event.currentTarget.contains(event.relatedTarget)) {
+          setIsOpen(false);
+        }
+      }}
+    >
+      <div className="edt-search__input-layer" aria-hidden={!isOpen}>
+        <div className="edt-search__row">
+          <IconSearch width={16} height={16} aria-hidden="true" />
+          <input
+            ref={inputRef}
+            value={value}
+            onChange={(event) => onChange(event.target.value)}
+            onFocus={openSearch}
+            onKeyDown={(event) => {
+              if (event.key !== "Escape") return;
+              event.preventDefault();
+              if (value) {
+                onChange("");
+              } else {
+                setIsOpen(false);
+              }
+            }}
+            placeholder="Search..."
+            aria-label="Search elements"
+            tabIndex={isOpen ? 0 : -1}
+            className="edt-search__input"
+          />
+          {value && (
+            <IconButton
+              aria-label="Clear search"
+              icon={<IconCross width={16} height={16} aria-hidden="true" />}
+              onClick={() => {
+                onChange("");
+                inputRef.current?.focus();
+              }}
+            />
+          )}
+        </div>
+      </div>
+      <div className="edt-search__button-layer" aria-hidden={isOpen}>
+        <TextButton
+          icon={<IconSearch width={16} height={16} aria-hidden="true" />}
+          onClick={openSearch}
+          tabIndex={isOpen ? -1 : 0}
+        >
+          Search
+        </TextButton>
+      </div>
+    </div>
+  );
 };
 
 export const ElementMenu = () => {
@@ -110,16 +185,9 @@ export const ElementMenu = () => {
         borderWidth="1px"
         borderSide="bottom"
       >
-        <Box flex="1 1 auto">
-          <TextInput
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search elements"
-            aria-label="Search elements"
-            icon={<IconSearch width={16} height={16} />}
-            size="m"
-          />
-        </Box>
+        <Flex flex="1 1 auto" minWidth={0} justifyContent="end">
+          <ElementSearch value={search} onChange={setSearch} />
+        </Flex>
         <button
           type="button"
           aria-label="Collapse element menu"
