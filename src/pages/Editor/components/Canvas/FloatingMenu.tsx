@@ -1,5 +1,7 @@
 import type { ComponentType, SVGProps } from "react";
 
+import { IconButton, Stack } from "@flodesk/grain";
+
 export interface FloatingMenuAction {
   label: string;
   icon: ComponentType<SVGProps<SVGSVGElement>>;
@@ -15,7 +17,8 @@ interface Props {
 }
 
 export const FloatingMenu = ({ ariaLabel, actions, className }: Props) => (
-  <div
+  <Stack
+    padding={0.5}
     role="toolbar"
     aria-label={ariaLabel}
     className={"edt-floating-menu" + (className ? " " + className : "")}
@@ -24,12 +27,15 @@ export const FloatingMenu = ({ ariaLabel, actions, className }: Props) => (
     {actions.map((action) => {
       const Icon = action.icon;
       return (
-        <button
+        <IconButton
+          style={{ width: 36, height: 36 }}
+          variant={action.danger ? "danger" : "neutral"}
+          icon={<Icon width={20} height={20} />}
           key={action.label}
           type="button"
           title={action.label}
           aria-label={action.label}
-          disabled={action.disabled}
+          isDisabled={action.disabled}
           onClick={(e) => {
             // The element wrapper that hosts this menu has its own onClick
             // that would re-select the original element; stop the click here
@@ -39,10 +45,8 @@ export const FloatingMenu = ({ ariaLabel, actions, className }: Props) => (
             action.onClick();
           }}
           className={action.danger ? "edt-floating-menu__danger" : undefined}
-        >
-          <Icon width={16} height={16} />
-        </button>
+        />
       );
     })}
-  </div>
+  </Stack>
 );

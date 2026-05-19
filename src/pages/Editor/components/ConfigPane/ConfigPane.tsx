@@ -51,7 +51,7 @@ export const ConfigPane = () => {
       flex="0 0 auto"
       width="320px"
       minHeight={0}
-      backgroundColor="background"
+      backgroundColor="background2"
       borderColor="border"
       borderWidth="1px"
       borderSide="left"
@@ -61,7 +61,7 @@ export const ConfigPane = () => {
         paddingTop="s2"
         borderColor="border"
         borderWidth="1px"
-        borderSide="bottom"
+        borderSide="none"
       >
         <TabGroup hasFullWidth>
           <Tab isActive={tab === "page"} onClick={() => setTab("page")}>
@@ -76,7 +76,13 @@ export const ConfigPane = () => {
         </TabGroup>
       </Box>
 
-      <Box flex="1 1 auto" minHeight={0} overflowY="auto" padding="m">
+      <Box
+        flex="1 1 auto"
+        minHeight={0}
+        overflowY="auto"
+        padding="m"
+        backgroundColor="background"
+      >
         {tab === "page" && <PageTab />}
         {tab === "layout" &&
           (selectedRow ? (

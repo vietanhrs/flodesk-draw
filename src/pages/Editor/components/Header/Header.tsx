@@ -1,14 +1,17 @@
 import { useState } from "react";
 
 import {
+  Arrange,
   Button,
   Flex,
   IconArrowLeft,
+  IconButton,
   IconDownload,
   IconMonitor,
   IconPhone,
   IconRedo,
   IconUndo,
+  TextButton,
   TextInput,
 } from "@flodesk/grain";
 import { Link } from "react-router-dom";
@@ -53,8 +56,8 @@ export const Header = ({ onBuild, isBuilding }: Props) => {
       justifyContent="space-between"
       gap="m"
       paddingX="m"
-      height="56px"
-      backgroundColor="background"
+      height="64px"
+      backgroundColor="shade1"
       borderColor="border"
       borderWidth="1px"
       borderSide="bottom"
@@ -95,53 +98,51 @@ export const Header = ({ onBuild, isBuilding }: Props) => {
       </Flex>
 
       <Flex wrap="nowrap" alignItems="center" gap="s">
-        <div role="toolbar" aria-label="History" className="edt-toolbar">
-          <button
+        <Arrange gap="s" role="toolbar" aria-label="History">
+          <TextButton
             type="button"
             aria-label="Undo"
             title="Undo (Ctrl/Cmd+Z)"
-            disabled={!canUndo}
+            isDisabled={!canUndo}
             onClick={undo}
-            className="edt-toolbar-btn"
+            icon={<IconUndo width={16} height={16} />}
           >
-            <IconUndo width={16} height={16} />
-          </button>
-          <button
+            Undo
+          </TextButton>
+          <TextButton
             type="button"
             aria-label="Redo"
             title="Redo (Ctrl/Cmd+Shift+Z)"
-            disabled={!canRedo}
+            isDisabled={!canRedo}
             onClick={redo}
-            className="edt-toolbar-btn"
+            icon={<IconRedo width={16} height={16} />}
           >
-            <IconRedo width={16} height={16} />
-          </button>
-        </div>
+            Redo
+          </TextButton>
+        </Arrange>
 
-        <div role="radiogroup" aria-label="Viewport" className="edt-toolbar">
-          <button
-            type="button"
+        <Arrange role="radiogroup" aria-label="Viewport">
+          <IconButton
             role="radio"
+            type="button"
+            isActive={viewport === "desktop"}
             aria-checked={viewport === "desktop"}
             aria-label="Desktop view"
             title="Desktop view"
             onClick={() => setViewport("desktop")}
-            className="edt-toolbar-btn"
-          >
-            <IconMonitor width={16} height={16} />
-          </button>
-          <button
-            type="button"
+            icon={<IconMonitor width={16} height={16} />}
+          />
+          <IconButton
             role="radio"
+            type="button"
+            isActive={viewport === "mobile"}
             aria-checked={viewport === "mobile"}
             aria-label="Mobile view"
             title="Mobile view"
             onClick={() => setViewport("mobile")}
-            className="edt-toolbar-btn"
-          >
-            <IconPhone width={16} height={16} />
-          </button>
-        </div>
+            icon={<IconPhone width={16} height={16} />}
+          />
+        </Arrange>
 
         <Button
           variant="accent"

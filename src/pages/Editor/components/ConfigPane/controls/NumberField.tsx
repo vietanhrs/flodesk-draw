@@ -1,6 +1,14 @@
 import { useState } from "react";
 
-import { Flex, Stack, Text } from "@flodesk/grain";
+import {
+  Flex,
+  IconButton,
+  IconMinus,
+  IconPlus,
+  Slider,
+  Stack,
+  Text,
+} from "@flodesk/grain";
 
 interface Props {
   label: string;
@@ -39,21 +47,45 @@ export const NumberField = ({
     setText(String(clamped));
   };
 
+  const nudge = (delta: number) => {
+    const next = Math.min(max, Math.max(min, value + delta));
+    if (next !== value) onChange(next);
+  };
+
   return (
-    <Stack tag="label" gap="xs" style={{ display: "block" }}>
+    // Stack is a plain div, not a <label>: wrapping both nudge buttons in a
+    // single <label> made the browser treat them as one form-control region,
+    // so hovering one button bled its hover state onto the other. Each
+    // control still has its own aria-label.
+    <Stack gap="xs" style={{ display: "block" }}>
       <Text tag="span" variant="caps" color="content2">
         {label}
       </Text>
       <Flex wrap="nowrap" alignItems="center" gap="s">
-        <input
-          type="range"
-          min={min}
-          max={max}
-          step={step}
-          value={value}
-          onChange={(e) => onChange(Number(e.target.value))}
-          aria-label={`${label} slider`}
-          className="edt-field__range"
+        <IconButton
+          icon={<IconMinus />}
+          aria-label={`Decrease ${label}`}
+          isDisabled={value <= min}
+          onClick={() => nudge(-step)}
+        />
+        {/* Grain's Slider spreads extra props onto its inner <input>, not its
+            outer <div>, so neither className nor style on <Slider> would size
+            the wrapper. Wrap it in a flex item that owns the width. */}
+        <div className="edt-field__slider">
+          <Slider
+            min={min}
+            max={max}
+            step={step}
+            value={value}
+            onChange={(e) => onChange(Number(e.target.value))}
+            aria-label={`${label} slider`}
+          />
+        </div>
+        <IconButton
+          icon={<IconPlus />}
+          aria-label={`Increase ${label}`}
+          isDisabled={value >= max}
+          onClick={() => nudge(step)}
         />
         <input
           type="number"
