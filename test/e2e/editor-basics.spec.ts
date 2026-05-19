@@ -7,21 +7,12 @@ test.describe("Editor basics", () => {
     await gotoEditor(page);
   });
 
-  test("edits the page title and persists it across reloads", async ({
+  test("renders no filename label when no file has been loaded", async ({
     page,
   }) => {
-    await page.getByLabel("Page title").fill("Launch announcement");
-    await page.getByLabel("Page title").blur();
-
-    await expect(page.getByLabel("Page title")).toHaveValue(
-      "Launch announcement"
-    );
-
-    await page.reload();
-
-    await expect(page.getByLabel("Page title")).toHaveValue(
-      "Launch announcement"
-    );
+    await expect(page.getByLabel("Current file")).toHaveCount(0);
+    // The Save affordance is always present for first-save (Save As).
+    await expect(page.getByRole("button", { name: "Save" })).toBeVisible();
   });
 
   test("toggles desktop and mobile canvas widths", async ({ page }) => {
@@ -50,9 +41,10 @@ test.describe("Editor basics", () => {
     );
   });
 
-  test("navigates back to templates", async ({ page }) => {
-    await page.getByLabel("Back to templates").click();
+  test("Flodesk logo navigates home", async ({ page }) => {
+    await page.getByRole("link", { name: "Flodesk homepage" }).click();
 
+    // `/` redirects to `/templates`.
     await expect(page).toHaveURL(/\/templates$/);
   });
 });

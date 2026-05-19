@@ -43,9 +43,9 @@ test.describe("Template gallery", () => {
       .click();
 
     await expect(page).toHaveURL(/\/templates\/bold-sale-announcement$/);
-    await expect(page.getByLabel("Page title")).toHaveValue(
-      "Bold sale announcement"
-    );
+    // No filename label when starting from a template (the user hasn't saved
+    // a `.flodesk` file yet).
+    await expect(page.getByLabel("Current file")).toHaveCount(0);
     await expect(page.getByText("70% OFF")).toBeVisible();
     await expect(
       page.getByRole("button", { name: "Build & export" })
@@ -62,6 +62,8 @@ test.describe("Template gallery", () => {
     await page.getByRole("option", { name: "Start from scratch" }).click();
 
     await expect(page).toHaveURL(/\/editor$/);
-    await expect(page.getByLabel("Page title")).toHaveValue("Untitled page");
+    // Empty starter shows the Save affordance but no filename label.
+    await expect(page.getByLabel("Current file")).toHaveCount(0);
+    await expect(page.getByRole("button", { name: "Save" })).toBeVisible();
   });
 });

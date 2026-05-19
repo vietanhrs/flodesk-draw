@@ -2,7 +2,9 @@ import { expect, type Page } from "@playwright/test";
 
 export const gotoEditor = async (page: Page, path = "/editor") => {
   await page.goto(path);
-  await expect(page.getByLabel("Page title")).toBeVisible();
+  // The Save button is always rendered in the editor header; using it as the
+  // readiness probe replaces the old "Page title" input check.
+  await expect(page.getByRole("button", { name: "Save" })).toBeVisible();
 };
 
 export const canvas = (page: Page) => page.getByTestId("editor-canvas");

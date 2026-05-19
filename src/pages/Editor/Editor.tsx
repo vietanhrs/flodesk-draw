@@ -1,7 +1,7 @@
 import { useState } from "react";
 
-import { Flex } from "@flodesk/grain";
-import { useParams } from "react-router-dom";
+import { Flex, Toast } from "@flodesk/grain";
+import { useLocation, useParams } from "react-router-dom";
 
 import "./editor.css";
 import { BuildModal } from "./components/BuildModal";
@@ -10,16 +10,22 @@ import { ConfigPane } from "./components/ConfigPane/ConfigPane";
 import { ElementMenu } from "./components/ElementMenu/ElementMenu";
 import { Header } from "./components/Header/Header";
 import { exportPageAsHtml } from "./exporter/exportFile";
+import { saveFlodeskFile, type LoadedFile } from "./exporter/flodeskFile";
 import { DragProvider } from "./state/DragContext";
 import { EditorProvider, useEditor } from "./state/EditorContext";
 
+interface EditorLocationState {
+  loadedFile?: LoadedFile;
+}
+
 const EditorShell = () => {
-  const { page } = useEditor();
+  const { page, loadedFile, setLoadedFile } = useEditor();
   const [build, setBuild] = useState<{
     isOpen: boolean;
     status: "building" | "done" | "error";
     message: string;
   }>({ isOpen: false, status: "building", message: "" });
+  const [saveError, setSaveError] = useState("");
 
   const handleBuild = async () => {
     setBuild({
@@ -28,7 +34,7 @@ const EditorShell = () => {
       message: "Preparing your page…",
     });
     try {
-      const saved = await exportPageAsHtml(page);
+      const saved = await exportPageAsHtml(page, loadedFile?.name);
       if (saved) {
         setBuild({
           isOpen: true,
@@ -48,6 +54,27 @@ const EditorShell = () => {
     }
   };
 
+  const handleSave = async () => {
+    setSaveError("");
+    try {
+      const result = await saveFlodeskFile(
+        page,
+        loadedFile?.handle,
+        loadedFile?.name ?? page.title
+      );
+      if (result) {
+        setLoadedFile({
+          name: result.name,
+          handle: result.handle,
+          page,
+        });
+      }
+    } catch (err) {
+      console.error("Save failed", err);
+      setSaveError("Could not save your .flodesk file. Please try again.");
+    }
+  };
+
   return (
     <Flex
       direction="column"
@@ -60,6 +87,7 @@ const EditorShell = () => {
       <Header
         onBuild={handleBuild}
         isBuilding={build.status === "building" && build.isOpen}
+        onSave={handleSave}
       />
       <Flex wrap="nowrap" alignItems="stretch" flex="1 1 auto" minHeight={0}>
         <ElementMenu />
@@ -72,14 +100,26 @@ const EditorShell = () => {
         message={build.message}
         onClose={() => setBuild((b) => ({ ...b, isOpen: false }))}
       />
+      <Toast
+        isOpen={saveError.length > 0}
+        variant="danger"
+        dismissTimeout={5000}
+        onDismiss={() => setSaveError("")}
+      >
+        <span role="alert">{saveError}</span>
+      </Toast>
     </Flex>
   );
 };
 
 export const Editor = () => {
   const params = useParams<{ templateId?: string }>();
+  const location = useLocation();
+  const initialFile = (location.state as EditorLocationState | null)
+    ?.loadedFile;
+
   return (
-    <EditorProvider templateId={params.templateId}>
+    <EditorProvider templateId={params.templateId} initialFile={initialFile}>
       <DragProvider>
         <EditorShell />
       </DragProvider>

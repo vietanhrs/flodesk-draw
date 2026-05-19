@@ -4,6 +4,7 @@ import { fireEvent, render } from "@testing-library/react";
 import { MemoryRouter, Route, Routes, useLocation } from "react-router-dom";
 
 import { Editor } from "@src/pages/Editor";
+import type { LoadedFile } from "@src/pages/Editor/exporter/flodeskFile";
 
 const LocationDisplay = () => {
   const location = useLocation();
@@ -14,16 +15,35 @@ const LocationDisplay = () => {
   );
 };
 
+interface RenderEditorOptions {
+  templateId?: string;
+  initialFile?: LoadedFile;
+}
+
+const normalizeOptions = (
+  templateIdOrOptions?: string | RenderEditorOptions
+): RenderEditorOptions =>
+  typeof templateIdOrOptions === "string"
+    ? { templateId: templateIdOrOptions }
+    : (templateIdOrOptions ?? {});
+
 /**
- * Mount the Editor at either `/editor` (blank) or `/templates/:templateId`
- * depending on whether a templateId is given. The Editor route component reads
- * `useParams().templateId` so we need a real Routes entry for it.
+ * Mount the Editor at either `/editor` (blank/file) or `/templates/:templateId`
+ * depending on options. The Editor route component reads `useParams()` and
+ * `useLocation().state`, so tests need real Routes entries.
  */
-export const renderEditor = (templateId?: string) => {
+export const renderEditor = (
+  templateIdOrOptions?: string | RenderEditorOptions
+) => {
+  const { templateId, initialFile } = normalizeOptions(templateIdOrOptions);
   const initialPath = templateId ? `/templates/${templateId}` : "/editor";
+  const initialEntry = initialFile
+    ? { pathname: initialPath, state: { loadedFile: initialFile } }
+    : initialPath;
+
   return render(
     <GrainProvider>
-      <MemoryRouter initialEntries={[initialPath]}>
+      <MemoryRouter initialEntries={[initialEntry]}>
         <LocationDisplay />
         <Routes>
           <Route path="/editor" element={<Editor />} />

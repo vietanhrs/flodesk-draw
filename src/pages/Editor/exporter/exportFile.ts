@@ -35,9 +35,12 @@ const fallbackDownload = (filename: string, html: string) => {
   setTimeout(() => URL.revokeObjectURL(url), 500);
 };
 
-export const exportPageAsHtml = async (page: PageData): Promise<boolean> => {
+export const exportPageAsHtml = async (
+  page: PageData,
+  filenameHint?: string
+): Promise<boolean> => {
   const html = buildHtml(page);
-  const suggested = `${slugify(page.title)}.html`;
+  const suggested = `${slugify(filenameHint ?? page.title)}.html`;
 
   const picker = (
     window as unknown as { showSaveFilePicker?: ShowSaveFilePicker }

@@ -1,52 +1,32 @@
-import { useState } from "react";
-
 import {
   Arrange,
   Button,
   Flex,
-  IconArrowLeft,
   IconButton,
   IconDownload,
   IconMonitor,
   IconPhone,
   IconRedo,
   IconUndo,
+  IconUpload,
+  Text,
   TextButton,
-  TextInput,
 } from "@flodesk/grain";
-import { Link } from "react-router-dom";
 
 import { useEditor } from "@src/pages/Editor/state/EditorContext";
+import { FlodeskLogo } from "@src/shared";
 
 interface Props {
   onBuild: () => Promise<void>;
   isBuilding: boolean;
+  onSave: () => Promise<void>;
 }
 
-export const Header = ({ onBuild, isBuilding }: Props) => {
-  const {
-    page,
-    updatePage,
-    canUndo,
-    canRedo,
-    undo,
-    redo,
-    viewport,
-    setViewport,
-  } = useEditor();
-
-  const [title, setTitle] = useState(page.title);
-  const [prevTitle, setPrevTitle] = useState(page.title);
-  if (prevTitle !== page.title) {
-    setPrevTitle(page.title);
-    setTitle(page.title);
-  }
-
-  const commitTitle = () => {
-    if (title !== page.title) {
-      updatePage({ title });
-    }
-  };
+export const Header = ({ onBuild, isBuilding, onSave }: Props) => {
+  const { canUndo, canRedo, undo, redo, viewport, setViewport, loadedFile } =
+    useEditor();
+  const savesToOpenedFile = !loadedFile || Boolean(loadedFile.handle);
+  const saveLabel = savesToOpenedFile ? "Save" : "Download copy";
 
   return (
     <Flex
@@ -70,31 +50,41 @@ export const Header = ({ onBuild, isBuilding }: Props) => {
         minWidth={0}
         flex="1 1 auto"
       >
-        <Link
-          to="/templates"
-          aria-label="Back to templates"
-          title="Back to templates"
-          className="edt-back-link"
+        <FlodeskLogo className="edt-header-logo" />
+        <Flex
+          wrap="nowrap"
+          alignItems="center"
+          gap="xs"
+          minWidth={0}
+          flex="1 1 auto"
         >
-          <IconArrowLeft width={18} height={18} />
-        </Link>
-        <form
-          className="edt-title-form"
-          onSubmit={(e) => {
-            e.preventDefault();
-            commitTitle();
-            e.currentTarget.querySelector("input")?.blur();
-          }}
-        >
-          <TextInput
-            aria-label="Page title"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            onBlur={commitTitle}
-            placeholder="Untitled page"
-            size="m"
+          {loadedFile && (
+            <Text
+              tag="span"
+              size="m"
+              color="shade13"
+              className="edt-header-filename"
+              aria-label="Current file"
+            >
+              {loadedFile.name}
+            </Text>
+          )}
+          <IconButton
+            type="button"
+            aria-label={saveLabel}
+            title={saveLabel}
+            onClick={() => {
+              void onSave();
+            }}
+            icon={
+              savesToOpenedFile ? (
+                <IconUpload width={16} height={16} />
+              ) : (
+                <IconDownload width={16} height={16} />
+              )
+            }
           />
-        </form>
+        </Flex>
       </Flex>
 
       <Flex wrap="nowrap" alignItems="center" gap="s">

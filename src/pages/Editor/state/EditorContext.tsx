@@ -7,9 +7,11 @@ import {
   useMemo,
   useReducer,
   useRef,
+  useState,
 } from "react";
 
 import type { ElementType, PageElement } from "@src/pages/Editor/elements";
+import type { LoadedFile } from "@src/pages/Editor/exporter/flodeskFile";
 import { createId } from "@src/pages/Editor/utils/ids";
 
 import type { DragSource, DropTarget } from "./DragContext";
@@ -17,7 +19,6 @@ import { findElementDefinition } from "./elementCatalog";
 import { buildPageForTemplate } from "./initialData";
 import type { PageData, PageRow, Selection, Viewport } from "./types";
 
-const STORAGE_PREFIX = "flodesk-draw:editor:";
 const HISTORY_LIMIT = 100;
 const DEBOUNCE_MERGE_MS = 600;
 
@@ -208,7 +209,7 @@ interface EditorActions {
   undo: () => void;
   redo: () => void;
   resetTo: (page: PageData) => void;
-  saveToStorage: () => void;
+  setLoadedFile: (file: LoadedFile | null) => void;
 }
 
 interface EditorContextValue extends EditorActions {
@@ -218,35 +219,40 @@ interface EditorContextValue extends EditorActions {
   selection: Selection;
   viewport: Viewport;
   isElementMenuOpen: boolean;
-  templateId?: string;
+  loadedFile: LoadedFile | null;
 }
 
 const EditorCtx = createContext<EditorContextValue | null>(null);
 
-const storageKey = (templateId?: string) =>
-  `${STORAGE_PREFIX}${templateId ?? "blank"}`;
-
-const loadFromStorage = (templateId?: string): PageData | null => {
-  try {
-    const raw = localStorage.getItem(storageKey(templateId));
-    if (!raw) return null;
-    return JSON.parse(raw) as PageData;
-  } catch {
-    return null;
-  }
-};
-
 interface ProviderProps {
   templateId?: string;
+  initialFile?: LoadedFile;
   children: React.ReactNode;
 }
 
-export const EditorProvider = ({ templateId, children }: ProviderProps) => {
-  const initial = useMemo<PageData>(() => {
-    const saved = loadFromStorage(templateId);
-    if (saved) return saved;
-    return buildPageForTemplate(templateId);
-  }, [templateId]);
+export const EditorProvider = ({
+  templateId,
+  initialFile,
+  children,
+}: ProviderProps) => {
+  // initialFile wins over templateId: when the user opens a .flodesk from the
+  // templates page we navigate to /editor and pass the file via location state.
+  // The route itself has no templateId so this guard is mostly defensive.
+  const initial = useMemo<PageData>(
+    () => initialFile?.page ?? buildPageForTemplate(templateId),
+    // Intentionally only seed on first mount; subsequent navigations to the
+    // same route re-render but should not reset the working page.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    []
+  );
+
+  const [loadedFile, setLoadedFileState] = useState<LoadedFile | null>(
+    initialFile ?? null
+  );
+
+  const setLoadedFile = useCallback((file: LoadedFile | null) => {
+    setLoadedFileState(file);
+  }, []);
 
   const [state, dispatch] = useReducer(reducer, {
     history: { past: [], present: initial, future: [] },
@@ -595,28 +601,6 @@ export const EditorProvider = ({ templateId, children }: ProviderProps) => {
     []
   );
 
-  const saveToStorage = useCallback(() => {
-    try {
-      localStorage.setItem(
-        storageKey(templateId),
-        JSON.stringify(stateRef.current.history.present)
-      );
-    } catch {
-      // ignore
-    }
-  }, [templateId]);
-
-  useEffect(() => {
-    try {
-      localStorage.setItem(
-        storageKey(templateId),
-        JSON.stringify(state.history.present)
-      );
-    } catch {
-      // ignore
-    }
-  }, [state.history.present, templateId]);
-
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       const target = e.target as HTMLElement | null;
@@ -649,7 +633,7 @@ export const EditorProvider = ({ templateId, children }: ProviderProps) => {
       selection: state.selection,
       viewport: state.viewport,
       isElementMenuOpen: state.isElementMenuOpen,
-      templateId,
+      loadedFile,
       updatePage,
       updateRow,
       setRowColumnsCount,
@@ -670,7 +654,7 @@ export const EditorProvider = ({ templateId, children }: ProviderProps) => {
       undo,
       redo,
       resetTo,
-      saveToStorage,
+      setLoadedFile,
     }),
     [
       state.history.present,
@@ -679,7 +663,7 @@ export const EditorProvider = ({ templateId, children }: ProviderProps) => {
       state.selection,
       state.viewport,
       state.isElementMenuOpen,
-      templateId,
+      loadedFile,
       updatePage,
       updateRow,
       setRowColumnsCount,
@@ -700,7 +684,7 @@ export const EditorProvider = ({ templateId, children }: ProviderProps) => {
       undo,
       redo,
       resetTo,
-      saveToStorage,
+      setLoadedFile,
     ]
   );
 

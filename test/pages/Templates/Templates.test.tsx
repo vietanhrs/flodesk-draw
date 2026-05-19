@@ -1,12 +1,18 @@
 import { screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { ALL_CATEGORY_ID, categories } from "@src/data/categories";
 import { templates } from "@src/data/templates";
+import * as flodeskFile from "@src/pages/Editor/exporter/flodeskFile";
+import { createEmptyPage } from "@src/pages/Editor/state/initialData";
 import { Templates } from "@src/pages/Templates/Templates";
 
 import { renderAtPath } from "./test-utils";
+
+afterEach(() => {
+  vi.restoreAllMocks();
+});
 
 const renderTemplatesAt = (initialPath = "/templates") =>
   renderAtPath(<Templates />, "/templates", initialPath);
@@ -69,6 +75,57 @@ describe("Templates page — category list", () => {
     // It is rendered after every category link.
     const links = within(sidebar).getAllByRole("link");
     expect(links[links.length - 1]).toBe(scratch);
+  });
+
+  it('shows an "Open from file" action at the very bottom of the sidebar', () => {
+    renderTemplatesAt();
+    const sidebar = screen.getByRole("complementary", {
+      name: /template categories/i,
+    });
+    const openBtn = within(sidebar).getByRole("button", {
+      name: /open from file/i,
+    });
+    expect(openBtn).toBeInTheDocument();
+
+    // It is the last interactive element in the sidebar nav, below both the
+    // category links and the "Start from scratch" link.
+    const interactive = within(sidebar)
+      .getByRole("navigation", { name: /template categories/i })
+      .querySelectorAll<HTMLElement>("a, button");
+    expect(interactive[interactive.length - 1]).toBe(openBtn);
+  });
+
+  it("invokes openFlodeskFile and navigates to /editor when 'Open from file' is clicked", async () => {
+    const user = userEvent.setup();
+    const openSpy = vi
+      .spyOn(flodeskFile, "openFlodeskFile")
+      .mockResolvedValue({ name: "saved-draft", page: createEmptyPage() });
+
+    renderTemplatesAt();
+    await user.click(screen.getByRole("button", { name: /open from file/i }));
+
+    await waitFor(() => expect(openSpy).toHaveBeenCalledTimes(1));
+    await waitFor(() =>
+      expect(screen.getByTestId("location")).toHaveTextContent("/editor")
+    );
+  });
+
+  it("surfaces an error when openFlodeskFile throws", async () => {
+    const user = userEvent.setup();
+    vi.spyOn(flodeskFile, "openFlodeskFile").mockRejectedValue(
+      new Error("File is not a Flodesk draft.")
+    );
+
+    renderTemplatesAt();
+    await user.click(screen.getByRole("button", { name: /open from file/i }));
+
+    await waitFor(() =>
+      expect(screen.getByRole("alert")).toHaveTextContent(
+        "File is not a Flodesk draft."
+      )
+    );
+    // No navigation when open fails.
+    expect(screen.getByTestId("location")).toHaveTextContent("/templates");
   });
 });
 

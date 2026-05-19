@@ -11,10 +11,9 @@ import {
 } from "./test-utils";
 
 beforeEach(() => {
-  // EditorProvider persists the working page to localStorage on every commit,
-  // so a leftover value from a previous test would short-circuit
-  // `buildPageForTemplate(...)` and load stale rows instead of the fresh
-  // template fixture. Clear it before each test.
+  // Defensive: tests no longer depend on localStorage (page state lives in
+  // memory + `.flodesk` files now), but clearing keeps any unrelated test
+  // suites or future regressions from leaking state between cases.
   localStorage.clear();
 });
 
@@ -65,11 +64,6 @@ describe("Editor — template loading", () => {
     expect(
       within(getRowInner(2)).getByText("Use code BLACK70 at checkout")
     ).toBeInTheDocument();
-
-    // The page title from the template is shown in the header.
-    expect(screen.getByLabelText("Page title")).toHaveValue(
-      "Bold sale announcement"
-    );
   });
 
   it("falls back to the blank empty page when no templateId is given", () => {
@@ -83,7 +77,6 @@ describe("Editor — template loading", () => {
       )
     ).toBeInTheDocument();
     expect(screen.getByText("Get started")).toBeInTheDocument();
-    expect(screen.getByLabelText("Page title")).toHaveValue("Untitled page");
   });
 });
 
