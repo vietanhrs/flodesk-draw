@@ -63,6 +63,69 @@
 
 /* ─── Element menu ──────────────────────────────────────────────────────── */
 
+.edt-search {
+  position: relative;
+  width: 96px;
+  max-width: 100%;
+  height: var(--grn-clearbutton-height);
+  transition:
+    width var(--grn-transition-slow),
+    min-width var(--grn-transition-slow);
+}
+
+.edt-search--open {
+  width: min(240px, 100%);
+  min-width: min(240px, 100%);
+}
+
+.edt-search__input-layer,
+.edt-search__button-layer {
+  transition: opacity var(--grn-transition-fast);
+}
+
+/*
+ * Keep the collapsed input pointer-active: clicks focus it to open search,
+ * while the visible TextButton remains the keyboard/screen-reader affordance.
+ */
+.edt-search__input-layer {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+}
+
+.edt-search--open .edt-search__input-layer {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.edt-search--open .edt-search__button-layer {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.edt-search__row {
+  display: grid;
+  grid-template-columns: 16px 1fr auto;
+  align-items: center;
+  gap: 8px;
+  height: var(--grn-clearbutton-height);
+}
+
+.edt-search__input {
+  width: 100%;
+  min-width: 0;
+  border: 0;
+  padding: 0;
+  outline: 0;
+  color: var(--grn-color-content);
+  background: transparent;
+  font: inherit;
+}
+
+.edt-search__input::placeholder {
+  color: var(--grn-field-placeholder-color);
+}
+
 .edt-menu__toggle {
   width: 28px;
   height: 28px;

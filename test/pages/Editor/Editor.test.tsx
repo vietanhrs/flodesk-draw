@@ -446,6 +446,36 @@ describe("Editor — element menu", () => {
     expect(screen.getByText("No elements match.")).toBeInTheDocument();
   });
 
+  it("opens, clears, and collapses the element search", async () => {
+    const user = userEvent.setup();
+    renderEditor();
+
+    await user.click(screen.getByRole("button", { name: "Search" }));
+
+    const searchInput = screen.getByLabelText("Search elements");
+    const searchRoot = searchInput.closest(".edt-search");
+    if (!searchRoot) throw new Error("expected search root to be present");
+
+    expect(searchInput).toHaveFocus();
+    expect(searchRoot).toHaveClass("edt-search--open");
+
+    await user.type(searchInput, "image");
+
+    expect(searchInput).toHaveValue("image");
+    expect(
+      screen.getByRole("button", { name: "Clear search" })
+    ).toBeInTheDocument();
+
+    await user.keyboard("{Escape}");
+
+    expect(searchInput).toHaveValue("");
+    expect(searchRoot).toHaveClass("edt-search--open");
+
+    fireEvent.blur(searchInput);
+
+    expect(searchRoot).not.toHaveClass("edt-search--open");
+  });
+
   it("drops a new element into an existing column on the canvas", async () => {
     const user = userEvent.setup();
     const { container } = renderEditor("bold-sale-announcement");

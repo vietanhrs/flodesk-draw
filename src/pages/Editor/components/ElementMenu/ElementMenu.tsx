@@ -54,18 +54,6 @@ const menuShellProps = {
   borderSide: "right" as const,
 };
 
-const searchStyles = `
-  .edt-search{position:relative;width:96px;max-width:100%;height:var(--grn-clearbutton-height);transition:width var(--grn-transition-slow),min-width var(--grn-transition-slow)}
-  .edt-search--open{width:min(240px,100%);min-width:min(240px,100%)}
-  .edt-search__input-layer,.edt-search__button-layer{transition:opacity var(--grn-transition-fast)}
-  .edt-search__input-layer{position:absolute;inset:0;opacity:0}
-  .edt-search--open .edt-search__input-layer{opacity:1;pointer-events:auto}
-  .edt-search--open .edt-search__button-layer{opacity:0;pointer-events:none}
-  .edt-search__row{display:grid;grid-template-columns:16px 1fr auto;align-items:center;gap:8px;height:var(--grn-clearbutton-height)}
-  .edt-search__input{width:100%;min-width:0;border:0;padding:0;outline:0;color:var(--grn-color-content);background:transparent;font:inherit}
-  .edt-search__input::placeholder{color:var(--grn-field-placeholder-color)}
-`;
-
 const ElementSearch = ({
   value,
   onChange,
@@ -79,13 +67,13 @@ const ElementSearch = ({
   const openSearch = () => {
     setIsOpen(true);
     inputRef.current?.focus();
+    // Focus again after the open state applies so quick typing keeps every character.
     requestAnimationFrame(() => inputRef.current?.focus());
   };
 
   return (
     <div
       className={"edt-search" + (isOpen ? " edt-search--open" : "")}
-      data-test-is-open={isOpen}
       onBlur={(event) => {
         if (!value && !event.currentTarget.contains(event.relatedTarget)) {
           setIsOpen(false);
@@ -101,7 +89,11 @@ const ElementSearch = ({
             onChange={(event) => onChange(event.target.value)}
             onFocus={openSearch}
             onKeyDown={(event) => {
-              if (event.key === "Escape" && !value) {
+              if (event.key !== "Escape") return;
+              event.preventDefault();
+              if (value) {
+                onChange("");
+              } else {
                 setIsOpen(false);
               }
             }}
@@ -184,7 +176,6 @@ export const ElementMenu = () => {
       width="288px"
       {...menuShellProps}
     >
-      <style>{searchStyles}</style>
       <Flex
         wrap="nowrap"
         alignItems="center"
@@ -194,13 +185,9 @@ export const ElementMenu = () => {
         borderWidth="1px"
         borderSide="bottom"
       >
-        <Box
-          flex="1 1 auto"
-          minWidth={0}
-          style={{ display: "flex", justifyContent: "flex-end" }}
-        >
+        <Flex flex="1 1 auto" minWidth={0} justifyContent="end">
           <ElementSearch value={search} onChange={setSearch} />
-        </Box>
+        </Flex>
         <button
           type="button"
           aria-label="Collapse element menu"
