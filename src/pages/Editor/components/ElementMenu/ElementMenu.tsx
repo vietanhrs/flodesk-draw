@@ -55,7 +55,7 @@ const menuShellProps = {
 };
 
 const searchStyles = `
-  .edt-search{position:relative;width:87px;max-width:100%;height:var(--grn-clearbutton-height);transition:width var(--grn-transition-slow),min-width var(--grn-transition-slow)}
+  .edt-search{position:relative;width:96px;max-width:100%;height:var(--grn-clearbutton-height);transition:width var(--grn-transition-slow),min-width var(--grn-transition-slow)}
   .edt-search--open{width:min(240px,100%);min-width:min(240px,100%)}
   .edt-search__input-layer,.edt-search__button-layer{transition:opacity var(--grn-transition-fast)}
   .edt-search__input-layer{position:absolute;inset:0;opacity:0}
