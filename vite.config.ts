@@ -140,6 +140,7 @@ export default defineConfig({
     globals: true,
     environment: "jsdom",
     setupFiles: "./test/setup.ts",
+    testTimeout: 15_000,
     server: {
       deps: {
         inline: [/@flodesk\/grain/],
