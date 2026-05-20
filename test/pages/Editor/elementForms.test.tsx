@@ -146,10 +146,10 @@ describe("Element forms", () => {
       const user = userEvent.setup();
       const { setProp } = renderForm(registry.paragraph);
 
-      // The "Weight" SegmentedField renders radios labelled "300", "400", ...
-      await user.click(screen.getByRole("radio", { name: "700" }));
+      // The "Weight" SegmentedField renders radios labelled "400", "500", ...
+      await user.click(screen.getByRole("radio", { name: "500" }));
 
-      expect(setProp).toHaveBeenCalledWith({ fontWeight: 700 });
+      expect(setProp).toHaveBeenCalledWith({ fontWeight: 500 });
     });
 
     it("social: editing a per-platform link URL fires setProp with patched { links }", () => {
