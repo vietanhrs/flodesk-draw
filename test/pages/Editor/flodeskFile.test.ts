@@ -5,6 +5,7 @@ import { createImage } from "@src/pages/Editor/elements/image/create";
 import { createSocial } from "@src/pages/Editor/elements/social/create";
 import { createVideo } from "@src/pages/Editor/elements/video/create";
 import {
+  openFlodeskFile,
   parseFlodeskFile,
   saveFlodeskFile,
 } from "@src/pages/Editor/exporter/flodeskFile";
@@ -31,6 +32,7 @@ const pageWithElement = (
 describe("flodeskFile", () => {
   afterEach(() => {
     vi.restoreAllMocks();
+    Reflect.deleteProperty(window, "showOpenFilePicker");
     Reflect.deleteProperty(window, "showSaveFilePicker");
   });
 
@@ -205,5 +207,62 @@ describe("flodeskFile", () => {
     expect(writable.close).toHaveBeenCalledTimes(1);
     expect(JSON.parse(written)).toEqual({ version: 1, page });
     expect(result).toEqual({ name: "opened-draft", handle });
+  });
+
+  it("opens a .flodesk draft through the File System Access picker", async () => {
+    const page = createEmptyPage();
+    const file = new File([draftWith(page)], "opened-draft.flodesk", {
+      type: "application/json",
+    });
+    const handle = {
+      getFile: vi.fn(() => Promise.resolve(file)),
+    } as unknown as FileSystemFileHandle;
+    const picker = vi.fn(() => Promise.resolve([handle]));
+    Object.defineProperty(window, "showOpenFilePicker", {
+      configurable: true,
+      writable: true,
+      value: picker,
+    });
+
+    const result = await openFlodeskFile();
+
+    const [pickerOptions] = picker.mock.calls[0] as [
+      { multiple: boolean; types: unknown[] },
+    ];
+    expect(pickerOptions.multiple).toBe(false);
+    expect(Array.isArray(pickerOptions.types)).toBe(true);
+    expect(result).toEqual({ name: "opened-draft", page, handle });
+  });
+
+  it("returns null when the open picker is cancelled", async () => {
+    const picker = vi.fn(() =>
+      Promise.reject(
+        Object.assign(new Error("cancelled"), { name: "AbortError" })
+      )
+    );
+    Object.defineProperty(window, "showOpenFilePicker", {
+      configurable: true,
+      writable: true,
+      value: picker,
+    });
+
+    await expect(openFlodeskFile()).resolves.toBeNull();
+  });
+
+  it("returns null when the save picker is cancelled", async () => {
+    const picker = vi.fn(() =>
+      Promise.reject(
+        Object.assign(new Error("cancelled"), { name: "AbortError" })
+      )
+    );
+    Object.defineProperty(window, "showSaveFilePicker", {
+      configurable: true,
+      writable: true,
+      value: picker,
+    });
+
+    await expect(
+      saveFlodeskFile(createEmptyPage(), undefined, "cancelled-draft")
+    ).resolves.toBeNull();
   });
 });
