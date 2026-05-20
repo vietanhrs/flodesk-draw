@@ -234,6 +234,50 @@ describe("flodeskFile", () => {
     expect(result).toEqual({ name: "opened-draft", page, handle });
   });
 
+  it("falls back to an input element when the open picker is unavailable", async () => {
+    const page = createEmptyPage();
+    const file = new File([draftWith(page)], "fallback-draft.flodesk", {
+      type: "application/json",
+    });
+    const originalCreateElement = document.createElement.bind(document);
+    const createElement = vi.spyOn(document, "createElement");
+
+    createElement.mockImplementation((tagName, options) => {
+      const element = originalCreateElement(tagName, options);
+      if (tagName !== "input") return element;
+      Object.defineProperty(element, "files", {
+        configurable: true,
+        value: [file],
+      });
+      vi.spyOn(element, "click").mockImplementation(() => {
+        element.dispatchEvent(new Event("change"));
+      });
+      return element;
+    });
+
+    const result = await openFlodeskFile();
+
+    expect(result).toEqual({ name: "fallback-draft", page });
+    expect(document.querySelector('input[type="file"]')).toBeNull();
+  });
+
+  it("returns null when the fallback input picker is cancelled", async () => {
+    const originalCreateElement = document.createElement.bind(document);
+    const createElement = vi.spyOn(document, "createElement");
+
+    createElement.mockImplementation((tagName, options) => {
+      const element = originalCreateElement(tagName, options);
+      if (tagName !== "input") return element;
+      vi.spyOn(element, "click").mockImplementation(() => {
+        element.dispatchEvent(new Event("cancel"));
+      });
+      return element;
+    });
+
+    await expect(openFlodeskFile()).resolves.toBeNull();
+    expect(document.querySelector('input[type="file"]')).toBeNull();
+  });
+
   it("returns null when the open picker is cancelled", async () => {
     const picker = vi.fn(() =>
       Promise.reject(
@@ -264,5 +308,71 @@ describe("flodeskFile", () => {
     await expect(
       saveFlodeskFile(createEmptyPage(), undefined, "cancelled-draft")
     ).resolves.toBeNull();
+  });
+
+  it("prompts for a new handle when saving without an opened file handle", async () => {
+    const page = createEmptyPage();
+    let written = "";
+    const writable = {
+      write: vi.fn(async (data: string | Blob) => {
+        written = typeof data === "string" ? data : await data.text();
+      }),
+      close: vi.fn(() => Promise.resolve()),
+    };
+    const handle = {
+      createWritable: vi.fn(() => Promise.resolve(writable)),
+      getFile: vi.fn(() =>
+        Promise.resolve(
+          new File([""], "saved-draft.flodesk", { type: "text/json" })
+        )
+      ),
+    } as unknown as FileSystemFileHandle;
+    const picker = vi.fn(() => Promise.resolve(handle));
+    Object.defineProperty(window, "showSaveFilePicker", {
+      configurable: true,
+      writable: true,
+      value: picker,
+    });
+
+    const result = await saveFlodeskFile(
+      page,
+      undefined,
+      "saved-draft.flodesk"
+    );
+
+    const [[pickerOptions]] = picker.mock.calls as unknown as [
+      [{ suggestedName: string; types: unknown[] }],
+    ];
+    expect(pickerOptions.suggestedName).toBe("saved-draft.flodesk");
+    expect(Array.isArray(pickerOptions.types)).toBe(true);
+    expect(JSON.parse(written)).toEqual({ version: 1, page });
+    expect(result).toEqual({ name: "saved-draft", handle });
+  });
+
+  it("falls back to a browser download when the save picker is unavailable", async () => {
+    vi.useFakeTimers();
+    const createObjectURL = vi
+      .spyOn(URL, "createObjectURL")
+      .mockReturnValue("blob:flodesk");
+    const revokeObjectURL = vi
+      .spyOn(URL, "revokeObjectURL")
+      .mockImplementation(() => {});
+    const anchorClick = vi
+      .spyOn(HTMLAnchorElement.prototype, "click")
+      .mockImplementation(() => {});
+
+    const result = await saveFlodeskFile(createEmptyPage(), undefined, "");
+
+    const anchor = [...document.querySelectorAll("a")].find(
+      (node) => node.download === "untitled.flodesk"
+    );
+    expect(createObjectURL).toHaveBeenCalledTimes(1);
+    expect(anchorClick).toHaveBeenCalledTimes(1);
+    expect(anchor).toBeUndefined();
+    expect(result).toEqual({ name: "untitled" });
+
+    vi.runAllTimers();
+    expect(revokeObjectURL).toHaveBeenCalledWith("blob:flodesk");
+    vi.useRealTimers();
   });
 });
