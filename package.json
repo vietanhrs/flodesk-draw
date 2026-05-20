@@ -7,6 +7,7 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "build:analyze": "ANALYZE_BUNDLE=1 bun run build",
+    "bundle:check": "bun run build:analyze && bun scripts/check-bundle-budget.mjs",
     "lint": "eslint .",
     "format": "prettier . --write",
     "format:check": "prettier . --check",
