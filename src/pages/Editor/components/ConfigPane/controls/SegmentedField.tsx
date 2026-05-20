@@ -1,4 +1,4 @@
-import { Stack, Text } from "@flodesk/grain";
+import { Stack, Text, TextToggle, TextToggleGroup } from "@flodesk/grain";
 
 interface Option<T extends string | number> {
   value: T;
@@ -23,26 +23,22 @@ export const SegmentedField = <T extends string | number>({
       <Text tag="span" variant="caps" color="content2">
         {label}
       </Text>
-      <div role="radiogroup" aria-label={label} className="edt-segmented">
+      <TextToggleGroup role="radiogroup" aria-label={label}>
         {options.map((opt) => {
           const isActive = opt.value === value;
           return (
-            <button
+            <TextToggle
               key={String(opt.value)}
-              type="button"
               role="radio"
               aria-checked={isActive}
+              isActive={isActive}
               onClick={() => onChange(opt.value)}
-              className={
-                "edt-segmented__btn" +
-                (isActive ? " edt-segmented__btn--active" : "")
-              }
             >
               {opt.label}
-            </button>
+            </TextToggle>
           );
         })}
-      </div>
+      </TextToggleGroup>
     </Stack>
   );
 };

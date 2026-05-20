@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-import { Flex, Stack, Text } from "@flodesk/grain";
+import { Flex, Stack, Text, TextButton, TextInput } from "@flodesk/grain";
 
 interface Props {
   label: string;
@@ -22,23 +22,19 @@ export const ColorInput = ({
   onChange,
   allowTransparent,
 }: Props) => {
-  const [text, setText] = useState(value);
-  const [prevValue, setPrevValue] = useState(value);
-  if (prevValue !== value) {
-    setPrevValue(value);
-    setText(value);
-  }
+  const [draft, setDraft] = useState({ value, text: value });
+  const text = draft.value === value ? draft.text : value;
 
   const isTransparent = value === "transparent" || value === "rgba(0,0,0,0)";
 
   const swatchColor = isTransparent ? "#ffffff" : value;
 
   return (
-    <Stack tag="label" gap="xs" style={{ display: "block" }}>
+    <Stack gap="xs" style={{ display: "block" }}>
       <Text tag="span" variant="caps" color="content2">
         {label}
       </Text>
-      <Flex wrap="nowrap" alignItems="stretch" gap="s">
+      <Flex wrap="nowrap" alignItems="center" gap="s">
         <div className="edt-color__swatch">
           {isTransparent && (
             <div aria-hidden="true" className="edt-color__check" />
@@ -48,7 +44,7 @@ export const ColorInput = ({
             aria-label={`${label} color picker`}
             value={swatchColor}
             onChange={(e) => {
-              setText(e.target.value);
+              setDraft({ value: e.target.value, text: e.target.value });
               onChange(e.target.value);
             }}
             className="edt-color__picker"
@@ -61,42 +57,51 @@ export const ColorInput = ({
             }}
           />
         </div>
-        <input
-          type="text"
-          aria-label={`${label} value`}
-          value={text}
-          onChange={(e) => {
-            const next = e.target.value;
-            setText(next);
-            // Live-commit as soon as the typed value parses as a valid hex
-            // so the canvas reflects the change without waiting for blur.
-            // Invalid intermediate strings (e.g. "#ab") are kept local until
-            // either a valid value is reached or onBlur reverts the field.
-            const normalized = normalizeHex(next);
-            if (normalized) onChange(normalized);
-          }}
-          onBlur={() => {
-            const normalized = normalizeHex(text);
-            if (normalized) onChange(normalized);
-            else setText(value);
-          }}
-          onKeyDown={(e) => {
-            if (e.key === "Enter") {
-              (e.target as HTMLInputElement).blur();
-            }
-          }}
-          className="edt-color__text"
-        />
+        <div style={{ flex: "1 1 auto", minWidth: 0 }}>
+          <TextInput
+            type="text"
+            aria-label={`${label} value`}
+            value={text}
+            onChange={(e) => {
+              const next = e.target.value;
+              // Live-commit as soon as the typed value parses as a valid hex
+              // so the canvas reflects the change without waiting for blur.
+              // Invalid intermediate strings (e.g. "#ab") are kept local until
+              // either a valid value is reached or onBlur reverts the field.
+              const normalized = normalizeHex(next);
+              if (normalized) {
+                onChange(normalized);
+                setDraft({ value: normalized, text: next });
+              } else {
+                setDraft({ value, text: next });
+              }
+            }}
+            onBlur={() => {
+              const normalized = normalizeHex(text);
+              if (normalized) {
+                onChange(normalized);
+                setDraft({ value: normalized, text: normalized });
+              } else {
+                setDraft({ value, text: value });
+              }
+            }}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                (e.target as HTMLInputElement).blur();
+              }
+            }}
+            size="m"
+          />
+        </div>
         {allowTransparent && (
-          <button
+          <TextButton
             type="button"
             onClick={() => onChange("transparent")}
             title="Set transparent"
             aria-label="Set transparent"
-            className="edt-color__none"
           >
             None
-          </button>
+          </TextButton>
         )}
       </Flex>
     </Stack>

@@ -8,6 +8,7 @@ import {
   Slider,
   Stack,
   Text,
+  TextInput,
 } from "@flodesk/grain";
 
 interface Props {
@@ -29,22 +30,18 @@ export const NumberField = ({
   unit,
   onChange,
 }: Props) => {
-  const [text, setText] = useState(String(value));
-  const [prevValue, setPrevValue] = useState(value);
-  if (prevValue !== value) {
-    setPrevValue(value);
-    setText(String(value));
-  }
+  const [draft, setDraft] = useState({ value, text: String(value) });
+  const text = draft.value === value ? draft.text : String(value);
 
   const commit = (raw: string) => {
     const parsed = Number(raw);
     if (Number.isNaN(parsed)) {
-      setText(String(value));
+      setDraft({ value, text: String(value) });
       return;
     }
     const clamped = Math.min(max, Math.max(min, parsed));
     onChange(clamped);
-    setText(String(clamped));
+    setDraft({ value: clamped, text: String(clamped) });
   };
 
   const nudge = (delta: number) => {
@@ -87,31 +84,35 @@ export const NumberField = ({
           isDisabled={value >= max}
           onClick={() => nudge(step)}
         />
-        <input
-          type="number"
-          min={min}
-          max={max}
-          step={step}
-          value={text}
-          onChange={(e) => {
-            const raw = e.target.value;
-            setText(raw);
-            // Live-commit when the typed value is a finite, in-range number
-            // so the canvas reflects the change without waiting for blur.
-            // Out-of-range or non-numeric input stays local until blur, which
-            // clamps via `commit()`.
-            const parsed = Number(raw);
-            if (Number.isFinite(parsed) && parsed >= min && parsed <= max) {
-              onChange(parsed);
-            }
-          }}
-          onBlur={(e) => commit(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === "Enter") (e.target as HTMLInputElement).blur();
-          }}
-          aria-label={label}
-          className="edt-field__numeric"
-        />
+        <div style={{ flex: "0 0 64px", width: 64 }}>
+          <TextInput
+            type="number"
+            min={min}
+            max={max}
+            step={step}
+            value={text}
+            onChange={(e) => {
+              const raw = e.target.value;
+              // Live-commit when the typed value is a finite, in-range number
+              // so the canvas reflects the change without waiting for blur.
+              // Out-of-range or non-numeric input stays local until blur, which
+              // clamps via `commit()`.
+              const parsed = Number(raw);
+              if (Number.isFinite(parsed) && parsed >= min && parsed <= max) {
+                onChange(parsed);
+                setDraft({ value: parsed, text: raw });
+              } else {
+                setDraft({ value, text: raw });
+              }
+            }}
+            onBlur={(e) => commit(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") (e.target as HTMLInputElement).blur();
+            }}
+            aria-label={label}
+            size="m"
+          />
+        </div>
         {unit && (
           <Text tag="span" size="s" color="content2">
             {unit}

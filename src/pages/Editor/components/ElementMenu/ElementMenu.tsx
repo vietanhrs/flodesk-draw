@@ -153,15 +153,20 @@ export const ElementMenu = () => {
         paddingTop="s2"
         {...menuShellProps}
       >
-        <button
+        <IconButton
           type="button"
           aria-label="Open element menu"
           title="Open element menu"
           onClick={() => toggleMenu(true)}
-          className="edt-menu__toggle"
-        >
-          <IconChevronRight width={16} height={16} />
-        </button>
+          icon={<IconChevronRight width={16} height={16} />}
+          style={{
+            width: 28,
+            height: 28,
+            minWidth: 28,
+            paddingLeft: 0,
+            paddingRight: 0,
+          }}
+        />
       </Flex>
     );
   }
@@ -188,15 +193,20 @@ export const ElementMenu = () => {
         <Flex flex="1 1 auto" minWidth={0} justifyContent="end">
           <ElementSearch value={search} onChange={setSearch} />
         </Flex>
-        <button
+        <IconButton
           type="button"
           aria-label="Collapse element menu"
           title="Collapse element menu"
           onClick={() => toggleMenu(false)}
-          className="edt-menu__toggle"
-        >
-          <IconChevronLeft width={16} height={16} />
-        </button>
+          icon={<IconChevronLeft width={16} height={16} />}
+          style={{
+            width: 28,
+            height: 28,
+            minWidth: 28,
+            paddingLeft: 0,
+            paddingRight: 0,
+          }}
+        />
       </Flex>
 
       <Arrange
