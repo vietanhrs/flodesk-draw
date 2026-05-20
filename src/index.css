@@ -39,6 +39,8 @@ body,
 }
 
 body {
+  --fd-color-readable-muted: #6f6966;
+
   font-family: "Flodesk Sans", "Helvetica Neue", Arial, sans-serif;
   color: var(--grn-color-content);
   background: var(--grn-color-background);
@@ -88,6 +90,58 @@ body {
     font-weight: 100;
     font-variation-settings: "wght" 100;
   }
+}
+
+/* ─── Route loading shell ───────────────────────────────────────────────── */
+
+.route-fallback {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 32px;
+  padding: 32px;
+  background: var(--grn-color-background2);
+  color: var(--grn-color-shade13);
+}
+
+.route-fallback__logo {
+  font-family: "Flodesk FlotesqueGX", "Helvetica Neue", Arial, sans-serif;
+  font-size: 22px;
+  line-height: 1;
+  letter-spacing: 0.04em;
+}
+
+.route-fallback__panel {
+  width: min(320px, 80vw);
+  padding: 20px;
+  border: 1px solid var(--grn-color-border);
+  border-radius: 8px;
+  background: var(--grn-color-background);
+  box-shadow: var(--grn-shadow-s);
+}
+
+.route-fallback__line,
+.route-fallback__block {
+  border-radius: 999px;
+  background: var(--grn-color-shade3);
+}
+
+.route-fallback__line {
+  width: 64%;
+  height: 12px;
+  margin-top: 10px;
+}
+
+.route-fallback__line--wide {
+  width: 100%;
+  margin-top: 0;
+}
+
+.route-fallback__block {
+  height: 96px;
+  margin-top: 18px;
+  border-radius: 6px;
 }
 
 /* ─── Error boundary fallback page (404-style) ──────────────────────────── */

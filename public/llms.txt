@@ -1,0 +1,6 @@
+# flodesk-draw
+
+flodesk-draw is a small visual editor for creating, previewing, saving, and
+exporting Flodesk-style email pages.
+
+- App: https://flodesk-draw.vietanhtran-uet.workers.dev/

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { Flex, Toast } from "@flodesk/grain";
 import { useLocation, useParams } from "react-router-dom";
@@ -23,6 +23,27 @@ interface EditorLocationState {
   loadedFile?: LoadedFile;
 }
 
+const MOBILE_EDITOR_QUERY = "(max-width: 767px)";
+
+const useIsMobileEditorChrome = () => {
+  const [isMobile, setIsMobile] = useState(() =>
+    typeof window === "undefined" || !window.matchMedia
+      ? false
+      : window.matchMedia(MOBILE_EDITOR_QUERY).matches
+  );
+
+  useEffect(() => {
+    if (!window.matchMedia) return;
+    const query = window.matchMedia(MOBILE_EDITOR_QUERY);
+    const sync = () => setIsMobile(query.matches);
+    sync();
+    query.addEventListener("change", sync);
+    return () => query.removeEventListener("change", sync);
+  }, []);
+
+  return isMobile;
+};
+
 const editorSessionKey = (
   templateId: string | undefined,
   initialFile: LoadedFile | undefined
@@ -36,6 +57,7 @@ const EditorShell = () => {
   const { page } = useEditorDocument();
   const loadedFile = useEditorLoadedFile();
   const { setLoadedFile } = useEditorActions();
+  const isMobileEditorChrome = useIsMobileEditorChrome();
   const [build, setBuild] = useState<{
     isOpen: boolean;
     status: "building" | "done" | "error";
@@ -99,16 +121,33 @@ const EditorShell = () => {
       height="100vh"
       width="100%"
       backgroundColor="background2"
+      className={
+        isMobileEditorChrome ? "edt-shell edt-shell--mobile" : "edt-shell"
+      }
     >
       <Header
         onBuild={handleBuild}
         isBuilding={build.status === "building" && build.isOpen}
         onSave={handleSave}
+        isCompact={isMobileEditorChrome}
       />
-      <Flex wrap="nowrap" alignItems="stretch" flex="1 1 auto" minHeight={0}>
-        <ElementMenu />
+      {isMobileEditorChrome && (
+        <div className="edt-mobile-notice" role="status">
+          Please switch to desktop to be able to add elements & configure the
+          page
+        </div>
+      )}
+      <Flex
+        tag="main"
+        wrap="nowrap"
+        alignItems="stretch"
+        flex="1 1 auto"
+        minHeight={0}
+        className="edt-main"
+      >
+        {!isMobileEditorChrome && <ElementMenu />}
         <Canvas />
-        <ConfigPane />
+        {!isMobileEditorChrome && <ConfigPane />}
       </Flex>
       <BuildModal
         isOpen={build.isOpen}

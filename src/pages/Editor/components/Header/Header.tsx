@@ -25,9 +25,15 @@ interface Props {
   onBuild: () => Promise<void>;
   isBuilding: boolean;
   onSave: () => Promise<void>;
+  isCompact?: boolean;
 }
 
-export const Header = ({ onBuild, isBuilding, onSave }: Props) => {
+export const Header = ({
+  onBuild,
+  isBuilding,
+  onSave,
+  isCompact = false,
+}: Props) => {
   const { canUndo, canRedo } = useEditorHistoryState();
   const viewport = useEditorViewport();
   const loadedFile = useEditorLoadedFile();
@@ -65,7 +71,7 @@ export const Header = ({ onBuild, isBuilding, onSave }: Props) => {
           minWidth={0}
           flex="1 1 auto"
         >
-          {loadedFile && (
+          {loadedFile && !isCompact && (
             <Text
               tag="span"
               size="m"
@@ -95,28 +101,30 @@ export const Header = ({ onBuild, isBuilding, onSave }: Props) => {
       </Flex>
 
       <Flex wrap="nowrap" alignItems="center" gap="s">
-        <Arrange gap="s" role="toolbar" aria-label="History">
-          <TextButton
-            type="button"
-            aria-label="Undo"
-            title="Undo (Ctrl/Cmd+Z)"
-            isDisabled={!canUndo}
-            onClick={undo}
-            icon={<IconUndo width={16} height={16} />}
-          >
-            Undo
-          </TextButton>
-          <TextButton
-            type="button"
-            aria-label="Redo"
-            title="Redo (Ctrl/Cmd+Shift+Z)"
-            isDisabled={!canRedo}
-            onClick={redo}
-            icon={<IconRedo width={16} height={16} />}
-          >
-            Redo
-          </TextButton>
-        </Arrange>
+        {!isCompact && (
+          <Arrange gap="s" role="toolbar" aria-label="History">
+            <TextButton
+              type="button"
+              aria-label="Undo"
+              title="Undo (Ctrl/Cmd+Z)"
+              isDisabled={!canUndo}
+              onClick={undo}
+              icon={<IconUndo width={16} height={16} />}
+            >
+              Undo
+            </TextButton>
+            <TextButton
+              type="button"
+              aria-label="Redo"
+              title="Redo (Ctrl/Cmd+Shift+Z)"
+              isDisabled={!canRedo}
+              onClick={redo}
+              icon={<IconRedo width={16} height={16} />}
+            >
+              Redo
+            </TextButton>
+          </Arrange>
+        )}
 
         <Arrange role="radiogroup" aria-label="Viewport">
           <IconButton
@@ -151,7 +159,7 @@ export const Header = ({ onBuild, isBuilding, onSave }: Props) => {
             void onBuild();
           }}
         >
-          {isBuilding ? "Building…" : "Build & export"}
+          {isBuilding ? "Building…" : isCompact ? "Export" : "Build & export"}
         </Button>
       </Flex>
     </Flex>
