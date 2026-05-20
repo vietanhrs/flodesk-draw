@@ -25,14 +25,26 @@ import {
 } from "@src/pages/Editor/state/elementCatalog";
 import { setNewElementDrag } from "@src/pages/Editor/utils/dragData";
 
+const isKeyboardActivation = (key: string): boolean =>
+  key === "Enter" || key === " ";
+
 const ElementCard = ({ def }: { def: ElementDefinition }) => {
   const Icon = def.icon;
   const { beginDrag, endDrag } = useDrag();
+  const { addRowWithElement } = useEditorActions();
+  const addElement = () => addRowWithElement(def.type);
+
   return (
     <div
       role="button"
       tabIndex={0}
       draggable
+      onClick={addElement}
+      onKeyDown={(e) => {
+        if (!isKeyboardActivation(e.key)) return;
+        e.preventDefault();
+        addElement();
+      }}
       onDragStart={(e) => {
         setNewElementDrag(e.dataTransfer, def.type);
         beginDrag("new-element");
