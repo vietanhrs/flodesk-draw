@@ -8,6 +8,12 @@ const BASE_URL = `http://${HOST}:${PORT}`;
 const REPORT_DIR = ".lighthouse";
 const KiB = 1024;
 
+const CI_RUNNER_NOTE =
+  "Note: CI Lighthouse scores are calibrated for GitHub Actions runners. " +
+  "Those runners have weaker and more variable CPU than local machines or " +
+  "the hosted Cloudflare Workers app, so the mobile performance score is a " +
+  "CI regression baseline, not a production performance rating.";
+
 const routes = [
   {
     name: "template-gallery-desktop",
@@ -31,6 +37,10 @@ const routes = [
     name: "template-gallery-mobile",
     path: "/templates",
     formFactor: "mobile",
+    // The hosted app scores higher in Lighthouse. GitHub Actions runners are
+    // CPU-constrained and noisy, so this score budget protects against CI
+    // regressions while the metric budgets below keep concrete Web Vitals and
+    // resource-size constraints in place.
     minimumScores: {
       performance: 0.55,
       accessibility: 0.9,
@@ -210,6 +220,7 @@ const main = async () => {
   );
 
   try {
+    console.log(CI_RUNNER_NOTE);
     await waitForServer();
     const results = [];
 
