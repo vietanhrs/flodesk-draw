@@ -26,6 +26,8 @@ describe("TemplateCard", () => {
     const iframe = screen.getByTitle(`${sample.title} preview`);
     expect(iframe).toHaveAttribute("aria-hidden", "true");
     expect(iframe).toHaveAttribute("tabindex", "-1");
+    expect(iframe).toHaveAttribute("loading", "lazy");
+    expect(iframe).toHaveAttribute("sandbox", "");
   });
 
   it('exposes a "View details" overlay link with the right href and aria-label', () => {

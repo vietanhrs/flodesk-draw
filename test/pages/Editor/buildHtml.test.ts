@@ -214,6 +214,10 @@ describe("buildHtml", () => {
     // Video.
     expect(html).toContain('src="https://www.youtube.com/embed/abc"');
     expect(html).toContain("padding-bottom:56.25%");
+    expect(html).toContain('loading="lazy"');
+    expect(html).toContain(
+      'sandbox="allow-scripts allow-same-origin allow-presentation"'
+    );
 
     // Social — IG icon + email icon.
     expect(html).toContain(
@@ -263,5 +267,71 @@ describe("buildHtml", () => {
   it("falls back to 'Untitled page' if no title is set", () => {
     const html = buildHtml({ ...basePage(), title: "" });
     expect(html).toContain("<title>Untitled page</title>");
+  });
+
+  it("replaces unsafe exported URLs with inert fallbacks", () => {
+    const html = buildHtml(
+      basePage([
+        {
+          id: "r",
+          backgroundColor: "transparent",
+          paddingX: 0,
+          paddingY: 0,
+          marginY: 0,
+          columnsCount: 1,
+          columnWidths: [1],
+          columnGap: 0,
+          columns: [
+            [
+              {
+                id: "b",
+                type: "button",
+                label: "Click",
+                href: "javascript:alert(1)",
+                backgroundColor: "#000",
+                textColor: "#fff",
+                paddingX: 16,
+                paddingY: 8,
+                radius: 0,
+                fontSize: 14,
+                align: "left",
+                letterSpacing: 0,
+              },
+              {
+                id: "i",
+                type: "image",
+                src: "data:text/html,<script>alert(1)</script>",
+                alt: "Unsafe",
+                widthPct: 100,
+                align: "left",
+                radius: 0,
+              },
+              {
+                id: "v",
+                type: "video",
+                url: "http://example.com/embed",
+                widthPct: 100,
+              },
+              {
+                id: "s",
+                type: "social",
+                color: "#000",
+                size: 24,
+                align: "left",
+                gap: 8,
+                links: [{ platform: "website", url: "javascript:alert(1)" }],
+              },
+            ],
+          ],
+        },
+      ])
+    );
+
+    expect(html).not.toContain("javascript:");
+    expect(html).not.toContain("data:text/html");
+    expect(html).toMatch(/<a href="#" style="[^"]*">Click<\/a>/);
+    expect(html).toContain('<img src="" alt="Unsafe"');
+    expect(html).toContain('<iframe src="about:blank"');
+    expect(html).toContain('href="#" aria-label="Website"');
   });
 });

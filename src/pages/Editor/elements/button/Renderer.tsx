@@ -1,4 +1,5 @@
 import { justifyOf } from "@src/pages/Editor/elements/shared/align";
+import { safeLinkUrl } from "@src/pages/Editor/elements/shared/urls";
 
 import type { ButtonElement } from "./types";
 
@@ -9,7 +10,7 @@ export const ButtonRenderer = ({ element }: { element: ButtonElement }) => {
   return (
     <div style={{ display: "flex", justifyContent: justifyOf(element.align) }}>
       <a
-        href={element.href || "#"}
+        href={safeLinkUrl(element.href)}
         onClick={(e) => e.preventDefault()}
         style={{
           display: "inline-block",
