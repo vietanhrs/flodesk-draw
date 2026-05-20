@@ -6,11 +6,6 @@ import {
 } from "@src/pages/Editor/elements/shared/validation";
 
 export const validateVideo: ElementValidator = (element, path) => {
-  requireUrl(
-    element.url,
-    `${path}.url`,
-    isSafeVideoUrl,
-    "an https video URL"
-  );
+  requireUrl(element.url, `${path}.url`, isSafeVideoUrl, "an https video URL");
   requireNumberInRange(element.widthPct, `${path}.widthPct`, 20, 100);
 };
