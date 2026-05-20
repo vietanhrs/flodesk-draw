@@ -6,6 +6,7 @@ import { ImageForm } from "./Form";
 import { ImageRenderer } from "./Renderer";
 import { imageToHtml } from "./toHtml";
 import type { ImageElement } from "./types";
+import { validateImage } from "./validate";
 
 export type { ImageElement } from "./types";
 
@@ -16,4 +17,5 @@ export const imageHandler: ElementHandler<ImageElement> = {
   Renderer: ImageRenderer,
   Form: ImageForm,
   toHtml: imageToHtml,
+  validate: validateImage,
 };

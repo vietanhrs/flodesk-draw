@@ -6,6 +6,7 @@ import { QuoteForm } from "./Form";
 import { QuoteRenderer } from "./Renderer";
 import { quoteToHtml } from "./toHtml";
 import type { QuoteElement } from "./types";
+import { validateQuote } from "./validate";
 
 export type { QuoteElement } from "./types";
 
@@ -16,4 +17,5 @@ export const quoteHandler: ElementHandler<QuoteElement> = {
   Renderer: QuoteRenderer,
   Form: QuoteForm,
   toHtml: quoteToHtml,
+  validate: validateQuote,
 };

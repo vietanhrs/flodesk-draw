@@ -6,6 +6,7 @@ import { SocialForm } from "./Form";
 import { SocialRenderer } from "./Renderer";
 import { socialToHtml } from "./toHtml";
 import type { SocialElement } from "./types";
+import { validateSocial } from "./validate";
 
 export type { SocialElement, SocialLink } from "./types";
 
@@ -16,4 +17,5 @@ export const socialHandler: ElementHandler<SocialElement> = {
   Renderer: SocialRenderer,
   Form: SocialForm,
   toHtml: socialToHtml,
+  validate: validateSocial,
 };

@@ -6,6 +6,7 @@ import { HeadingForm } from "./Form";
 import { HeadingRenderer } from "./Renderer";
 import { headingToHtml } from "./toHtml";
 import type { HeadingElement } from "./types";
+import { validateHeading } from "./validate";
 
 export type { HeadingElement } from "./types";
 
@@ -16,4 +17,5 @@ export const headingHandler: ElementHandler<HeadingElement> = {
   Renderer: HeadingRenderer,
   Form: HeadingForm,
   toHtml: headingToHtml,
+  validate: validateHeading,
 };

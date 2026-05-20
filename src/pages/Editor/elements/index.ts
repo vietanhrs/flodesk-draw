@@ -5,3 +5,4 @@ export {
   type ElementType,
   type PageElement,
 } from "./registry";
+export { validateElement } from "./validation";

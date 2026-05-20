@@ -6,6 +6,7 @@ import { DividerForm } from "./Form";
 import { DividerRenderer } from "./Renderer";
 import { dividerToHtml } from "./toHtml";
 import type { DividerElement } from "./types";
+import { validateDivider } from "./validate";
 
 export type { DividerElement } from "./types";
 
@@ -16,4 +17,5 @@ export const dividerHandler: ElementHandler<DividerElement> = {
   Renderer: DividerRenderer,
   Form: DividerForm,
   toHtml: dividerToHtml,
+  validate: validateDivider,
 };
