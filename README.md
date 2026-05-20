@@ -11,7 +11,7 @@ Built as a take-home around Flodesk's [Grain](https://grain.flodesk.com/) design
 - **Configuration pane** — page-, layout- (per-row), and element-level controls that reflect changes immediately on the canvas.
 - **Viewport toggle** — switch the preview between desktop (1080px) and mobile (390px).
 - **Export** — produce a single `.html` document with inline HTML/CSS. Images (`<img src>`), video embeds (YouTube `<iframe src>`), and link targets (button/social `href`) remain URL-referenced. Uses the File System Access API where supported, otherwise a regular blob download.
-- **Local persistence** — your in-progress page is stashed in `localStorage` per template, so a refresh doesn't lose work.
+- **Draft files** — open and save `.flodesk` draft files. Chromium can save back to the opened file via the File System Access API; other browsers fall back to downloads.
 
 ## Prerequisites
 
@@ -31,14 +31,17 @@ bun install            # or `bun install --frozen-lockfile` to match CI exactly
 
 ## Scripts
 
-| Command            | What it does                                                             |
-| ------------------ | ------------------------------------------------------------------------ |
-| `bun run dev`      | Start the Vite dev server (HMR) at `http://localhost:5173`.              |
-| `bun run build`    | Type-check (`tsc -b`) and produce a production build in `dist/`.         |
-| `bun run preview`  | Serve the production build locally.                                      |
-| `bun run lint`     | Run ESLint over the source tree.                                         |
-| `bun run test`     | Run Vitest in watch mode. Append `--run` for a single pass.              |
-| `bun run coverage` | Run the test suite once with v8 coverage; report written to `coverage/`. |
+| Command                 | What it does                                                             |
+| ----------------------- | ------------------------------------------------------------------------ |
+| `bun run dev`           | Start the Vite dev server (HMR) at `http://localhost:5173`.              |
+| `bun run build`         | Type-check (`tsc -b`) and produce a production build in `dist/`.         |
+| `bun run build:analyze` | Build with `ANALYZE_BUNDLE=1` and emit `dist/bundle-analysis.json`.      |
+| `bun run preview`       | Serve the production build locally.                                      |
+| `bun run lint`          | Run ESLint over the source tree.                                         |
+| `bun run format:check`  | Check Prettier formatting without writing changes.                       |
+| `bun run test`          | Run Vitest in watch mode. Append `--run` for a single pass.              |
+| `bun run test:e2e`      | Run the Playwright end-to-end suite.                                     |
+| `bun run coverage`      | Run the test suite once with v8 coverage; report written to `coverage/`. |
 
 ## Project layout
 
@@ -72,7 +75,7 @@ flodesk-draw/
 │           │   ├── Header/          Title, history, viewport toggle, build button
 │           │   └── BuildModal.tsx   Export progress + status dialog
 │           ├── exporter/            Page → static HTML and download orchestration
-│           ├── state/               EditorContext (reducer + history), types, element catalog
+│           ├── state/               Zustand store, actions/mutations, history, types, templates
 │           └── utils/               Drag dataTransfer helpers, id generator
 │
 └── test/
@@ -93,4 +96,14 @@ flodesk-draw/
 
 ## Continuous integration
 
-Every pull request and every push to `main` runs `bun install --frozen-lockfile` → `lint` → `test --run` → `build` on Ubuntu via GitHub Actions ([`.github/workflows/ci.yml`](./.github/workflows/ci.yml)).
+Every pull request and every push to `main` runs `bun install --frozen-lockfile` → `format:check` → `lint` → `test --run` → `build` → `test:e2e` on Ubuntu via GitHub Actions ([`.github/workflows/ci.yml`](./.github/workflows/ci.yml)).
+
+## Known warnings
+
+The Playwright run may log this React 19 warning from Grain:
+
+```text
+Accessing element.ref was removed in React 19. ref is now a regular prop.
+```
+
+This comes from `@flodesk/grain`, not application code. The test setup filters that specific warning where appropriate and keeps all other unexpected console errors visible.
