@@ -8,7 +8,7 @@ import { defineConfig, globalIgnores } from "eslint/config";
 import importPlugin from "eslint-plugin-import-x";
 
 export default defineConfig([
-  globalIgnores(["dist"]),
+  globalIgnores(["coverage", "dist", "playwright-report", "test-results"]),
   {
     files: ["**/*.{ts,tsx}"],
     extends: [
