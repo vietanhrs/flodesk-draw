@@ -1,235 +1,22 @@
 /* eslint-disable react-refresh/only-export-components */
-import {
-  type Context,
-  createContext,
-  type ReactNode,
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useReducer,
-  useRef,
-  useState,
-} from "react";
 
-import type { ElementType, PageElement } from "@src/pages/Editor/elements";
+import { type ReactNode, useEffect, useLayoutEffect } from "react";
+
+import { useShallow } from "zustand/react/shallow";
+
 import type { LoadedFile } from "@src/pages/Editor/exporter/flodeskFile";
-import { createId } from "@src/pages/Editor/utils/ids";
 
-import type { DragSource, DropTarget } from "./DragContext";
-import { findElementDefinition } from "./elementCatalog";
-import { buildPageForTemplate } from "./initialData";
-import type { PageData, PageRow, Selection, Viewport } from "./types";
+import {
+  initializeEditorStore,
+  useEditorStore,
+  type EditorActions,
+} from "./editorStore";
+import type { PageData, Selection, Viewport } from "./types";
 
-const HISTORY_LIMIT = 100;
-const LARGE_PAGE_HISTORY_LIMIT = 25;
-const LARGE_PAGE_HISTORY_THRESHOLD_BYTES = 120_000;
-const DEBOUNCE_MERGE_MS = 600;
-
-interface HistoryStack {
-  past: PageData[];
-  present: PageData;
-  future: PageData[];
-}
-
-interface EditorState {
-  history: HistoryStack;
-  selection: Selection;
-  viewport: Viewport;
-  isElementMenuOpen: boolean;
-  lastCommitKey: string | null;
-  lastCommitAt: number;
-}
-
-type Action =
-  | { type: "COMMIT"; payload: PageData; debounceKey?: string }
-  | { type: "RESET"; payload: PageData }
-  | { type: "UNDO" }
-  | { type: "REDO" }
-  | { type: "SELECT"; payload: Selection }
-  | { type: "SET_VIEWPORT"; payload: Viewport }
-  | { type: "TOGGLE_MENU"; payload?: boolean };
-
-const estimatePageBytes = (page: PageData): number =>
-  JSON.stringify(page).length;
-
-const historyLimitForPage = (page: PageData): number =>
-  estimatePageBytes(page) > LARGE_PAGE_HISTORY_THRESHOLD_BYTES
-    ? LARGE_PAGE_HISTORY_LIMIT
-    : HISTORY_LIMIT;
-
-const cloneRow = (r: PageRow): PageRow => ({
-  ...r,
-  id: createId("row"),
-  columnWidths: [...r.columnWidths],
-  columns: r.columns.map((col) =>
-    col.map((el) => ({ ...el, id: createId("el") }))
-  ),
-});
-
-const reducer = (state: EditorState, action: Action): EditorState => {
-  switch (action.type) {
-    case "COMMIT": {
-      const now = Date.now();
-      const same =
-        action.debounceKey &&
-        action.debounceKey === state.lastCommitKey &&
-        now - state.lastCommitAt < DEBOUNCE_MERGE_MS;
-      const historyLimit = historyLimitForPage(action.payload);
-      const past = same
-        ? state.history.past.slice(-historyLimit)
-        : [...state.history.past, state.history.present].slice(-historyLimit);
-      return {
-        ...state,
-        history: {
-          past,
-          present: action.payload,
-          future: [],
-        },
-        lastCommitKey: action.debounceKey ?? null,
-        lastCommitAt: now,
-      };
-    }
-    case "RESET":
-      return {
-        ...state,
-        history: { past: [], present: action.payload, future: [] },
-        selection: null,
-        lastCommitKey: null,
-        lastCommitAt: 0,
-      };
-    case "UNDO": {
-      if (state.history.past.length === 0) return state;
-      const prev = state.history.past[state.history.past.length - 1];
-      const historyLimit = historyLimitForPage(prev);
-      return {
-        ...state,
-        history: {
-          past: state.history.past.slice(0, -1),
-          present: prev,
-          future: [state.history.present, ...state.history.future].slice(
-            0,
-            historyLimit
-          ),
-        },
-        lastCommitKey: null,
-      };
-    }
-    case "REDO": {
-      if (state.history.future.length === 0) return state;
-      const [next, ...rest] = state.history.future;
-      const historyLimit = historyLimitForPage(next);
-      return {
-        ...state,
-        history: {
-          past: [...state.history.past, state.history.present].slice(
-            -historyLimit
-          ),
-          present: next,
-          future: rest,
-        },
-        lastCommitKey: null,
-      };
-    }
-    case "SELECT":
-      return { ...state, selection: action.payload };
-    case "SET_VIEWPORT":
-      return { ...state, viewport: action.payload };
-    case "TOGGLE_MENU":
-      return {
-        ...state,
-        isElementMenuOpen:
-          typeof action.payload === "boolean"
-            ? action.payload
-            : !state.isElementMenuOpen,
-      };
-    default:
-      return state;
-  }
-};
-
-const replaceRow = (
-  page: PageData,
-  rowId: string,
-  patch: (row: PageRow) => PageRow
-): PageData => ({
-  ...page,
-  rows: page.rows.map((r) => (r.id === rowId ? patch(r) : r)),
-});
-
-const replaceElement = (
-  page: PageData,
-  rowId: string,
-  elementId: string,
-  patch: (el: PageElement) => PageElement
-): PageData =>
-  replaceRow(page, rowId, (row) => ({
-    ...row,
-    columns: row.columns.map((col) =>
-      col.map((el) => (el.id === elementId ? patch(el) : el))
-    ),
-  }));
-
-const newEmptyColumns = (count: number): PageElement[][] =>
-  Array.from({ length: count }, () => []);
-
-const evenWidths = (count: number): number[] =>
-  Array.from({ length: count }, () => 1);
-
-const insertAt = <T,>(arr: T[], item: T, index: number): T[] => [
-  ...arr.slice(0, index),
-  item,
-  ...arr.slice(index),
-];
-
-const move = <T,>(arr: T[], from: number, to: number): T[] => {
-  if (from === to || from < 0 || from >= arr.length) return arr;
-  const next = [...arr];
-  const [item] = next.splice(from, 1);
-  next.splice(to, 0, item);
-  return next;
-};
-
-interface EditorActions {
-  updatePage: (patch: Partial<PageData>, debounceKey?: string) => void;
-  updateRow: (
-    rowId: string,
-    patch: Partial<PageRow>,
-    debounceKey?: string
-  ) => void;
-  setRowColumnsCount: (rowId: string, count: 1 | 2 | 3 | 4) => void;
-  setColumnWidth: (rowId: string, index: number, width: number) => void;
-  updateElement: <T extends PageElement>(
-    rowId: string,
-    elementId: string,
-    patch: Partial<T>,
-    debounceKey?: string
-  ) => void;
-  addRowAt: (index: number) => void;
-  moveRow: (fromIndex: number, toIndex: number) => void;
-  duplicateRow: (rowId: string) => void;
-  deleteRow: (rowId: string) => void;
-  addElement: (
-    rowId: string,
-    columnIndex: number,
-    type: ElementType,
-    insertIndex?: number
-  ) => void;
-  addRowWithElement: (type: ElementType) => void;
-  duplicateElement: (
-    rowId: string,
-    columnIndex: number,
-    elementId: string
-  ) => void;
-  deleteElement: (rowId: string, elementId: string) => void;
-  moveElement: (source: DragSource, target: DropTarget) => void;
-  setSelection: (sel: Selection) => void;
-  setViewport: (v: Viewport) => void;
-  toggleMenu: (open?: boolean) => void;
-  undo: () => void;
-  redo: () => void;
-  resetTo: (page: PageData) => void;
-  setLoadedFile: (file: LoadedFile | null) => void;
+interface ProviderProps {
+  templateId?: string;
+  initialFile?: LoadedFile;
+  children: ReactNode;
 }
 
 interface EditorContextValue extends EditorActions {
@@ -251,423 +38,14 @@ interface EditorHistoryContextValue {
   canRedo: boolean;
 }
 
-const EditorDocumentCtx = createContext<EditorDocumentContextValue | null>(
-  null
-);
-const EditorHistoryCtx = createContext<EditorHistoryContextValue | null>(null);
-const EditorSelectionCtx = createContext<Selection | null | undefined>(
-  undefined
-);
-const EditorViewportCtx = createContext<Viewport | null>(null);
-const EditorMenuCtx = createContext<boolean | null>(null);
-const EditorLoadedFileCtx = createContext<LoadedFile | null | undefined>(
-  undefined
-);
-const EditorActionsCtx = createContext<EditorActions | null>(null);
-
-const useRequiredContext = <T,>(
-  context: Context<T | null>,
-  hookName: string
-): T => {
-  const ctx = useContext(context);
-  if (ctx === null)
-    throw new Error(`${hookName} must be used within EditorProvider`);
-  return ctx;
-};
-
-const useOptionalContext = <T,>(
-  context: Context<T | undefined>,
-  hookName: string
-): T => {
-  const ctx = useContext(context);
-  if (ctx === undefined)
-    throw new Error(`${hookName} must be used within EditorProvider`);
-  return ctx;
-};
-
-interface ProviderProps {
-  templateId?: string;
-  initialFile?: LoadedFile;
-  children: ReactNode;
-}
-
-interface InitialStateSeed {
-  templateId?: string;
-  initialFile?: LoadedFile;
-}
-
-const createInitialState = ({
-  templateId,
-  initialFile,
-}: InitialStateSeed): EditorState => ({
-  history: {
-    past: [],
-    present: initialFile?.page ?? buildPageForTemplate(templateId),
-    future: [],
-  },
-  selection: null,
-  viewport: "desktop",
-  isElementMenuOpen: true,
-  lastCommitKey: null,
-  lastCommitAt: 0,
-});
-
 export const EditorProvider = ({
   templateId,
   initialFile,
   children,
 }: ProviderProps) => {
-  const [loadedFile, setLoadedFileState] = useState<LoadedFile | null>(
-    () => initialFile ?? null
-  );
-
-  const setLoadedFile = useCallback((file: LoadedFile | null) => {
-    setLoadedFileState(file);
-  }, []);
-
-  const [state, dispatch] = useReducer(
-    reducer,
-    { templateId, initialFile },
-    createInitialState
-  );
-
-  const stateRef = useRef(state);
-  useEffect(() => {
-    stateRef.current = state;
-  }, [state]);
-
-  const commit = useCallback(
-    (next: PageData, debounceKey?: string) => {
-      dispatch({ type: "COMMIT", payload: next, debounceKey });
-    },
-    [dispatch]
-  );
-
-  const updatePage = useCallback(
-    (patch: Partial<PageData>, debounceKey?: string) => {
-      const current = stateRef.current.history.present;
-      commit({ ...current, ...patch }, debounceKey);
-    },
-    [commit]
-  );
-
-  const updateRow = useCallback(
-    (rowId: string, patch: Partial<PageRow>, debounceKey?: string) => {
-      const current = stateRef.current.history.present;
-      commit(
-        replaceRow(current, rowId, (r) => ({ ...r, ...patch })),
-        debounceKey
-      );
-    },
-    [commit]
-  );
-
-  const setRowColumnsCount = useCallback(
-    (rowId: string, count: 1 | 2 | 3 | 4) => {
-      const current = stateRef.current.history.present;
-      const next = replaceRow(current, rowId, (row) => {
-        if (row.columnsCount === count) return row;
-        const columns = [...row.columns];
-        if (count > columns.length) {
-          while (columns.length < count) columns.push([]);
-        } else {
-          const overflow = columns.slice(count).flat();
-          columns.length = count;
-          if (overflow.length > 0) {
-            columns[count - 1] = [...columns[count - 1], ...overflow];
-          }
-        }
-        return {
-          ...row,
-          columnsCount: count,
-          columnWidths: evenWidths(count),
-          columns,
-        };
-      });
-      commit(next);
-    },
-    [commit]
-  );
-
-  const setColumnWidth = useCallback(
-    (rowId: string, index: number, width: number) => {
-      const current = stateRef.current.history.present;
-      const next = replaceRow(current, rowId, (row) => {
-        const widths = [...row.columnWidths];
-        widths[index] = Math.max(0.1, width);
-        return { ...row, columnWidths: widths };
-      });
-      commit(next, `col-width-${rowId}-${index}`);
-    },
-    [commit]
-  );
-
-  const updateElement = useCallback(
-    <T extends PageElement>(
-      rowId: string,
-      elementId: string,
-      patch: Partial<T>,
-      debounceKey?: string
-    ) => {
-      const current = stateRef.current.history.present;
-      commit(
-        replaceElement(current, rowId, elementId, (el) => ({
-          ...el,
-          ...patch,
-        })),
-        debounceKey
-      );
-    },
-    [commit]
-  );
-
-  const addRowAt = useCallback(
-    (index: number) => {
-      const current = stateRef.current.history.present;
-      const newRow: PageRow = {
-        id: createId("row"),
-        backgroundColor: "transparent",
-        paddingX: 64,
-        paddingY: 40,
-        marginY: 0,
-        columnsCount: 1,
-        columnWidths: [1],
-        columnGap: 24,
-        columns: newEmptyColumns(1),
-      };
-      commit({ ...current, rows: insertAt(current.rows, newRow, index) });
-      dispatch({ type: "SELECT", payload: { kind: "row", rowId: newRow.id } });
-    },
-    [commit]
-  );
-
-  const moveRow = useCallback(
-    (fromIndex: number, toIndex: number) => {
-      const current = stateRef.current.history.present;
-      commit({ ...current, rows: move(current.rows, fromIndex, toIndex) });
-    },
-    [commit]
-  );
-
-  const duplicateRow = useCallback(
-    (rowId: string) => {
-      const current = stateRef.current.history.present;
-      const index = current.rows.findIndex((r) => r.id === rowId);
-      if (index < 0) return;
-      const dup = cloneRow(current.rows[index]);
-      commit({ ...current, rows: insertAt(current.rows, dup, index + 1) });
-      dispatch({ type: "SELECT", payload: { kind: "row", rowId: dup.id } });
-    },
-    [commit]
-  );
-
-  const deleteRow = useCallback(
-    (rowId: string) => {
-      const current = stateRef.current.history.present;
-      commit({
-        ...current,
-        rows: current.rows.filter((r) => r.id !== rowId),
-      });
-      dispatch({ type: "SELECT", payload: null });
-    },
-    [commit]
-  );
-
-  const addElement = useCallback(
-    (
-      rowId: string,
-      columnIndex: number,
-      type: ElementType,
-      insertIndex?: number
-    ) => {
-      const def = findElementDefinition(type);
-      if (!def) return;
-      const current = stateRef.current.history.present;
-      const newEl = def.create();
-      const next = replaceRow(current, rowId, (row) => {
-        const columns = row.columns.map((col, i) => {
-          if (i !== columnIndex) return col;
-          const at = insertIndex ?? col.length;
-          return insertAt(col, newEl, at);
-        });
-        return { ...row, columns };
-      });
-      commit(next);
-      dispatch({
-        type: "SELECT",
-        payload: {
-          kind: "element",
-          rowId,
-          columnIndex,
-          elementId: newEl.id,
-        },
-      });
-    },
-    [commit]
-  );
-
-  const addRowWithElement = useCallback(
-    (type: ElementType) => {
-      const def = findElementDefinition(type);
-      if (!def) return;
-      const current = stateRef.current.history.present;
-      const newEl = def.create();
-      const newRow: PageRow = {
-        id: createId("row"),
-        backgroundColor: "transparent",
-        paddingX: 64,
-        paddingY: 40,
-        marginY: 0,
-        columnsCount: 1,
-        columnWidths: [1],
-        columnGap: 24,
-        columns: [[newEl]],
-      };
-      commit({ ...current, rows: [...current.rows, newRow] });
-      dispatch({
-        type: "SELECT",
-        payload: {
-          kind: "element",
-          rowId: newRow.id,
-          columnIndex: 0,
-          elementId: newEl.id,
-        },
-      });
-    },
-    [commit]
-  );
-
-  const duplicateElement = useCallback(
-    (rowId: string, columnIndex: number, elementId: string) => {
-      const current = stateRef.current.history.present;
-      const row = current.rows.find((r) => r.id === rowId);
-      if (!row) return;
-      const col = row.columns[columnIndex];
-      if (!col) return;
-      const elIdx = col.findIndex((el) => el.id === elementId);
-      if (elIdx < 0) return;
-      const clone = { ...col[elIdx], id: createId("el") };
-      const next = replaceRow(current, rowId, (r) => ({
-        ...r,
-        columns: r.columns.map((c, i) =>
-          i === columnIndex ? insertAt(c, clone, elIdx + 1) : c
-        ),
-      }));
-      commit(next);
-      dispatch({
-        type: "SELECT",
-        payload: {
-          kind: "element",
-          rowId,
-          columnIndex,
-          elementId: clone.id,
-        },
-      });
-    },
-    [commit]
-  );
-
-  const deleteElement = useCallback(
-    (rowId: string, elementId: string) => {
-      const current = stateRef.current.history.present;
-      const next = replaceRow(current, rowId, (row) => ({
-        ...row,
-        columns: row.columns.map((col) =>
-          col.filter((el) => el.id !== elementId)
-        ),
-      }));
-      commit(next);
-      dispatch({ type: "SELECT", payload: { kind: "row", rowId } });
-    },
-    [commit]
-  );
-
-  const moveElement = useCallback(
-    (source: DragSource, target: DropTarget) => {
-      const current = stateRef.current.history.present;
-      const srcRow = current.rows.find((r) => r.id === source.rowId);
-      if (!srcRow) return;
-      const srcCol = srcRow.columns[source.columnIndex];
-      if (!srcCol) return;
-      const srcElIdx = srcCol.findIndex((el) => el.id === source.elementId);
-      if (srcElIdx < 0) return;
-      const element = srcCol[srcElIdx];
-
-      const isSameColumn =
-        source.rowId === target.rowId &&
-        source.columnIndex === target.columnIndex;
-
-      let adjustedInsert = target.insertIndex;
-      if (isSameColumn && adjustedInsert > srcElIdx) adjustedInsert -= 1;
-      if (isSameColumn && adjustedInsert === srcElIdx) return;
-
-      const nextRows = current.rows.map((row) => {
-        if (row.id !== source.rowId && row.id !== target.rowId) return row;
-        const columns = row.columns.map((col, idx) => {
-          let next = col;
-          if (
-            row.id === source.rowId &&
-            idx === source.columnIndex &&
-            !(isSameColumn && idx === target.columnIndex)
-          ) {
-            next = next.filter((el) => el.id !== source.elementId);
-          }
-          if (
-            row.id === source.rowId &&
-            isSameColumn &&
-            idx === source.columnIndex
-          ) {
-            const without = next.filter((el) => el.id !== source.elementId);
-            return insertAt(without, element, adjustedInsert);
-          }
-          if (
-            row.id === target.rowId &&
-            idx === target.columnIndex &&
-            !isSameColumn
-          ) {
-            return insertAt(next, element, adjustedInsert);
-          }
-          return next;
-        });
-        return { ...row, columns };
-      });
-
-      commit({ ...current, rows: nextRows });
-      dispatch({
-        type: "SELECT",
-        payload: {
-          kind: "element",
-          rowId: target.rowId,
-          columnIndex: target.columnIndex,
-          elementId: element.id,
-        },
-      });
-    },
-    [commit]
-  );
-
-  const setSelection = useCallback(
-    (sel: Selection) => dispatch({ type: "SELECT", payload: sel }),
-    []
-  );
-
-  const setViewport = useCallback(
-    (v: Viewport) => dispatch({ type: "SET_VIEWPORT", payload: v }),
-    []
-  );
-
-  const toggleMenu = useCallback(
-    (open?: boolean) => dispatch({ type: "TOGGLE_MENU", payload: open }),
-    []
-  );
-
-  const undo = useCallback(() => dispatch({ type: "UNDO" }), []);
-  const redo = useCallback(() => dispatch({ type: "REDO" }), []);
-
-  const resetTo = useCallback(
-    (page: PageData) => dispatch({ type: "RESET", payload: page }),
-    []
-  );
+  useLayoutEffect(() => {
+    initializeEditorStore({ templateId, initialFile });
+  }, [templateId, initialFile]);
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
@@ -681,149 +59,55 @@ export const EditorProvider = ({
       const meta = e.metaKey || e.ctrlKey;
       if (!meta) return;
       const key = e.key.toLowerCase();
+      const { undo, redo } = useEditorStore.getState().actions;
+
       if (key === "z" && !e.shiftKey) {
         e.preventDefault();
-        dispatch({ type: "UNDO" });
+        undo();
       } else if ((key === "z" && e.shiftKey) || key === "y") {
         e.preventDefault();
-        dispatch({ type: "REDO" });
+        redo();
       }
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
   }, []);
 
-  const documentValue = useMemo<EditorDocumentContextValue>(
-    () => ({
-      page: state.history.present,
-    }),
-    [state.history.present]
-  );
-
-  const historyValue = useMemo<EditorHistoryContextValue>(
-    () => ({
-      canUndo: state.history.past.length > 0,
-      canRedo: state.history.future.length > 0,
-    }),
-    [state.history.past.length, state.history.future.length]
-  );
-
-  const actionsValue = useMemo<EditorActions>(
-    () => ({
-      updatePage,
-      updateRow,
-      setRowColumnsCount,
-      setColumnWidth,
-      updateElement,
-      addRowAt,
-      moveRow,
-      duplicateRow,
-      deleteRow,
-      addElement,
-      addRowWithElement,
-      duplicateElement,
-      deleteElement,
-      moveElement,
-      setSelection,
-      setViewport,
-      toggleMenu,
-      undo,
-      redo,
-      resetTo,
-      setLoadedFile,
-    }),
-    [
-      updatePage,
-      updateRow,
-      setRowColumnsCount,
-      setColumnWidth,
-      updateElement,
-      addRowAt,
-      moveRow,
-      duplicateRow,
-      deleteRow,
-      addElement,
-      addRowWithElement,
-      duplicateElement,
-      deleteElement,
-      moveElement,
-      setSelection,
-      setViewport,
-      toggleMenu,
-      undo,
-      redo,
-      resetTo,
-      setLoadedFile,
-    ]
-  );
-
-  return (
-    <EditorDocumentCtx.Provider value={documentValue}>
-      <EditorHistoryCtx.Provider value={historyValue}>
-        <EditorSelectionCtx.Provider value={state.selection}>
-          <EditorViewportCtx.Provider value={state.viewport}>
-            <EditorMenuCtx.Provider value={state.isElementMenuOpen}>
-              <EditorLoadedFileCtx.Provider value={loadedFile}>
-                <EditorActionsCtx.Provider value={actionsValue}>
-                  {children}
-                </EditorActionsCtx.Provider>
-              </EditorLoadedFileCtx.Provider>
-            </EditorMenuCtx.Provider>
-          </EditorViewportCtx.Provider>
-        </EditorSelectionCtx.Provider>
-      </EditorHistoryCtx.Provider>
-    </EditorDocumentCtx.Provider>
-  );
+  return children;
 };
 
-export const useEditor = (): EditorContextValue => {
-  const documentValue = useEditorDocument();
-  const historyValue = useEditorHistoryState();
-  const selection = useEditorSelection();
-  const viewport = useEditorViewport();
-  const isElementMenuOpen = useEditorMenuState();
-  const loadedFile = useEditorLoadedFile();
-  const actions = useEditorActions();
-
-  return useMemo(
-    () => ({
-      ...documentValue,
-      ...historyValue,
-      selection,
-      viewport,
-      isElementMenuOpen,
-      loadedFile,
-      ...actions,
-    }),
-    [
-      documentValue,
-      historyValue,
-      selection,
-      viewport,
-      isElementMenuOpen,
-      loadedFile,
-      actions,
-    ]
-  );
-};
+export const useEditor = (): EditorContextValue => ({
+  ...useEditorDocument(),
+  ...useEditorHistoryState(),
+  selection: useEditorSelection(),
+  viewport: useEditorViewport(),
+  isElementMenuOpen: useEditorMenuState(),
+  loadedFile: useEditorLoadedFile(),
+  ...useEditorActions(),
+});
 
 export const useEditorDocument = (): EditorDocumentContextValue =>
-  useRequiredContext(EditorDocumentCtx, "useEditorDocument");
+  useEditorStore(useShallow((state) => ({ page: state.history.present })));
 
 export const useEditorHistoryState = (): EditorHistoryContextValue =>
-  useRequiredContext(EditorHistoryCtx, "useEditorHistoryState");
+  useEditorStore(
+    useShallow((state) => ({
+      canUndo: state.history.past.length > 0,
+      canRedo: state.history.future.length > 0,
+    }))
+  );
 
 export const useEditorSelection = (): Selection =>
-  useOptionalContext(EditorSelectionCtx, "useEditorSelection");
+  useEditorStore((state) => state.selection);
 
 export const useEditorViewport = (): Viewport =>
-  useRequiredContext(EditorViewportCtx, "useEditorViewport");
+  useEditorStore((state) => state.viewport);
 
 export const useEditorMenuState = (): boolean =>
-  useRequiredContext(EditorMenuCtx, "useEditorMenuState");
+  useEditorStore((state) => state.isElementMenuOpen);
 
 export const useEditorLoadedFile = (): LoadedFile | null =>
-  useOptionalContext(EditorLoadedFileCtx, "useEditorLoadedFile");
+  useEditorStore((state) => state.loadedFile);
 
 export const useEditorActions = (): EditorActions =>
-  useRequiredContext(EditorActionsCtx, "useEditorActions");
+  useEditorStore((state) => state.actions);
