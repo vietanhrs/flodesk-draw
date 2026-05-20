@@ -1,6 +1,6 @@
 import { screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import { ALL_CATEGORY_ID, categories } from "@src/data/categories";
 import { MobileHeader } from "@src/pages/Templates/components/MobileHeader";
@@ -9,10 +9,14 @@ import { renderAtPath } from "./test-utils";
 
 const renderMobile = (
   activeCategoryId: string = ALL_CATEGORY_ID,
-  initialPath: string = "/templates"
+  initialPath: string = "/templates",
+  onOpenFromFile: () => Promise<void> = vi.fn()
 ) =>
   renderAtPath(
-    <MobileHeader activeCategoryId={activeCategoryId} />,
+    <MobileHeader
+      activeCategoryId={activeCategoryId}
+      onOpenFromFile={onOpenFromFile}
+    />,
     "/templates",
     initialPath
   );
@@ -64,6 +68,9 @@ describe("MobileHeader", () => {
     expect(
       screen.getByRole("option", { name: /start from scratch/i })
     ).toBeInTheDocument();
+    expect(
+      screen.getByRole("option", { name: /open from file/i })
+    ).toBeInTheDocument();
   });
 
   it("navigates to /templates when Browse all is picked", async () => {
@@ -95,5 +102,15 @@ describe("MobileHeader", () => {
     await waitFor(() =>
       expect(screen.getByTestId("location")).toHaveTextContent(/^\/editor$/)
     );
+  });
+
+  it("invokes the file-open handler when Open from file is picked", async () => {
+    const onOpenFromFile = vi.fn().mockResolvedValue(undefined);
+    renderMobile(ALL_CATEGORY_ID, "/templates", onOpenFromFile);
+    const user = await openSelect();
+
+    await user.click(screen.getByRole("option", { name: /open from file/i }));
+
+    await waitFor(() => expect(onOpenFromFile).toHaveBeenCalledTimes(1));
   });
 });

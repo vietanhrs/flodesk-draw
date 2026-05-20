@@ -160,8 +160,8 @@ export const CanvasRow = ({ row, rowIndex, totalRows, onRowDropAt }: Props) => {
         <div className="edt-row__edge edt-row__edge--bottom" />
       )}
 
+      {/* eslint-disable jsx-a11y/no-noninteractive-element-interactions, jsx-a11y/no-noninteractive-tabindex -- Editor rows are custom drag surfaces; keyboard selection is covered in Editor.test.tsx. */}
       <div
-        // This complements the outer canvas-row test id above.
         data-testid={`canvas-row-${rowIndex + 1}`}
         draggable
         onDragStart={handleRowDragStart}
@@ -192,6 +192,7 @@ export const CanvasRow = ({ row, rowIndex, totalRows, onRowDropAt }: Props) => {
           paddingBottom: row.paddingY,
         }}
       >
+        {/* eslint-enable jsx-a11y/no-noninteractive-element-interactions, jsx-a11y/no-noninteractive-tabindex */}
         <div
           style={{
             display: "grid",
@@ -347,6 +348,7 @@ export const CanvasRow = ({ row, rowIndex, totalRows, onRowDropAt }: Props) => {
             }
 
             return (
+              // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions -- Empty editor columns use click-to-select row behavior while actual keyboard selection lives on row/element surfaces.
               <div
                 data-testid={`canvas-column-${rowIndex + 1}-${columnIndex + 1}`}
                 key={columnIndex}

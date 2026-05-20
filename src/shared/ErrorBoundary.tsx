@@ -27,7 +27,7 @@ export class ErrorBoundary extends Component<
     console.error("[ErrorBoundary] Caught error:", error, errorInfo);
   }
 
-  handleRefresh = (e?: React.MouseEvent) => {
+  handleRefresh = (e?: React.MouseEvent<HTMLElement>) => {
     e?.preventDefault();
     this.setState({ hasError: false, error: null });
   };
@@ -48,9 +48,13 @@ export class ErrorBoundary extends Component<
               It looks like something went wrong on our side.
               <br />
               Please{" "}
-              <a href="#" onClick={this.handleRefresh}>
+              <button
+                type="button"
+                onClick={this.handleRefresh}
+                className="eb-link-button"
+              >
                 refresh
-              </a>{" "}
+              </button>{" "}
               the page or <a href="/">go back and try again</a>.
             </p>
 

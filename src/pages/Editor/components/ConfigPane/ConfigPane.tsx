@@ -2,10 +2,12 @@ import { useMemo, useState } from "react";
 
 import { Box, Flex, Tab, TabGroup, Text } from "@flodesk/grain";
 
+import type { PageElement } from "@src/pages/Editor/elements";
 import {
   useEditorDocument,
   useEditorSelection,
 } from "@src/pages/Editor/state/EditorContext";
+import type { PageRow, Selection } from "@src/pages/Editor/state/types";
 
 import { ElementTab } from "./ElementTab";
 import { LayoutTab } from "./LayoutTab";
@@ -13,53 +15,23 @@ import { PageTab } from "./PageTab";
 
 type TabKey = "page" | "layout" | "element";
 
-export const ConfigPane = () => {
-  const { page } = useEditorDocument();
-  const selection = useEditorSelection();
+interface ConfigPaneContentProps {
+  defaultTab: TabKey;
+  selectedRow: PageRow | null;
+  selectedElement: PageElement | null;
+  selection: Selection;
+}
 
-  const selectedRow = useMemo(() => {
-    if (!selection) return null;
-    return page.rows.find((r) => r.id === selection.rowId) ?? null;
-  }, [page.rows, selection]);
-
-  const selectedElement = useMemo(() => {
-    if (!selection || selection.kind !== "element" || !selectedRow) return null;
-    return (
-      selectedRow.columns[selection.columnIndex]?.find(
-        (el) => el.id === selection.elementId
-      ) ?? null
-    );
-  }, [selectedRow, selection]);
-
-  const defaultTab: TabKey =
-    selection?.kind === "element"
-      ? "element"
-      : selection?.kind === "row"
-        ? "layout"
-        : "page";
-
+const ConfigPaneContent = ({
+  defaultTab,
+  selectedRow,
+  selectedElement,
+  selection,
+}: ConfigPaneContentProps) => {
   const [tab, setTab] = useState<TabKey>(defaultTab);
-  const [prevDefault, setPrevDefault] = useState<TabKey>(defaultTab);
-  if (prevDefault !== defaultTab) {
-    setPrevDefault(defaultTab);
-    setTab(defaultTab);
-  }
 
   return (
-    <Flex
-      tag="aside"
-      aria-label="Configuration"
-      direction="column"
-      wrap="nowrap"
-      alignItems="stretch"
-      flex="0 0 auto"
-      width="320px"
-      minHeight={0}
-      backgroundColor="background2"
-      borderColor="border"
-      borderWidth="1px"
-      borderSide="left"
-    >
+    <>
       <Box
         paddingX="s2"
         paddingTop="s2"
@@ -105,6 +77,62 @@ export const ConfigPane = () => {
             </Text>
           ))}
       </Box>
+    </>
+  );
+};
+
+export const ConfigPane = () => {
+  const { page } = useEditorDocument();
+  const selection = useEditorSelection();
+  const selectionKey = selection
+    ? selection.kind === "element"
+      ? `${selection.kind}:${selection.rowId}:${selection.columnIndex}:${selection.elementId}`
+      : `${selection.kind}:${selection.rowId}`
+    : "none";
+
+  const selectedRow = useMemo(() => {
+    if (!selection) return null;
+    return page.rows.find((r) => r.id === selection.rowId) ?? null;
+  }, [page.rows, selection]);
+
+  const selectedElement = useMemo(() => {
+    if (!selection || selection.kind !== "element" || !selectedRow) return null;
+    return (
+      selectedRow.columns[selection.columnIndex]?.find(
+        (el) => el.id === selection.elementId
+      ) ?? null
+    );
+  }, [selectedRow, selection]);
+
+  const defaultTab: TabKey =
+    selection?.kind === "element"
+      ? "element"
+      : selection?.kind === "row"
+        ? "layout"
+        : "page";
+
+  return (
+    <Flex
+      tag="aside"
+      aria-label="Configuration"
+      direction="column"
+      wrap="nowrap"
+      alignItems="stretch"
+      flex="0 0 auto"
+      width="320px"
+      minHeight={0}
+      backgroundColor="background2"
+      borderColor="border"
+      borderWidth="1px"
+      borderSide="left"
+    >
+      <ConfigPaneContent
+        key={selectionKey}
+        defaultTab={defaultTab}
+        selectedRow={selectedRow}
+        selectedElement={selectedElement}
+        selection={selection}
+      />
     </Flex>
   );
 };

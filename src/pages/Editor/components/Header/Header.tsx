@@ -15,7 +15,7 @@ import {
 
 import {
   useEditorActions,
-  useEditorDocument,
+  useEditorHistoryState,
   useEditorLoadedFile,
   useEditorViewport,
 } from "@src/pages/Editor/state/EditorContext";
@@ -28,7 +28,7 @@ interface Props {
 }
 
 export const Header = ({ onBuild, isBuilding, onSave }: Props) => {
-  const { canUndo, canRedo } = useEditorDocument();
+  const { canUndo, canRedo } = useEditorHistoryState();
   const viewport = useEditorViewport();
   const loadedFile = useEditorLoadedFile();
   const { undo, redo, setViewport } = useEditorActions();
