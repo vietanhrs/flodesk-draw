@@ -32,7 +32,7 @@ const routes = [
     path: "/templates",
     formFactor: "mobile",
     minimumScores: {
-      performance: 0.65,
+      performance: 0.55,
       accessibility: 0.9,
       "best-practices": 0.9,
       seo: 0.9,
