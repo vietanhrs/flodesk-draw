@@ -6,7 +6,7 @@ export const createButton = (): ButtonElement => ({
   id: createId("el"),
   type: "button",
   label: "Learn more",
-  href: "#",
+  href: "",
   backgroundColor: "#1f1f1f",
   textColor: "#ffffff",
   paddingX: 32,

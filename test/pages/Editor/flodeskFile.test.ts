@@ -128,6 +128,31 @@ describe("flodeskFile", () => {
     );
   });
 
+  it("rejects relative and protocol-relative URLs in loaded drafts", () => {
+    const relativeLinkPage = pageWithElement({
+      ...createButton(),
+      href: "/foo",
+    });
+    const protocolRelativeImagePage = pageWithElement({
+      ...createImage(),
+      src: "//cdn.example/foo.jpg",
+    });
+    const schemeRelativeVideoPage = pageWithElement({
+      ...createVideo(),
+      url: "https:foo",
+    });
+
+    expect(() => parseFlodeskFile(draftWith(relativeLinkPage))).toThrow(
+      /href must be an http, https, mailto, or tel URL/
+    );
+    expect(() =>
+      parseFlodeskFile(draftWith(protocolRelativeImagePage))
+    ).toThrow(/src must be an http or https image URL/);
+    expect(() => parseFlodeskFile(draftWith(schemeRelativeVideoPage))).toThrow(
+      /url must be an https video URL/
+    );
+  });
+
   it("rejects values outside the editor's parser bounds", () => {
     const page = createEmptyPage();
     page.paddingX = 999;

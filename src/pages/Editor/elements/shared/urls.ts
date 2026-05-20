@@ -1,5 +1,3 @@
-const URL_BASE = "https://flodesk.local";
-
 const hasControlChar = (value: string): boolean => {
   for (let i = 0; i < value.length; i += 1) {
     const code = value.charCodeAt(i);
@@ -8,32 +6,49 @@ const hasControlChar = (value: string): boolean => {
   return false;
 };
 
+const hasExplicitScheme = (value: string): boolean =>
+  /^[a-z][a-z0-9+.-]*:/i.test(value);
+
 const parseUrl = (value: string): URL | null => {
   const trimmed = value.trim();
-  if (!trimmed || hasControlChar(trimmed)) return null;
+  if (!trimmed || hasControlChar(trimmed) || !hasExplicitScheme(trimmed)) {
+    return null;
+  }
   try {
-    return new URL(trimmed, URL_BASE);
+    return new URL(trimmed);
   } catch {
     return null;
   }
 };
 
-const hasAllowedProtocol = (
+const hasAbsoluteNetworkUrl = (
   value: string,
   allowedProtocols: readonly string[]
 ): boolean => {
+  const trimmed = value.trim();
+  if (!/^https?:\/\//i.test(trimmed)) return false;
   const url = parseUrl(value);
-  return url !== null && allowedProtocols.includes(url.protocol);
+  return (
+    url !== null &&
+    allowedProtocols.includes(url.protocol) &&
+    url.hostname.length > 0
+  );
 };
 
 export const isSafeLinkUrl = (value: string): boolean =>
-  hasAllowedProtocol(value, ["http:", "https:", "mailto:", "tel:"]);
+  hasAbsoluteNetworkUrl(value, ["http:", "https:"]) ||
+  (() => {
+    const url = parseUrl(value);
+    return (
+      url !== null && (url.protocol === "mailto:" || url.protocol === "tel:")
+    );
+  })();
 
 export const isSafeImageUrl = (value: string): boolean =>
-  hasAllowedProtocol(value, ["http:", "https:"]);
+  hasAbsoluteNetworkUrl(value, ["http:", "https:"]);
 
 export const isSafeVideoUrl = (value: string): boolean =>
-  hasAllowedProtocol(value, ["https:"]);
+  hasAbsoluteNetworkUrl(value, ["https:"]);
 
 export const safeLinkUrl = (value: string): string =>
   isSafeLinkUrl(value) ? value.trim() : "#";

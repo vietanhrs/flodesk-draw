@@ -334,4 +334,61 @@ describe("buildHtml", () => {
     expect(html).toContain('<iframe src="about:blank"');
     expect(html).toContain('href="#" aria-label="Website"');
   });
+
+  it("replaces relative and protocol-relative exported URLs with inert fallbacks", () => {
+    const html = buildHtml(
+      basePage([
+        {
+          id: "r",
+          backgroundColor: "transparent",
+          paddingX: 0,
+          paddingY: 0,
+          marginY: 0,
+          columnsCount: 1,
+          columnWidths: [1],
+          columnGap: 0,
+          columns: [
+            [
+              {
+                id: "b",
+                type: "button",
+                label: "Relative",
+                href: "/foo",
+                backgroundColor: "#000",
+                textColor: "#fff",
+                paddingX: 16,
+                paddingY: 8,
+                radius: 0,
+                fontSize: 14,
+                align: "left",
+                letterSpacing: 0,
+              },
+              {
+                id: "i",
+                type: "image",
+                src: "//cdn.example/foo.jpg",
+                alt: "Protocol relative",
+                widthPct: 100,
+                align: "left",
+                radius: 0,
+              },
+              {
+                id: "v",
+                type: "video",
+                url: "https:foo",
+                widthPct: 100,
+              },
+            ],
+          ],
+        },
+      ])
+    );
+
+    expect(html).not.toContain("/foo");
+    expect(html).not.toContain("//cdn.example/foo.jpg");
+    expect(html).not.toContain("https:foo");
+    expect(html).toMatch(/<a href="#" style="[^"]*">Relative<\/a>/);
+    expect(html).toContain('<img src="" alt="Protocol relative"');
+    expect(html).toContain('<iframe src="about:blank"');
+  });
 });
