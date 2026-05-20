@@ -1,6 +1,8 @@
 /* eslint-disable react-refresh/only-export-components */
 import {
+  type Context,
   createContext,
+  type ReactNode,
   useCallback,
   useContext,
   useEffect,
@@ -222,12 +224,49 @@ interface EditorContextValue extends EditorActions {
   loadedFile: LoadedFile | null;
 }
 
-const EditorCtx = createContext<EditorContextValue | null>(null);
+interface EditorDocumentContextValue {
+  page: PageData;
+  canUndo: boolean;
+  canRedo: boolean;
+}
+
+const EditorDocumentCtx = createContext<EditorDocumentContextValue | null>(
+  null
+);
+const EditorSelectionCtx = createContext<Selection | null | undefined>(
+  undefined
+);
+const EditorViewportCtx = createContext<Viewport | null>(null);
+const EditorMenuCtx = createContext<boolean | null>(null);
+const EditorLoadedFileCtx = createContext<LoadedFile | null | undefined>(
+  undefined
+);
+const EditorActionsCtx = createContext<EditorActions | null>(null);
+
+const useRequiredContext = <T,>(
+  context: Context<T | null>,
+  hookName: string
+): T => {
+  const ctx = useContext(context);
+  if (ctx === null)
+    throw new Error(`${hookName} must be used within EditorProvider`);
+  return ctx;
+};
+
+const useOptionalContext = <T,>(
+  context: Context<T | undefined>,
+  hookName: string
+): T => {
+  const ctx = useContext(context);
+  if (ctx === undefined)
+    throw new Error(`${hookName} must be used within EditorProvider`);
+  return ctx;
+};
 
 interface ProviderProps {
   templateId?: string;
   initialFile?: LoadedFile;
-  children: React.ReactNode;
+  children: ReactNode;
 }
 
 export const EditorProvider = ({
@@ -625,15 +664,21 @@ export const EditorProvider = ({
     return () => window.removeEventListener("keydown", handler);
   }, []);
 
-  const value = useMemo<EditorContextValue>(
+  const documentValue = useMemo<EditorDocumentContextValue>(
     () => ({
       page: state.history.present,
       canUndo: state.history.past.length > 0,
       canRedo: state.history.future.length > 0,
-      selection: state.selection,
-      viewport: state.viewport,
-      isElementMenuOpen: state.isElementMenuOpen,
-      loadedFile,
+    }),
+    [
+      state.history.present,
+      state.history.past.length,
+      state.history.future.length,
+    ]
+  );
+
+  const actionsValue = useMemo<EditorActions>(
+    () => ({
       updatePage,
       updateRow,
       setRowColumnsCount,
@@ -657,13 +702,6 @@ export const EditorProvider = ({
       setLoadedFile,
     }),
     [
-      state.history.present,
-      state.history.past.length,
-      state.history.future.length,
-      state.selection,
-      state.viewport,
-      state.isElementMenuOpen,
-      loadedFile,
       updatePage,
       updateRow,
       setRowColumnsCount,
@@ -688,11 +726,58 @@ export const EditorProvider = ({
     ]
   );
 
-  return <EditorCtx.Provider value={value}>{children}</EditorCtx.Provider>;
+  return (
+    <EditorDocumentCtx.Provider value={documentValue}>
+      <EditorSelectionCtx.Provider value={state.selection}>
+        <EditorViewportCtx.Provider value={state.viewport}>
+          <EditorMenuCtx.Provider value={state.isElementMenuOpen}>
+            <EditorLoadedFileCtx.Provider value={loadedFile}>
+              <EditorActionsCtx.Provider value={actionsValue}>
+                {children}
+              </EditorActionsCtx.Provider>
+            </EditorLoadedFileCtx.Provider>
+          </EditorMenuCtx.Provider>
+        </EditorViewportCtx.Provider>
+      </EditorSelectionCtx.Provider>
+    </EditorDocumentCtx.Provider>
+  );
 };
 
 export const useEditor = (): EditorContextValue => {
-  const ctx = useContext(EditorCtx);
-  if (!ctx) throw new Error("useEditor must be used within EditorProvider");
-  return ctx;
+  const documentValue = useEditorDocument();
+  const selection = useEditorSelection();
+  const viewport = useEditorViewport();
+  const isElementMenuOpen = useEditorMenuState();
+  const loadedFile = useEditorLoadedFile();
+  const actions = useEditorActions();
+
+  return useMemo(
+    () => ({
+      ...documentValue,
+      selection,
+      viewport,
+      isElementMenuOpen,
+      loadedFile,
+      ...actions,
+    }),
+    [documentValue, selection, viewport, isElementMenuOpen, loadedFile, actions]
+  );
 };
+
+export const useEditorDocument = (): EditorDocumentContextValue =>
+  useRequiredContext(EditorDocumentCtx, "useEditorDocument");
+
+export const useEditorSelection = (): Selection =>
+  useOptionalContext(EditorSelectionCtx, "useEditorSelection");
+
+export const useEditorViewport = (): Viewport =>
+  useRequiredContext(EditorViewportCtx, "useEditorViewport");
+
+export const useEditorMenuState = (): boolean =>
+  useRequiredContext(EditorMenuCtx, "useEditorMenuState");
+
+export const useEditorLoadedFile = (): LoadedFile | null =>
+  useOptionalContext(EditorLoadedFileCtx, "useEditorLoadedFile");
+
+export const useEditorActions = (): EditorActions =>
+  useRequiredContext(EditorActionsCtx, "useEditorActions");

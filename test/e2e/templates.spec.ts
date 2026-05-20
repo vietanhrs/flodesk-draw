@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./fixtures";
 
 test.describe("Template gallery", () => {
   test("redirects home to the template gallery", async ({ page }) => {

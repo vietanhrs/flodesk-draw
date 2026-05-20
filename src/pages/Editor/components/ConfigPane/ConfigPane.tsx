@@ -2,7 +2,10 @@ import { useMemo, useState } from "react";
 
 import { Box, Flex, Tab, TabGroup, Text } from "@flodesk/grain";
 
-import { useEditor } from "@src/pages/Editor/state/EditorContext";
+import {
+  useEditorDocument,
+  useEditorSelection,
+} from "@src/pages/Editor/state/EditorContext";
 
 import { ElementTab } from "./ElementTab";
 import { LayoutTab } from "./LayoutTab";
@@ -11,7 +14,8 @@ import { PageTab } from "./PageTab";
 type TabKey = "page" | "layout" | "element";
 
 export const ConfigPane = () => {
-  const { page, selection } = useEditor();
+  const { page } = useEditorDocument();
+  const selection = useEditorSelection();
 
   const selectedRow = useMemo(() => {
     if (!selection) return null;

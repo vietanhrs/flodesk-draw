@@ -13,7 +13,12 @@ import {
   TextButton,
 } from "@flodesk/grain";
 
-import { useEditor } from "@src/pages/Editor/state/EditorContext";
+import {
+  useEditorActions,
+  useEditorDocument,
+  useEditorLoadedFile,
+  useEditorViewport,
+} from "@src/pages/Editor/state/EditorContext";
 import { FlodeskLogo } from "@src/shared";
 
 interface Props {
@@ -23,8 +28,10 @@ interface Props {
 }
 
 export const Header = ({ onBuild, isBuilding, onSave }: Props) => {
-  const { canUndo, canRedo, undo, redo, viewport, setViewport, loadedFile } =
-    useEditor();
+  const { canUndo, canRedo } = useEditorDocument();
+  const viewport = useEditorViewport();
+  const loadedFile = useEditorLoadedFile();
+  const { undo, redo, setViewport } = useEditorActions();
   const savesToOpenedFile = !loadedFile || Boolean(loadedFile.handle);
   const saveLabel = savesToOpenedFile ? "Save" : "Download copy";
 

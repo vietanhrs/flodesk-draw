@@ -1,5 +1,4 @@
-import { expect, test } from "@playwright/test";
-
+import { expect, test } from "./fixtures";
 import { canvas, gotoEditor } from "./helpers/editor";
 
 test.describe("Editor basics", () => {

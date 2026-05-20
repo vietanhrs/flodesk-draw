@@ -14,7 +14,10 @@ import {
 } from "@flodesk/grain";
 
 import { useDrag } from "@src/pages/Editor/state/DragContext";
-import { useEditor } from "@src/pages/Editor/state/EditorContext";
+import {
+  useEditorActions,
+  useEditorMenuState,
+} from "@src/pages/Editor/state/EditorContext";
 import {
   elementCategories,
   elementDefinitions,
@@ -128,7 +131,8 @@ const ElementSearch = ({
 };
 
 export const ElementMenu = () => {
-  const { isElementMenuOpen, toggleMenu } = useEditor();
+  const isElementMenuOpen = useEditorMenuState();
+  const { toggleMenu } = useEditorActions();
   const [search, setSearch] = useState("");
   const [categoryId, setCategoryId] = useState<string>(elementCategories[0].id);
 
