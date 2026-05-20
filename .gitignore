@@ -11,6 +11,7 @@ node_modules
 dist
 dist-ssr
 coverage
+.lighthouse
 playwright-report
 test-results
 *.local

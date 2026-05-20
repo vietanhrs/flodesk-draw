@@ -5,10 +5,7 @@ export const fontFamilyOptions = [
 ];
 
 export const weightOptions = [
-  { value: 300, label: "300" },
   { value: 400, label: "400" },
   { value: 500, label: "500" },
   { value: 600, label: "600" },
-  { value: 700, label: "700" },
-  { value: 900, label: "900" },
 ];

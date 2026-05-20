@@ -15,6 +15,10 @@
   min-width: 0;
 }
 
+.tpl-page .c-content2 {
+  color: var(--fd-color-readable-muted) !important;
+}
+
 .tpl-section__empty {
   margin-top: 40px;
 }
@@ -85,7 +89,7 @@
   font-size: 14px;
   text-decoration: none;
   font-weight: 400;
-  color: var(--grn-color-content2);
+  color: var(--fd-color-readable-muted);
   transition: color 120ms ease;
 }
 
@@ -128,6 +132,8 @@
 
 .tpl-card {
   width: 100%;
+  content-visibility: auto;
+  contain-intrinsic-size: 360px 520px;
 }
 
 @media (min-width: 1280px) {

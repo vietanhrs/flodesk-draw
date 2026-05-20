@@ -14,6 +14,24 @@ import {
   renderEditor,
 } from "./test-utils";
 
+const originalMatchMedia = window.matchMedia;
+
+const setEditorChromeMedia = (matches: boolean) => {
+  Object.defineProperty(window, "matchMedia", {
+    writable: true,
+    value: vi.fn().mockImplementation((query: string) => ({
+      matches: query === "(max-width: 767px)" ? matches : false,
+      media: query,
+      onchange: null,
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+      addListener: vi.fn(),
+      removeListener: vi.fn(),
+      dispatchEvent: vi.fn(),
+    })),
+  });
+};
+
 beforeEach(() => {
   // Defensive: tests no longer depend on localStorage (page state lives in
   // memory + `.flodesk` files now), but clearing keeps any unrelated test
@@ -23,6 +41,10 @@ beforeEach(() => {
 
 afterEach(() => {
   vi.restoreAllMocks();
+  Object.defineProperty(window, "matchMedia", {
+    writable: true,
+    value: originalMatchMedia,
+  });
 });
 
 /**
@@ -1023,6 +1045,30 @@ describe("Editor — undo / redo", () => {
 });
 
 describe("Editor — viewport", () => {
+  it("uses compact canvas-only chrome on mobile screens", () => {
+    setEditorChromeMedia(true);
+
+    renderEditor("bold-sale-announcement");
+
+    expect(screen.getByTestId("editor-canvas")).toBeInTheDocument();
+    expect(screen.queryByLabelText("Element menu")).not.toBeInTheDocument();
+    expect(screen.queryByLabelText("Configuration")).not.toBeInTheDocument();
+    expect(
+      screen.getByText(
+        "Please switch to desktop to be able to add elements & configure the page"
+      )
+    ).toBeInTheDocument();
+    expect(screen.queryByRole("toolbar", { name: "History" })).toBeNull();
+    expect(screen.getByRole("button", { name: "Save" })).toBeInTheDocument();
+    expect(
+      screen.getByRole("radio", { name: "Desktop view" })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("radio", { name: "Mobile view" })
+    ).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Export" })).toBeInTheDocument();
+  });
+
   it("toggles the canvas paper max-width between desktop and mobile", async () => {
     const user = userEvent.setup();
     const { container } = renderEditor("bold-sale-announcement");
