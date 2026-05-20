@@ -2,7 +2,11 @@ import { useCallback } from "react";
 
 import { Box, Flex } from "@flodesk/grain";
 
-import { useEditor } from "@src/pages/Editor/state/EditorContext";
+import {
+  useEditorActions,
+  useEditorDocument,
+  useEditorViewport,
+} from "@src/pages/Editor/state/EditorContext";
 import {
   dragHasNewElement,
   readNewElementDrag,
@@ -16,8 +20,10 @@ const VIEWPORT_WIDTH: Record<"desktop" | "mobile", number> = {
 };
 
 export const Canvas = () => {
-  const { page, viewport, setSelection, moveRow, addRowAt, addRowWithElement } =
-    useEditor();
+  const { page } = useEditorDocument();
+  const viewport = useEditorViewport();
+  const { setSelection, moveRow, addRowAt, addRowWithElement } =
+    useEditorActions();
 
   const handleRowDropAt = useCallback(
     (fromRowId: string, placeAfter: boolean, targetRowId: string) => {

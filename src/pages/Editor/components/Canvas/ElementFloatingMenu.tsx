@@ -5,7 +5,7 @@ import {
   IconTrash,
 } from "@flodesk/grain";
 
-import { useEditor } from "@src/pages/Editor/state/EditorContext";
+import { useEditorActions } from "@src/pages/Editor/state/EditorContext";
 
 import { FloatingMenu } from "./FloatingMenu";
 
@@ -24,7 +24,7 @@ export const ElementFloatingMenu = ({
   elementIndex,
   columnLength,
 }: Props) => {
-  const { moveElement, duplicateElement, deleteElement } = useEditor();
+  const { moveElement, duplicateElement, deleteElement } = useEditorActions();
   const source = { rowId, columnIndex, elementId };
 
   return (

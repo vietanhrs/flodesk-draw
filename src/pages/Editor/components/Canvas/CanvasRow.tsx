@@ -1,7 +1,10 @@
 import { useMemo, useState } from "react";
 
 import { useDrag } from "@src/pages/Editor/state/DragContext";
-import { useEditor } from "@src/pages/Editor/state/EditorContext";
+import {
+  useEditorActions,
+  useEditorSelection,
+} from "@src/pages/Editor/state/EditorContext";
 import type { PageRow } from "@src/pages/Editor/state/types";
 import {
   dragHasAnyElement,
@@ -38,14 +41,9 @@ const computeInsertIndex = (column: HTMLElement, clientY: number): number => {
 };
 
 export const CanvasRow = ({ row, rowIndex, totalRows, onRowDropAt }: Props) => {
-  const {
-    selection,
-    setSelection,
-    addRowAt,
-    addElement,
-    deleteElement,
-    moveElement,
-  } = useEditor();
+  const selection = useEditorSelection();
+  const { setSelection, addRowAt, addElement, deleteElement, moveElement } =
+    useEditorActions();
   const { dragKind, source, dropTarget, beginDrag, endDrag, setDropTarget } =
     useDrag();
 

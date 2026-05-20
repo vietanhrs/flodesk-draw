@@ -1,6 +1,6 @@
 import { Stack, Text } from "@flodesk/grain";
 
-import { useEditor } from "@src/pages/Editor/state/EditorContext";
+import { useEditorActions } from "@src/pages/Editor/state/EditorContext";
 import type { PageRow } from "@src/pages/Editor/state/types";
 
 import { ColorInput } from "./controls/ColorInput";
@@ -12,7 +12,7 @@ interface Props {
 }
 
 export const LayoutTab = ({ row }: Props) => {
-  const { updateRow, setRowColumnsCount, setColumnWidth } = useEditor();
+  const { updateRow, setRowColumnsCount, setColumnWidth } = useEditorActions();
 
   return (
     <Stack gap="20px">

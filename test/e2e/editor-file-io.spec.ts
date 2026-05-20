@@ -1,6 +1,6 @@
-import { expect, test } from "@playwright/test";
 import fs from "node:fs";
 
+import { expect, test } from "./fixtures";
 import { canvasElement } from "./helpers/editor";
 
 // A minimal valid Flodesk draft: version 1 with a one-row, one-element page.

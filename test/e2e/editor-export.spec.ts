@@ -1,5 +1,6 @@
-import { expect, test } from "@playwright/test";
 import fs from "node:fs";
+
+import { expect, test } from "./fixtures";
 
 test.describe("Editor export", () => {
   test("downloads the edited page as HTML using the template title", async ({

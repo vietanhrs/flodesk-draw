@@ -12,14 +12,21 @@ import { Header } from "./components/Header/Header";
 import { exportPageAsHtml } from "./exporter/exportFile";
 import { saveFlodeskFile, type LoadedFile } from "./exporter/flodeskFile";
 import { DragProvider } from "./state/DragContext";
-import { EditorProvider, useEditor } from "./state/EditorContext";
+import {
+  EditorProvider,
+  useEditorActions,
+  useEditorDocument,
+  useEditorLoadedFile,
+} from "./state/EditorContext";
 
 interface EditorLocationState {
   loadedFile?: LoadedFile;
 }
 
 const EditorShell = () => {
-  const { page, loadedFile, setLoadedFile } = useEditor();
+  const { page } = useEditorDocument();
+  const loadedFile = useEditorLoadedFile();
+  const { setLoadedFile } = useEditorActions();
   const [build, setBuild] = useState<{
     isOpen: boolean;
     status: "building" | "done" | "error";

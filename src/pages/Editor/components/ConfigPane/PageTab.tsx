@@ -1,12 +1,16 @@
 import { Stack } from "@flodesk/grain";
 
-import { useEditor } from "@src/pages/Editor/state/EditorContext";
+import {
+  useEditorActions,
+  useEditorDocument,
+} from "@src/pages/Editor/state/EditorContext";
 
 import { ColorInput } from "./controls/ColorInput";
 import { NumberField } from "./controls/NumberField";
 
 export const PageTab = () => {
-  const { page, updatePage } = useEditor();
+  const { page } = useEditorDocument();
+  const { updatePage } = useEditorActions();
 
   return (
     <Stack gap="20px">

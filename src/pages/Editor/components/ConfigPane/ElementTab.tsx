@@ -7,7 +7,7 @@ import {
   type ElementFormProps,
   type PageElement,
 } from "@src/pages/Editor/elements";
-import { useEditor } from "@src/pages/Editor/state/EditorContext";
+import { useEditorActions } from "@src/pages/Editor/state/EditorContext";
 
 interface Props {
   rowId: string;
@@ -15,7 +15,7 @@ interface Props {
 }
 
 export const ElementTab = ({ rowId, element }: Props) => {
-  const { updateElement } = useEditor();
+  const { updateElement } = useEditorActions();
 
   const setProp = (patch: Partial<PageElement>, debounceKey?: string) => {
     updateElement<PageElement>(rowId, element.id, patch, debounceKey);
