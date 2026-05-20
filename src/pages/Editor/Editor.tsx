@@ -23,6 +23,15 @@ interface EditorLocationState {
   loadedFile?: LoadedFile;
 }
 
+const editorSessionKey = (
+  templateId: string | undefined,
+  initialFile: LoadedFile | undefined
+) => {
+  if (initialFile) return `file:${initialFile.name}`;
+  if (templateId) return `template:${templateId}`;
+  return "scratch";
+};
+
 const EditorShell = () => {
   const { page } = useEditorDocument();
   const loadedFile = useEditorLoadedFile();
@@ -124,9 +133,14 @@ export const Editor = () => {
   const location = useLocation();
   const initialFile = (location.state as EditorLocationState | null)
     ?.loadedFile;
+  const sessionKey = editorSessionKey(params.templateId, initialFile);
 
   return (
-    <EditorProvider templateId={params.templateId} initialFile={initialFile}>
+    <EditorProvider
+      key={sessionKey}
+      templateId={params.templateId}
+      initialFile={initialFile}
+    >
       <DragProvider>
         <EditorShell />
       </DragProvider>

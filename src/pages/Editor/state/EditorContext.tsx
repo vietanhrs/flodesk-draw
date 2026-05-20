@@ -269,38 +269,45 @@ interface ProviderProps {
   children: ReactNode;
 }
 
+interface InitialStateSeed {
+  templateId?: string;
+  initialFile?: LoadedFile;
+}
+
+const createInitialState = ({
+  templateId,
+  initialFile,
+}: InitialStateSeed): EditorState => ({
+  history: {
+    past: [],
+    present: initialFile?.page ?? buildPageForTemplate(templateId),
+    future: [],
+  },
+  selection: null,
+  viewport: "desktop",
+  isElementMenuOpen: true,
+  lastCommitKey: null,
+  lastCommitAt: 0,
+});
+
 export const EditorProvider = ({
   templateId,
   initialFile,
   children,
 }: ProviderProps) => {
-  // initialFile wins over templateId: when the user opens a .flodesk from the
-  // templates page we navigate to /editor and pass the file via location state.
-  // The route itself has no templateId so this guard is mostly defensive.
-  const initial = useMemo<PageData>(
-    () => initialFile?.page ?? buildPageForTemplate(templateId),
-    // Intentionally only seed on first mount; subsequent navigations to the
-    // same route re-render but should not reset the working page.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    []
-  );
-
   const [loadedFile, setLoadedFileState] = useState<LoadedFile | null>(
-    initialFile ?? null
+    () => initialFile ?? null
   );
 
   const setLoadedFile = useCallback((file: LoadedFile | null) => {
     setLoadedFileState(file);
   }, []);
 
-  const [state, dispatch] = useReducer(reducer, {
-    history: { past: [], present: initial, future: [] },
-    selection: null,
-    viewport: "desktop",
-    isElementMenuOpen: true,
-    lastCommitKey: null,
-    lastCommitAt: 0,
-  });
+  const [state, dispatch] = useReducer(
+    reducer,
+    { templateId, initialFile },
+    createInitialState
+  );
 
   const stateRef = useRef(state);
   useEffect(() => {

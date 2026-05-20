@@ -1,6 +1,10 @@
 import { fireEvent, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { useNavigate } from "react-router-dom";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+
+import type { LoadedFile } from "@src/pages/Editor/exporter/flodeskFile";
+import { createEmptyPage } from "@src/pages/Editor/state/initialData";
 
 import {
   DROP_ABOVE,
@@ -44,6 +48,27 @@ const getCanvasPaper = (container: HTMLElement): HTMLElement => {
   return paper;
 };
 
+const RouteSwitchControls = () => {
+  const navigate = useNavigate();
+
+  return (
+    <nav aria-label="Editor route test controls">
+      <button
+        type="button"
+        onClick={() => void navigate("/templates/bold-sale-announcement")}
+      >
+        Load sale template
+      </button>
+      <button
+        type="button"
+        onClick={() => void navigate("/templates/welcome-to-the-family")}
+      >
+        Load welcome template
+      </button>
+    </nav>
+  );
+};
+
 describe("Editor — template loading", () => {
   it("loads the canvas data for a known templateId", () => {
     renderEditor("bold-sale-announcement");
@@ -77,6 +102,59 @@ describe("Editor — template loading", () => {
       )
     ).toBeInTheDocument();
     expect(screen.getByText("Get started")).toBeInTheDocument();
+  });
+
+  it("resets page state and history when switching template routes", async () => {
+    const user = userEvent.setup();
+    renderEditor({
+      templateId: "bold-sale-announcement",
+      routeControls: <RouteSwitchControls />,
+    });
+
+    const hex = screen.getByLabelText("Background value");
+    await user.clear(hex);
+    await user.type(hex, "#abcdef");
+    expect(screen.getByRole("button", { name: "Undo" })).toBeEnabled();
+
+    await user.click(
+      screen.getByRole("button", { name: "Load welcome template" })
+    );
+
+    await screen.findByText("Hello, lovely friend.");
+    expect(screen.getByTestId("location")).toHaveTextContent(
+      "/templates/welcome-to-the-family"
+    );
+    expect(screen.queryByText("70% OFF")).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Undo" })).toBeDisabled();
+  });
+
+  it("clears loaded-file state when switching from a file route to a template route", async () => {
+    const user = userEvent.setup();
+    const loadedFile: LoadedFile = {
+      name: "route-draft",
+      page: createEmptyPage(),
+    };
+
+    renderEditor({
+      initialFile: loadedFile,
+      routeControls: <RouteSwitchControls />,
+    });
+
+    expect(screen.getByLabelText("Current file")).toHaveTextContent(
+      "route-draft"
+    );
+    expect(screen.getByText("Build something beautiful")).toBeInTheDocument();
+
+    await user.click(
+      screen.getByRole("button", { name: "Load welcome template" })
+    );
+
+    await screen.findByText("Hello, lovely friend.");
+    expect(screen.queryByLabelText("Current file")).not.toBeInTheDocument();
+    expect(
+      screen.queryByText("Build something beautiful")
+    ).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Save" })).toBeInTheDocument();
   });
 });
 
