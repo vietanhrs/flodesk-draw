@@ -1,6 +1,6 @@
+import { validateElement } from "@src/pages/Editor/elements/validation";
 import type { PageData } from "@src/pages/Editor/state/types";
 
-import { validateElement } from "./elementValidation";
 import {
   failInvalidPage,
   isRecord,

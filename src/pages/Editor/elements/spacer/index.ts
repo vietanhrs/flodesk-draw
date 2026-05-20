@@ -6,6 +6,7 @@ import { SpacerForm } from "./Form";
 import { SpacerRenderer } from "./Renderer";
 import { spacerToHtml } from "./toHtml";
 import type { SpacerElement } from "./types";
+import { validateSpacer } from "./validate";
 
 export type { SpacerElement } from "./types";
 
@@ -16,4 +17,5 @@ export const spacerHandler: ElementHandler<SpacerElement> = {
   Renderer: SpacerRenderer,
   Form: SpacerForm,
   toHtml: spacerToHtml,
+  validate: validateSpacer,
 };

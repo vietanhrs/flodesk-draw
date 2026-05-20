@@ -17,6 +17,11 @@ export interface ElementFormProps<E extends BaseElement> {
   setProp: (patch: Partial<E>, debounceKey?: string) => void;
 }
 
+export type ElementValidator = (
+  element: Record<string, unknown>,
+  path: string
+) => void;
+
 export interface ElementHandler<E extends BaseElement> {
   type: E["type"];
   create: () => E;
@@ -24,4 +29,5 @@ export interface ElementHandler<E extends BaseElement> {
   Renderer: ComponentType<{ element: E }>;
   Form: ComponentType<ElementFormProps<E>>;
   toHtml: (el: E) => string;
+  validate: ElementValidator;
 }

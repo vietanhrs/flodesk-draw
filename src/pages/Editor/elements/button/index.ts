@@ -6,6 +6,7 @@ import { ButtonForm } from "./Form";
 import { ButtonRenderer } from "./Renderer";
 import { buttonToHtml } from "./toHtml";
 import type { ButtonElement } from "./types";
+import { validateButton } from "./validate";
 
 export type { ButtonElement } from "./types";
 
@@ -16,4 +17,5 @@ export const buttonHandler: ElementHandler<ButtonElement> = {
   Renderer: ButtonRenderer,
   Form: ButtonForm,
   toHtml: buttonToHtml,
+  validate: validateButton,
 };

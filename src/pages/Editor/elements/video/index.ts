@@ -6,6 +6,7 @@ import { VideoForm } from "./Form";
 import { VideoRenderer } from "./Renderer";
 import { videoToHtml } from "./toHtml";
 import type { VideoElement } from "./types";
+import { validateVideo } from "./validate";
 
 export type { VideoElement } from "./types";
 
@@ -16,4 +17,5 @@ export const videoHandler: ElementHandler<VideoElement> = {
   Renderer: VideoRenderer,
   Form: VideoForm,
   toHtml: videoToHtml,
+  validate: validateVideo,
 };
