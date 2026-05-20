@@ -226,8 +226,8 @@ describe("flodeskFile", () => {
 
     const result = await openFlodeskFile();
 
-    const [pickerOptions] = picker.mock.calls[0] as [
-      { multiple: boolean; types: unknown[] },
+    const [[pickerOptions]] = picker.mock.calls as unknown as [
+      [{ multiple: boolean; types: unknown[] }],
     ];
     expect(pickerOptions.multiple).toBe(false);
     expect(Array.isArray(pickerOptions.types)).toBe(true);
