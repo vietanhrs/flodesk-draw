@@ -4,6 +4,7 @@ import {
   escapeHtml,
   styleString,
 } from "@src/pages/Editor/elements/shared/html";
+import { safeLinkUrl } from "@src/pages/Editor/elements/shared/urls";
 
 import type { ButtonElement } from "./types";
 
@@ -29,5 +30,5 @@ export const buttonToHtml = (el: ButtonElement): string => {
     border: hasBorder ? `1px solid ${el.textColor}` : "none",
     "font-family": "'Helvetica Neue', Arial, sans-serif",
   });
-  return `<div style="${wrapper}"><a href="${escapeAttr(el.href || "#")}" style="${btn}">${escapeHtml(el.label)}</a></div>`;
+  return `<div style="${wrapper}"><a href="${escapeAttr(safeLinkUrl(el.href))}" style="${btn}">${escapeHtml(el.label)}</a></div>`;
 };

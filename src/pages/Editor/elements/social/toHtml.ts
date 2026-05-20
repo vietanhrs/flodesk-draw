@@ -3,6 +3,7 @@ import {
   escapeAttr,
   styleString,
 } from "@src/pages/Editor/elements/shared/html";
+import { safeLinkUrl } from "@src/pages/Editor/elements/shared/urls";
 
 import { socialIcon, socialLabel } from "./labels";
 import type { SocialElement } from "./types";
@@ -29,7 +30,7 @@ export const socialToHtml = (el: SocialElement): string => {
         "text-decoration": "none",
         "font-family": "'Helvetica Neue', Arial, sans-serif",
       });
-      return `<a href="${escapeAttr(link.url || "#")}" aria-label="${escapeAttr(socialLabel[link.platform])}" style="${a}">${socialIcon[link.platform]}</a>`;
+      return `<a href="${escapeAttr(safeLinkUrl(link.url))}" aria-label="${escapeAttr(socialLabel[link.platform])}" style="${a}">${socialIcon[link.platform]}</a>`;
     })
     .join("");
   return `<div style="${wrapper}">${links}</div>`;

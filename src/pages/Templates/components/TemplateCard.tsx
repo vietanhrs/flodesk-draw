@@ -21,6 +21,8 @@ export const TemplateCard = ({ template }: TemplateCardProps) => {
           srcDoc={template.html}
           aria-hidden="true"
           tabIndex={-1}
+          loading="lazy"
+          sandbox=""
           className="tpl-card__iframe"
           style={{
             width: `${TEMPLATE_PREVIEW_WIDTH}px`,

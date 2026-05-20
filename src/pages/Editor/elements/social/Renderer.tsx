@@ -1,4 +1,5 @@
 import { justifyOf } from "@src/pages/Editor/elements/shared/align";
+import { safeLinkUrl } from "@src/pages/Editor/elements/shared/urls";
 
 import { socialIcon, socialLabel } from "./labels";
 import type { SocialElement } from "./types";
@@ -14,7 +15,7 @@ export const SocialRenderer = ({ element }: { element: SocialElement }) => (
     {element.links.map((link, i) => (
       <a
         key={`${link.platform}-${i}`}
-        href={link.url || "#"}
+        href={safeLinkUrl(link.url)}
         onClick={(e) => e.preventDefault()}
         aria-label={socialLabel[link.platform]}
         style={{

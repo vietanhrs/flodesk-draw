@@ -2,6 +2,10 @@ import {
   escapeAttr,
   styleString,
 } from "@src/pages/Editor/elements/shared/html";
+import {
+  safeVideoUrl,
+  VIDEO_IFRAME_SANDBOX,
+} from "@src/pages/Editor/elements/shared/urls";
 
 import type { VideoElement } from "./types";
 
@@ -19,5 +23,5 @@ export const videoToHtml = (el: VideoElement): string => {
     height: "100%",
     border: 0,
   });
-  return `<div style="${wrapper}"><iframe src="${escapeAttr(el.url)}" title="Embedded video" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen style="${iframe}"></iframe></div>`;
+  return `<div style="${wrapper}"><iframe src="${escapeAttr(safeVideoUrl(el.url))}" title="Embedded video" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen loading="lazy" sandbox="${VIDEO_IFRAME_SANDBOX}" style="${iframe}"></iframe></div>`;
 };
