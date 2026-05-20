@@ -806,6 +806,17 @@ describe("Editor — config pane", () => {
     expect(
       screen.getByRole("radiogroup", { name: "Level" })
     ).toBeInTheDocument();
+
+    // Clear selection from the canvas background; the pane should reset back
+    // to Page instead of keeping stale Layout/Element tab state.
+    fireEvent.click(screen.getByTestId("editor-canvas").parentElement!);
+    expect(
+      screen.queryByRole("radiogroup", { name: "Level" })
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("radiogroup", { name: "Columns" })
+    ).not.toBeInTheDocument();
+    expect(screen.getByLabelText("Horizontal padding")).toBeInTheDocument();
   });
 
   it("shows the selected element's catalog name above the form in the Element tab", () => {

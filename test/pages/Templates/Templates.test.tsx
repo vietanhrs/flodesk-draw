@@ -17,6 +17,23 @@ afterEach(() => {
 const renderTemplatesAt = (initialPath = "/templates") =>
   renderAtPath(<Templates />, "/templates", initialPath);
 
+const getMobileSelectTrigger = (): HTMLButtonElement => {
+  const trigger = document.querySelector<HTMLButtonElement>(
+    'button[aria-haspopup="listbox"]'
+  );
+  if (!trigger) throw new Error("Select trigger not found");
+  return trigger;
+};
+
+const openMobileSelect = async () => {
+  const user = userEvent.setup();
+  await user.click(getMobileSelectTrigger());
+  await waitFor(() =>
+    expect(screen.getAllByRole("option").length).toBeGreaterThan(0)
+  );
+  return user;
+};
+
 describe("Templates page — category list", () => {
   it("renders every category from the data file in the sidebar nav", () => {
     renderTemplatesAt();
@@ -125,6 +142,23 @@ describe("Templates page — category list", () => {
       )
     );
     // No navigation when open fails.
+    expect(screen.getByTestId("location")).toHaveTextContent("/templates");
+  });
+
+  it("surfaces mobile file-open errors through the shared toast", async () => {
+    vi.spyOn(flodeskFile, "openFlodeskFile").mockRejectedValue(
+      new Error("Mobile file could not be opened.")
+    );
+
+    renderTemplatesAt();
+    const user = await openMobileSelect();
+    await user.click(screen.getByRole("option", { name: /open from file/i }));
+
+    await waitFor(() =>
+      expect(screen.getByRole("alert")).toHaveTextContent(
+        "Mobile file could not be opened."
+      )
+    );
     expect(screen.getByTestId("location")).toHaveTextContent("/templates");
   });
 });

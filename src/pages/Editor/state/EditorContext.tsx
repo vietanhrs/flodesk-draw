@@ -22,6 +22,8 @@ import { buildPageForTemplate } from "./initialData";
 import type { PageData, PageRow, Selection, Viewport } from "./types";
 
 const HISTORY_LIMIT = 100;
+const LARGE_PAGE_HISTORY_LIMIT = 25;
+const LARGE_PAGE_HISTORY_THRESHOLD_BYTES = 120_000;
 const DEBOUNCE_MERGE_MS = 600;
 
 interface HistoryStack {
@@ -48,6 +50,14 @@ type Action =
   | { type: "SET_VIEWPORT"; payload: Viewport }
   | { type: "TOGGLE_MENU"; payload?: boolean };
 
+const estimatePageBytes = (page: PageData): number =>
+  JSON.stringify(page).length;
+
+const historyLimitForPage = (page: PageData): number =>
+  estimatePageBytes(page) > LARGE_PAGE_HISTORY_THRESHOLD_BYTES
+    ? LARGE_PAGE_HISTORY_LIMIT
+    : HISTORY_LIMIT;
+
 const cloneRow = (r: PageRow): PageRow => ({
   ...r,
   id: createId("row"),
@@ -65,9 +75,10 @@ const reducer = (state: EditorState, action: Action): EditorState => {
         action.debounceKey &&
         action.debounceKey === state.lastCommitKey &&
         now - state.lastCommitAt < DEBOUNCE_MERGE_MS;
+      const historyLimit = historyLimitForPage(action.payload);
       const past = same
-        ? state.history.past
-        : [...state.history.past, state.history.present].slice(-HISTORY_LIMIT);
+        ? state.history.past.slice(-historyLimit)
+        : [...state.history.past, state.history.present].slice(-historyLimit);
       return {
         ...state,
         history: {
@@ -90,12 +101,16 @@ const reducer = (state: EditorState, action: Action): EditorState => {
     case "UNDO": {
       if (state.history.past.length === 0) return state;
       const prev = state.history.past[state.history.past.length - 1];
+      const historyLimit = historyLimitForPage(prev);
       return {
         ...state,
         history: {
           past: state.history.past.slice(0, -1),
           present: prev,
-          future: [state.history.present, ...state.history.future],
+          future: [state.history.present, ...state.history.future].slice(
+            0,
+            historyLimit
+          ),
         },
         lastCommitKey: null,
       };
@@ -103,10 +118,13 @@ const reducer = (state: EditorState, action: Action): EditorState => {
     case "REDO": {
       if (state.history.future.length === 0) return state;
       const [next, ...rest] = state.history.future;
+      const historyLimit = historyLimitForPage(next);
       return {
         ...state,
         history: {
-          past: [...state.history.past, state.history.present],
+          past: [...state.history.past, state.history.present].slice(
+            -historyLimit
+          ),
           present: next,
           future: rest,
         },
@@ -226,6 +244,9 @@ interface EditorContextValue extends EditorActions {
 
 interface EditorDocumentContextValue {
   page: PageData;
+}
+
+interface EditorHistoryContextValue {
   canUndo: boolean;
   canRedo: boolean;
 }
@@ -233,6 +254,7 @@ interface EditorDocumentContextValue {
 const EditorDocumentCtx = createContext<EditorDocumentContextValue | null>(
   null
 );
+const EditorHistoryCtx = createContext<EditorHistoryContextValue | null>(null);
 const EditorSelectionCtx = createContext<Selection | null | undefined>(
   undefined
 );
@@ -674,14 +696,16 @@ export const EditorProvider = ({
   const documentValue = useMemo<EditorDocumentContextValue>(
     () => ({
       page: state.history.present,
+    }),
+    [state.history.present]
+  );
+
+  const historyValue = useMemo<EditorHistoryContextValue>(
+    () => ({
       canUndo: state.history.past.length > 0,
       canRedo: state.history.future.length > 0,
     }),
-    [
-      state.history.present,
-      state.history.past.length,
-      state.history.future.length,
-    ]
+    [state.history.past.length, state.history.future.length]
   );
 
   const actionsValue = useMemo<EditorActions>(
@@ -735,23 +759,26 @@ export const EditorProvider = ({
 
   return (
     <EditorDocumentCtx.Provider value={documentValue}>
-      <EditorSelectionCtx.Provider value={state.selection}>
-        <EditorViewportCtx.Provider value={state.viewport}>
-          <EditorMenuCtx.Provider value={state.isElementMenuOpen}>
-            <EditorLoadedFileCtx.Provider value={loadedFile}>
-              <EditorActionsCtx.Provider value={actionsValue}>
-                {children}
-              </EditorActionsCtx.Provider>
-            </EditorLoadedFileCtx.Provider>
-          </EditorMenuCtx.Provider>
-        </EditorViewportCtx.Provider>
-      </EditorSelectionCtx.Provider>
+      <EditorHistoryCtx.Provider value={historyValue}>
+        <EditorSelectionCtx.Provider value={state.selection}>
+          <EditorViewportCtx.Provider value={state.viewport}>
+            <EditorMenuCtx.Provider value={state.isElementMenuOpen}>
+              <EditorLoadedFileCtx.Provider value={loadedFile}>
+                <EditorActionsCtx.Provider value={actionsValue}>
+                  {children}
+                </EditorActionsCtx.Provider>
+              </EditorLoadedFileCtx.Provider>
+            </EditorMenuCtx.Provider>
+          </EditorViewportCtx.Provider>
+        </EditorSelectionCtx.Provider>
+      </EditorHistoryCtx.Provider>
     </EditorDocumentCtx.Provider>
   );
 };
 
 export const useEditor = (): EditorContextValue => {
   const documentValue = useEditorDocument();
+  const historyValue = useEditorHistoryState();
   const selection = useEditorSelection();
   const viewport = useEditorViewport();
   const isElementMenuOpen = useEditorMenuState();
@@ -761,18 +788,30 @@ export const useEditor = (): EditorContextValue => {
   return useMemo(
     () => ({
       ...documentValue,
+      ...historyValue,
       selection,
       viewport,
       isElementMenuOpen,
       loadedFile,
       ...actions,
     }),
-    [documentValue, selection, viewport, isElementMenuOpen, loadedFile, actions]
+    [
+      documentValue,
+      historyValue,
+      selection,
+      viewport,
+      isElementMenuOpen,
+      loadedFile,
+      actions,
+    ]
   );
 };
 
 export const useEditorDocument = (): EditorDocumentContextValue =>
   useRequiredContext(EditorDocumentCtx, "useEditorDocument");
+
+export const useEditorHistoryState = (): EditorHistoryContextValue =>
+  useRequiredContext(EditorHistoryCtx, "useEditorHistoryState");
 
 export const useEditorSelection = (): Selection =>
   useOptionalContext(EditorSelectionCtx, "useEditorSelection");
