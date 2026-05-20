@@ -1,4 +1,6 @@
 /* eslint-disable react-refresh/only-export-components */
+import type { ReactNode } from "react";
+
 import { GrainProvider } from "@flodesk/grain";
 import { fireEvent, render } from "@testing-library/react";
 import { MemoryRouter, Route, Routes, useLocation } from "react-router-dom";
@@ -18,6 +20,7 @@ const LocationDisplay = () => {
 interface RenderEditorOptions {
   templateId?: string;
   initialFile?: LoadedFile;
+  routeControls?: ReactNode;
 }
 
 const normalizeOptions = (
@@ -35,7 +38,8 @@ const normalizeOptions = (
 export const renderEditor = (
   templateIdOrOptions?: string | RenderEditorOptions
 ) => {
-  const { templateId, initialFile } = normalizeOptions(templateIdOrOptions);
+  const { templateId, initialFile, routeControls } =
+    normalizeOptions(templateIdOrOptions);
   const initialPath = templateId ? `/templates/${templateId}` : "/editor";
   const initialEntry = initialFile
     ? { pathname: initialPath, state: { loadedFile: initialFile } }
@@ -50,6 +54,7 @@ export const renderEditor = (
           <Route path="/templates/:templateId" element={<Editor />} />
           <Route path="*" element={null} />
         </Routes>
+        {routeControls}
       </MemoryRouter>
     </GrainProvider>
   );
