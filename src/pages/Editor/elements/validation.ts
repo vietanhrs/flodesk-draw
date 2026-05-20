@@ -1,3 +1,4 @@
+import type { ElementValidator } from "@src/pages/Editor/elements/base";
 import {
   failInvalidPage,
   isRecord,
@@ -6,10 +7,31 @@ import {
   requireString,
 } from "@src/pages/Editor/elements/shared/validation";
 
-import { registry, type ElementType } from "./registry";
+import { validateButton } from "./button/validate";
+import { validateDivider } from "./divider/validate";
+import { validateHeading } from "./heading/validate";
+import { validateImage } from "./image/validate";
+import { validateParagraph } from "./paragraph/validate";
+import { validateQuote } from "./quote/validate";
+import type { ElementType } from "./registry";
+import { validateSocial } from "./social/validate";
+import { validateSpacer } from "./spacer/validate";
+import { validateVideo } from "./video/validate";
+
+const elementValidators = {
+  heading: validateHeading,
+  paragraph: validateParagraph,
+  quote: validateQuote,
+  image: validateImage,
+  video: validateVideo,
+  button: validateButton,
+  divider: validateDivider,
+  spacer: validateSpacer,
+  social: validateSocial,
+} satisfies Record<ElementType, ElementValidator>;
 
 const isElementType = (type: string): type is ElementType =>
-  Object.hasOwn(registry, type);
+  Object.hasOwn(elementValidators, type);
 
 const requireCommonElementFields = (
   element: Record<string, unknown>,
@@ -26,5 +48,5 @@ const requireCommonElementFields = (
 export const validateElement = (value: unknown, path: string) => {
   if (!isRecord(value)) return failInvalidPage(path, "an object");
   const type = requireCommonElementFields(value, path);
-  registry[type].validate(value, path);
+  elementValidators[type](value, path);
 };
