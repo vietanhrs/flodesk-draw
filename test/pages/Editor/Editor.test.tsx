@@ -585,6 +585,24 @@ describe("Editor — element menu", () => {
     expect(container.querySelectorAll("hr").length).toBeGreaterThan(0);
   });
 
+  it("adds a menu element from the keyboard", () => {
+    renderEditor();
+
+    expect(screen.queryByLabelText("Row 2")).not.toBeInTheDocument();
+
+    const headingCard = screen.getByRole("button", {
+      name: "Drag to add Heading",
+    });
+    headingCard.focus();
+    fireEvent.keyDown(headingCard, { key: "Enter" });
+
+    expect(screen.getByLabelText("Row 2")).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: "Heading" })
+    ).toBeInTheDocument();
+    expect(screen.getByLabelText("Text")).toHaveValue("Headline text");
+  });
+
   it("drops a new element into the top of an existing column when the cursor is above all children", async () => {
     const user = userEvent.setup();
     const { container } = renderEditor("bold-sale-announcement");
@@ -717,6 +735,51 @@ describe("Editor — element menu", () => {
 });
 
 describe("Editor — config pane", () => {
+  it("selects rows and elements from keyboard-activated editor surfaces", () => {
+    const { container } = renderEditor("bold-sale-announcement");
+
+    getRowInner(1).focus();
+    fireEvent.keyDown(getRowInner(1), { key: "Enter" });
+
+    expect(
+      screen.getByRole("radiogroup", { name: "Columns" })
+    ).toBeInTheDocument();
+
+    const heading = container.querySelector("h1");
+    if (!heading) throw new Error("expected a rendered heading in row 1");
+    const elementWrapper = heading.closest(".edt-element") as HTMLElement;
+
+    elementWrapper.focus();
+    fireEvent.keyDown(elementWrapper, { key: "Enter" });
+
+    expect(
+      screen.getByRole("heading", { name: "Heading", level: 3 })
+    ).toBeInTheDocument();
+    expect(screen.getByLabelText("Text")).toHaveValue("70% OFF");
+  });
+
+  it("only deletes selected elements from the keyboard", () => {
+    const { container } = renderEditor("bold-sale-announcement");
+
+    const heading = container.querySelector("h1");
+    if (!heading) throw new Error("expected a rendered heading in row 1");
+    const elementWrapper = heading.closest(".edt-element") as HTMLElement;
+
+    elementWrapper.focus();
+    fireEvent.keyDown(elementWrapper, { key: "Delete" });
+    expect(container.querySelector("h1")).not.toBeNull();
+
+    fireEvent.keyDown(elementWrapper, { key: "Enter" });
+    const selectedWrapper = container.querySelector<HTMLElement>(
+      ".edt-element--selected"
+    );
+    if (!selectedWrapper) throw new Error("expected selected element wrapper");
+    fireEvent.keyDown(selectedWrapper, { key: "Delete" });
+
+    expect(container.querySelector("h1")).toBeNull();
+    expect(screen.getByLabelText("Row 1")).toBeInTheDocument();
+  });
+
   it("switches to the Layout tab when a row is selected and the Element tab when an element is", () => {
     const { container } = renderEditor("bold-sale-announcement");
 

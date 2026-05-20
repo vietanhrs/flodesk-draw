@@ -40,6 +40,18 @@ const computeInsertIndex = (column: HTMLElement, clientY: number): number => {
   return items.length;
 };
 
+const isKeyboardActivation = (key: string): boolean =>
+  key === "Enter" || key === " ";
+
+const isEditableTarget = (target: EventTarget | null): boolean => {
+  if (!(target instanceof HTMLElement)) return false;
+  return (
+    target.tagName === "INPUT" ||
+    target.tagName === "TEXTAREA" ||
+    target.isContentEditable
+  );
+};
+
 export const CanvasRow = ({ row, rowIndex, totalRows, onRowDropAt }: Props) => {
   const selection = useEditorSelection();
   const { setSelection, addRowAt, addElement, deleteElement, moveElement } =
@@ -108,6 +120,8 @@ export const CanvasRow = ({ row, rowIndex, totalRows, onRowDropAt }: Props) => {
     }
   };
 
+  const selectRow = () => setSelection({ kind: "row", rowId: row.id });
+
   return (
     // The outer id is for counting rows; the inner id targets the draggable
     // surface because row chrome is positioned as a sibling.
@@ -153,6 +167,14 @@ export const CanvasRow = ({ row, rowIndex, totalRows, onRowDropAt }: Props) => {
         onDragStart={handleRowDragStart}
         onDragEnd={handleRowDragEnd}
         onClick={handleSelectRow}
+        onKeyDown={(e) => {
+          if (!isKeyboardActivation(e.key)) return;
+          e.preventDefault();
+          selectRow();
+        }}
+        tabIndex={0}
+        role="group"
+        aria-current={isRowSelected ? "true" : undefined}
         aria-label={`Row ${rowIndex + 1}`}
         className={
           "edt-row__inner" +
@@ -278,18 +300,24 @@ export const CanvasRow = ({ row, rowIndex, totalRows, onRowDropAt }: Props) => {
                       });
                     }}
                     onKeyDown={(e) => {
-                      const target = e.target as HTMLElement;
-                      if (
-                        target.tagName === "INPUT" ||
-                        target.tagName === "TEXTAREA" ||
-                        target.isContentEditable
-                      )
+                      if (isEditableTarget(e.target)) return;
+                      if (isKeyboardActivation(e.key)) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        setSelection({
+                          kind: "element",
+                          rowId: row.id,
+                          columnIndex,
+                          elementId: element.id,
+                        });
                         return;
+                      }
                       if (
                         isSelected &&
                         (e.key === "Delete" || e.key === "Backspace")
                       ) {
                         e.preventDefault();
+                        e.stopPropagation();
                         deleteElement(row.id, element.id);
                       }
                     }}
