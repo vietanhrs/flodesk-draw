@@ -47,5 +47,8 @@ jobs:
       - name: Install Playwright system deps
         run: bunx playwright install-deps chrome
 
+      - name: Performance regression tests
+        run: bun run test:perf
+
       - name: E2E tests
         run: bun run test:e2e
