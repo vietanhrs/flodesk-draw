@@ -23,6 +23,18 @@ interface ShowSaveFilePicker {
   }): Promise<FileSystemFileHandleLike>;
 }
 
+export interface HtmlExportResult {
+  ok: boolean;
+  reason?: "cancelled" | "picker-write-failed" | "download-fallback";
+}
+
+const isAbortError = (error: unknown): boolean =>
+  error instanceof Error && error.name === "AbortError";
+
+const getSaveFilePicker = (): ShowSaveFilePicker | undefined =>
+  (window as unknown as { showSaveFilePicker?: ShowSaveFilePicker })
+    .showSaveFilePicker;
+
 const fallbackDownload = (filename: string, html: string) => {
   const blob = new Blob([html], { type: "text/html;charset=utf-8" });
   const url = URL.createObjectURL(blob);
@@ -38,36 +50,40 @@ const fallbackDownload = (filename: string, html: string) => {
 export const exportPageAsHtml = async (
   page: PageData,
   filenameHint?: string
-): Promise<boolean> => {
+): Promise<HtmlExportResult> => {
   const html = buildHtml(page);
   const suggested = `${slugify(filenameHint ?? page.title)}.html`;
+  const picker = getSaveFilePicker();
 
-  const picker = (
-    window as unknown as { showSaveFilePicker?: ShowSaveFilePicker }
-  ).showSaveFilePicker;
-
-  if (typeof picker === "function") {
-    try {
-      const handle = await picker({
-        suggestedName: suggested,
-        types: [
-          {
-            description: "HTML page",
-            accept: { "text/html": [".html"] },
-          },
-        ],
-      });
-      const writable = await handle.createWritable();
-      await writable.write(html);
-      await writable.close();
-      return true;
-    } catch (err) {
-      if ((err as Error).name === "AbortError") return false;
-      fallbackDownload(suggested, html);
-      return true;
-    }
+  if (typeof picker !== "function") {
+    fallbackDownload(suggested, html);
+    return { ok: true, reason: "download-fallback" };
   }
 
-  fallbackDownload(suggested, html);
-  return true;
+  let handle: FileSystemFileHandleLike;
+  try {
+    handle = await picker({
+      suggestedName: suggested,
+      types: [
+        {
+          description: "HTML page",
+          accept: { "text/html": [".html"] },
+        },
+      ],
+    });
+  } catch (error) {
+    if (isAbortError(error)) return { ok: false, reason: "cancelled" };
+    throw error;
+  }
+
+  try {
+    const writable = await handle.createWritable();
+    await writable.write(html);
+    await writable.close();
+    return { ok: true };
+  } catch (error) {
+    console.error("Falling back to download after picker write failure", error);
+    fallbackDownload(suggested, html);
+    return { ok: true, reason: "picker-write-failed" };
+  }
 };
