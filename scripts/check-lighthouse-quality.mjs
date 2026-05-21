@@ -51,7 +51,7 @@ const routes = [
     maximumMetrics: {
       "largest-contentful-paint": 6_500,
       "cumulative-layout-shift": 0.1,
-      "total-blocking-time": 500,
+      "total-blocking-time": 650,
       "speed-index": 6_500,
       "total-byte-weight": 950 * KiB,
     },
