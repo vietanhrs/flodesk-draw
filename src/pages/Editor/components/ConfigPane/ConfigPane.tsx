@@ -16,19 +16,26 @@ import { PageTab } from "./PageTab";
 type TabKey = "page" | "layout" | "element";
 
 interface ConfigPaneContentProps {
-  defaultTab: TabKey;
   selectedRow: PageRow | null;
   selectedElement: PageElement | null;
   selection: Selection;
 }
 
 const ConfigPaneContent = ({
-  defaultTab,
   selectedRow,
   selectedElement,
   selection,
 }: ConfigPaneContentProps) => {
-  const [tab, setTab] = useState<TabKey>(defaultTab);
+  const [manualTab, setManualTab] = useState<TabKey | null>(null);
+
+  const activeTab: TabKey =
+    selection?.kind === "element"
+      ? "element"
+      : selection?.kind === "row"
+        ? manualTab === "page"
+          ? "page"
+          : "layout"
+        : manualTab ?? "page";
 
   return (
     <>
@@ -40,13 +47,19 @@ const ConfigPaneContent = ({
         borderSide="none"
       >
         <TabGroup hasFullWidth>
-          <Tab isActive={tab === "page"} onClick={() => setTab("page")}>
+          <Tab isActive={activeTab === "page"} onClick={() => setManualTab("page")}>
             Page
           </Tab>
-          <Tab isActive={tab === "layout"} onClick={() => setTab("layout")}>
+          <Tab
+            isActive={activeTab === "layout"}
+            onClick={() => setManualTab("layout")}
+          >
             Layout
           </Tab>
-          <Tab isActive={tab === "element"} onClick={() => setTab("element")}>
+          <Tab
+            isActive={activeTab === "element"}
+            onClick={() => setManualTab("element")}
+          >
             Element
           </Tab>
         </TabGroup>
@@ -59,8 +72,8 @@ const ConfigPaneContent = ({
         padding="m"
         backgroundColor="background"
       >
-        {tab === "page" && <PageTab />}
-        {tab === "layout" &&
+        {activeTab === "page" && <PageTab />}
+        {activeTab === "layout" &&
           (selectedRow ? (
             <LayoutTab row={selectedRow} />
           ) : (
@@ -68,7 +81,7 @@ const ConfigPaneContent = ({
               Select a row in the canvas to configure its layout.
             </Text>
           ))}
-        {tab === "element" &&
+        {activeTab === "element" &&
           (selectedElement && selection?.kind === "element" ? (
             <ElementTab rowId={selection.rowId} element={selectedElement} />
           ) : (
@@ -84,11 +97,6 @@ const ConfigPaneContent = ({
 export const ConfigPane = () => {
   const { page } = useEditorDocument();
   const selection = useEditorSelection();
-  const selectionKey = selection
-    ? selection.kind === "element"
-      ? `${selection.kind}:${selection.rowId}:${selection.columnIndex}:${selection.elementId}`
-      : `${selection.kind}:${selection.rowId}`
-    : "none";
 
   const selectedRow = useMemo(() => {
     if (!selection) return null;
@@ -103,13 +111,6 @@ export const ConfigPane = () => {
       ) ?? null
     );
   }, [selectedRow, selection]);
-
-  const defaultTab: TabKey =
-    selection?.kind === "element"
-      ? "element"
-      : selection?.kind === "row"
-        ? "layout"
-        : "page";
 
   return (
     <Flex
@@ -127,8 +128,6 @@ export const ConfigPane = () => {
       borderSide="left"
     >
       <ConfigPaneContent
-        key={selectionKey}
-        defaultTab={defaultTab}
         selectedRow={selectedRow}
         selectedElement={selectedElement}
         selection={selection}

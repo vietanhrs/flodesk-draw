@@ -2,6 +2,7 @@ import { useCallback } from "react";
 
 import { Box, Flex } from "@flodesk/grain";
 
+import { EDITOR_CANVAS_MAX_WIDTH } from "@src/pages/Editor/constants";
 import {
   useEditorActions,
   useEditorDocument,
@@ -13,11 +14,6 @@ import {
 } from "@src/pages/Editor/utils/dragData";
 
 import { CanvasRow } from "./CanvasRow";
-
-const VIEWPORT_WIDTH: Record<"desktop" | "mobile", number> = {
-  desktop: 1080,
-  mobile: 390,
-};
 
 export const Canvas = () => {
   const { page } = useEditorDocument();
@@ -61,7 +57,7 @@ export const Canvas = () => {
         backgroundColor="background"
         shadow="l"
         style={{
-          maxWidth: VIEWPORT_WIDTH[viewport],
+          maxWidth: EDITOR_CANVAS_MAX_WIDTH[viewport],
           backgroundColor: page.backgroundColor,
           paddingTop: page.paddingY,
           paddingBottom: page.paddingY,
@@ -82,6 +78,8 @@ export const Canvas = () => {
             padding="m"
             radius="m"
             className="edt-canvas-empty"
+            role="region"
+            aria-label="Empty canvas"
             onDragOver={(e) => {
               if (dragHasNewElement(e.dataTransfer)) e.preventDefault();
             }}

@@ -38,8 +38,20 @@ export const Header = ({
   const viewport = useEditorViewport();
   const loadedFile = useEditorLoadedFile();
   const { undo, redo, setViewport } = useEditorActions();
-  const savesToOpenedFile = !loadedFile || Boolean(loadedFile.handle);
-  const saveLabel = savesToOpenedFile ? "Save" : "Download copy";
+
+  const isDirectSaveSupportedForCurrentDoc =
+    !loadedFile || Boolean(loadedFile.handle);
+  const saveButtonLabel = isDirectSaveSupportedForCurrentDoc
+    ? "Save"
+    : "Download copy";
+  const saveButtonTitle = isDirectSaveSupportedForCurrentDoc
+    ? "Save draft"
+    : "Download a copy of this draft";
+  const saveButtonIcon = isDirectSaveSupportedForCurrentDoc ? (
+    <IconUpload width={16} height={16} />
+  ) : (
+    <IconDownload width={16} height={16} />
+  );
 
   return (
     <Flex
@@ -84,18 +96,12 @@ export const Header = ({
           )}
           <IconButton
             type="button"
-            aria-label={saveLabel}
-            title={saveLabel}
+            aria-label={saveButtonLabel}
+            title={saveButtonTitle}
             onClick={() => {
               void onSave();
             }}
-            icon={
-              savesToOpenedFile ? (
-                <IconUpload width={16} height={16} />
-              ) : (
-                <IconDownload width={16} height={16} />
-              )
-            }
+            icon={saveButtonIcon}
           />
         </Flex>
       </Flex>

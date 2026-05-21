@@ -2,11 +2,10 @@ import { useEffect, useState } from "react";
 
 import { useIsMountedRef } from "@src/shared";
 
+import { MOBILE_EDITOR_QUERY } from "./constants";
 import { exportPageAsHtml } from "./exporter/exportFile";
 import { saveFlodeskFile, type LoadedFile } from "./exporter/flodeskFile";
 import type { PageData } from "./state/types";
-
-const MOBILE_EDITOR_QUERY = "(max-width: 767px)";
 
 export const useIsMobileEditorChrome = () => {
   const [isMobile, setIsMobile] = useState(() =>
