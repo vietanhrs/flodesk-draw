@@ -77,15 +77,15 @@ const EditorShell = () => {
       message: "Preparing your page…",
     });
     try {
-      const saved = await exportPageAsHtml(page, loadedFile?.name);
+      const result = await exportPageAsHtml(page, loadedFile?.name);
       if (!canUpdateState()) return;
-      if (saved) {
+      if (result.ok) {
         setBuild({
           isOpen: true,
           status: "done",
           message: "Your page has been exported as an HTML file.",
         });
-      } else {
+      } else if (result.reason === "cancelled") {
         setBuild({ isOpen: false, status: "done", message: "" });
       }
     } catch (err) {

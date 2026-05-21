@@ -97,7 +97,7 @@ describe("Editor — Header", () => {
     const user = userEvent.setup();
     const exportSpy = vi
       .spyOn(exporter, "exportPageAsHtml")
-      .mockResolvedValue(true);
+      .mockResolvedValue({ ok: true });
 
     renderEditor();
     await user.click(screen.getByRole("button", { name: "Build & export" }));

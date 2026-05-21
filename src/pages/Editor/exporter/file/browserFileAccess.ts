@@ -23,6 +23,15 @@ const fsWindow = () =>
 const toError = (err: unknown): Error =>
   err instanceof Error ? err : new Error(String(err));
 
+const isAbortError = (err: unknown): boolean =>
+  err instanceof Error && err.name === "AbortError";
+
+const normalizeSuggestedName = (suggestedName?: string): string => {
+  const fallbackName =
+    suggestedName && suggestedName.length > 0 ? suggestedName : "untitled";
+  return `${stripExtension(fallbackName)}${FLODESK_EXTENSION}`;
+};
+
 const fallbackOpen = (): Promise<LoadedFile | null> =>
   new Promise((resolve, reject) => {
     const input = document.createElement("input");
@@ -62,9 +71,7 @@ const fallbackOpen = (): Promise<LoadedFile | null> =>
         )
         .catch(fail);
     };
-    // If the user dismisses the picker, browsers don't always fire `change`.
-    // A `cancel` event fires in modern browsers; older ones leave the promise
-    // pending until GC, which is acceptable for our one-shot helper.
+
     input.addEventListener("cancel", () => finish(null));
     document.body.appendChild(input);
     input.click();
@@ -84,20 +91,22 @@ const fallbackDownload = (filename: string, contents: string) => {
 
 export const openFlodeskFile = async (): Promise<LoadedFile | null> => {
   const picker = fsWindow().showOpenFilePicker;
-  if (typeof picker === "function") {
-    let handle: FileSystemFileHandle;
-    try {
-      [handle] = await picker({ multiple: false, types: flodeskTypes });
-    } catch (err) {
-      if ((err as Error).name === "AbortError") return null;
-      throw err;
-    }
-    const file = await handle.getFile();
-    assertFileSize(file.size);
-    const page = parseFlodeskFile(await file.text());
-    return { name: stripExtension(file.name), page, handle };
+  if (typeof picker !== "function") {
+    return fallbackOpen();
   }
-  return fallbackOpen();
+
+  let handle: FileSystemFileHandle;
+  try {
+    [handle] = await picker({ multiple: false, types: flodeskTypes });
+  } catch (err) {
+    if (isAbortError(err)) return null;
+    throw err;
+  }
+
+  const file = await handle.getFile();
+  assertFileSize(file.size);
+  const page = parseFlodeskFile(await file.text());
+  return { name: stripExtension(file.name), page, handle };
 };
 
 export const saveFlodeskFile = async (
@@ -115,19 +124,21 @@ export const saveFlodeskFile = async (
     return { name: stripExtension(file.name), handle: currentHandle };
   }
 
-  const fallbackName =
-    suggestedName && suggestedName.length > 0 ? suggestedName : "untitled";
-  const suggested = `${stripExtension(fallbackName)}${FLODESK_EXTENSION}`;
-
+  const normalizedSuggestedName = normalizeSuggestedName(suggestedName);
   const picker = fsWindow().showSaveFilePicker;
+
   if (typeof picker === "function") {
     let handle: FileSystemFileHandle;
     try {
-      handle = await picker({ suggestedName: suggested, types: flodeskTypes });
+      handle = await picker({
+        suggestedName: normalizedSuggestedName,
+        types: flodeskTypes,
+      });
     } catch (err) {
-      if ((err as Error).name === "AbortError") return null;
+      if (isAbortError(err)) return null;
       throw err;
     }
+
     const writable = await handle.createWritable();
     await writable.write(contents);
     await writable.close();
@@ -135,6 +146,6 @@ export const saveFlodeskFile = async (
     return { name: stripExtension(file.name), handle };
   }
 
-  fallbackDownload(suggested, contents);
-  return { name: stripExtension(suggested) };
+  fallbackDownload(normalizedSuggestedName, contents);
+  return { name: stripExtension(normalizedSuggestedName) };
 };
