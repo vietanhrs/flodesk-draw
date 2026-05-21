@@ -3,6 +3,8 @@ import { useEffect, useState } from "react";
 import { Flex, Toast } from "@flodesk/grain";
 import { useLocation, useParams } from "react-router-dom";
 
+import { useIsMountedRef } from "@src/shared";
+
 import "./editor.css";
 import { BuildModal } from "./components/BuildModal";
 import { Canvas } from "./components/Canvas/Canvas";
@@ -54,6 +56,7 @@ const editorSessionKey = (
 };
 
 const EditorShell = () => {
+  const isMountedRef = useIsMountedRef();
   const { page } = useEditorDocument();
   const loadedFile = useEditorLoadedFile();
   const { setLoadedFile } = useEditorActions();
@@ -64,6 +67,8 @@ const EditorShell = () => {
     message: string;
   }>({ isOpen: false, status: "building", message: "" });
   const [saveError, setSaveError] = useState("");
+  const canUpdateState = () =>
+    isMountedRef.current && typeof window !== "undefined";
 
   const handleBuild = async () => {
     setBuild({
@@ -73,6 +78,7 @@ const EditorShell = () => {
     });
     try {
       const saved = await exportPageAsHtml(page, loadedFile?.name);
+      if (!canUpdateState()) return;
       if (saved) {
         setBuild({
           isOpen: true,
@@ -83,6 +89,7 @@ const EditorShell = () => {
         setBuild({ isOpen: false, status: "done", message: "" });
       }
     } catch (err) {
+      if (!canUpdateState()) return;
       console.error("Export failed", err);
       setBuild({
         isOpen: true,
@@ -100,6 +107,7 @@ const EditorShell = () => {
         loadedFile?.handle,
         loadedFile?.name ?? page.title
       );
+      if (!canUpdateState()) return;
       if (result) {
         setLoadedFile({
           name: result.name,
@@ -108,6 +116,7 @@ const EditorShell = () => {
         });
       }
     } catch (err) {
+      if (!canUpdateState()) return;
       console.error("Save failed", err);
       setSaveError("Could not save your .flodesk file. Please try again.");
     }
@@ -159,7 +168,9 @@ const EditorShell = () => {
         isOpen={saveError.length > 0}
         variant="danger"
         dismissTimeout={5000}
-        onDismiss={() => setSaveError("")}
+        onDismiss={() => {
+          if (canUpdateState()) setSaveError("");
+        }}
       >
         <span role="alert">{saveError}</span>
       </Toast>

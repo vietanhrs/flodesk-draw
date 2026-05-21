@@ -1,4 +1,10 @@
-import { screen, waitFor, within } from "@testing-library/react";
+import {
+  act,
+  fireEvent,
+  screen,
+  waitFor,
+  within,
+} from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
@@ -14,6 +20,7 @@ import { Templates } from "@src/pages/Templates/Templates";
 import { renderAtPath } from "./test-utils";
 
 afterEach(() => {
+  vi.useRealTimers();
   vi.restoreAllMocks();
 });
 
@@ -162,6 +169,31 @@ describe("Templates page — category list", () => {
     );
     // No navigation when open fails.
     expect(screen.getByTestId("location")).toHaveTextContent("/templates");
+  });
+
+  it("ignores a stale toast dismiss timer after unmount", async () => {
+    vi.useFakeTimers();
+    vi.spyOn(flodeskFile, "openFlodeskFile").mockRejectedValue(
+      new Error("File is not a Flodesk draft.")
+    );
+    const { unmount } = renderTemplatesAt();
+
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: /open from file/i }));
+      await Promise.resolve();
+    });
+
+    expect(screen.getByRole("alert")).toHaveTextContent(
+      "File is not a Flodesk draft."
+    );
+
+    unmount();
+
+    expect(() => {
+      act(() => {
+        vi.advanceTimersByTime(5000);
+      });
+    }).not.toThrow();
   });
 
   it("surfaces mobile file-open errors through the shared toast", async () => {
