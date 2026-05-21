@@ -47,14 +47,22 @@ bun install            # or `bun install --frozen-lockfile` to match CI exactly
 
 ```
 flodesk-draw/
-├── .github/workflows/ci.yml         GitHub Actions: lint → test → build on every PR + push to main
+├── .github/
+│   └── workflows/ci.yml             GitHub Actions: format → lint → test → build → e2e
 ├── .bun-version                     Pinned Bun version
+├── .prettierrc.json                 Prettier config
 ├── index.html                       Vite entry
+├── package.json / bun.lock          Scripts and pinned dependency graph
 ├── vite.config.ts                   Vite + Vitest config (jsdom env, path aliases)
+├── playwright.config.ts             Playwright e2e config
 ├── eslint.config.js                 ESLint flat config (TS, React Hooks, import order)
 ├── tsconfig.{json,app,node}.json    TypeScript project references
+├── wrangler.jsonc                   Cloudflare/Wrangler local preview + deploy config
 │
-├── public/                          Static assets served as-is (fonts, etc.)
+├── public/
+│   ├── favicon.svg
+│   ├── llms.txt / robots.txt
+│   └── fonts/                       Flodesk font assets served as-is
 │
 ├── src/
 │   ├── main.tsx                     React 19 root + GrainProvider
@@ -65,24 +73,39 @@ flodesk-draw/
 │   ├── data/                        Static catalogues (template metadata, category labels)
 │   ├── shared/                      Cross-page primitives (logo, error boundary, suspense route)
 │   └── pages/
-│       ├── Templates/               Template gallery — sidebar, mobile header, card grid
+│       ├── Templates/
+│       │   ├── Templates.tsx        Template gallery shell
+│       │   ├── templates.css        Template gallery styles
+│       │   └── components/          Sidebar, mobile header, template cards
 │       └── Editor/
-│           ├── Editor.tsx           Shell composition (header + body + modal)
+│           ├── Editor.tsx           Shell composition (header + body + modals)
+│           ├── editor.css           Editor layout and canvas styles
 │           ├── components/
 │           │   ├── Canvas/          Paper, rows, drop zones, floating row menu
-│           │   ├── ConfigPane/      Page / Layout / Element tabs + controls
+│           │   ├── ConfigPane/      Page / Layout / Element tabs
+│           │   │   └── controls/    Shared text, number, color, segmented controls
 │           │   ├── ElementMenu/     Draggable element palette with category + search
 │           │   ├── Header/          Title, history, viewport toggle, build button
 │           │   └── BuildModal.tsx   Export progress + status dialog
-│           ├── exporter/            Page → static HTML and download orchestration
+│           ├── elements/            Element registry, renderers, forms, validators, HTML exporters
+│           │   ├── button/ divider/ heading/ image/ paragraph/
+│           │   ├── quote/ social/ spacer/ video/
+│           │   └── shared/          Element-level shared helpers
+│           ├── exporter/            Page → static HTML + file import/export orchestration
+│           │   └── file/            `.flodesk` parse, validation, and browser file access
 │           ├── state/               Zustand store, actions/mutations, history, types, templates
+│           │   └── templates/       Built-in editor templates
 │           └── utils/               Drag dataTransfer helpers, id generator
 │
 └── test/
     ├── setup.ts                     Vitest setup — jest-dom matchers, jsdom shims, log filters
-    └── pages/
-        ├── Editor/                  Editor integration tests + buildHtml unit tests + helpers
-        └── Templates/               Templates page integration tests
+    ├── e2e/                         Playwright editor/template/export/file-IO flows
+    │   └── helpers/                 E2E page-object helpers
+    ├── pages/
+    │   ├── Editor/                  Editor unit/integration tests + exporter tests + helpers
+    │   └── Templates/               Templates page integration tests + helpers
+    ├── perf/                        Playwright performance checks
+    └── shared/                      Shared component tests
 ```
 
 ## Tech stack
