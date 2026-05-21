@@ -30,10 +30,10 @@ describe("TemplateCard", () => {
     expect(iframe).toHaveAttribute("sandbox", "");
   });
 
-  it('exposes a "View details" overlay link with the right href and aria-label', () => {
+  it('exposes a "Open template" overlay link with the right href and aria-label', () => {
     renderAtPath(<TemplateCard template={sample} />, "/templates");
     const link = screen.getByRole("link", {
-      name: `View details: ${sample.title}`,
+      name: `Open template: ${sample.title}`,
     });
     expect(link).toHaveAttribute("href", `/templates/${sample.id}`);
     // The dim/backdrop + button visibility are CSS-driven on .tpl-card:hover;
@@ -42,25 +42,25 @@ describe("TemplateCard", () => {
     expect(link.closest("article")).toHaveClass("tpl-card");
   });
 
-  it("keeps the View details link reachable after hovering the card", async () => {
+  it("keeps the Open template link reachable after hovering the card", async () => {
     const user = userEvent.setup();
     renderAtPath(<TemplateCard template={sample} />, "/templates");
     const article = screen
       .getByRole("link", {
-        name: `View details: ${sample.title}`,
+        name: `Open template: ${sample.title}`,
       })
       .closest("article")!;
     await user.hover(article);
     expect(
-      screen.getByRole("link", { name: `View details: ${sample.title}` })
+      screen.getByRole("link", { name: `Open template: ${sample.title}` })
     ).toBeInTheDocument();
   });
 
-  it("navigates to /templates/:templateId when View details is clicked", async () => {
+  it("navigates to /templates/:templateId when Open template is clicked", async () => {
     const user = userEvent.setup();
     renderAtPath(<TemplateCard template={sample} />, "/templates");
     await user.click(
-      screen.getByRole("link", { name: `View details: ${sample.title}` })
+      screen.getByRole("link", { name: `Open template: ${sample.title}` })
     );
     await waitFor(() =>
       expect(screen.getByTestId("location")).toHaveTextContent(

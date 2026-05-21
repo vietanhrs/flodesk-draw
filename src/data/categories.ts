@@ -4,6 +4,7 @@ export interface Category {
 }
 
 export const ALL_CATEGORY_ID = "all";
+export const UNKNOWN_CATEGORY_LABEL = "Unknown category";
 
 export const categories: Category[] = [
   { id: ALL_CATEGORY_ID, label: "Browse all" },
@@ -15,5 +16,9 @@ export const categories: Category[] = [
   { id: "plain-text", label: "Plain text" },
 ];
 
+export const hasCategory = (id: string): boolean =>
+  categories.some((category) => category.id === id);
+
 export const getCategoryLabel = (id: string): string =>
-  categories.find((c) => c.id === id)?.label ?? "";
+  categories.find((category) => category.id === id)?.label ??
+  UNKNOWN_CATEGORY_LABEL;
