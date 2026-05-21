@@ -94,6 +94,49 @@ test.describe("Editor — file I/O", () => {
     );
   });
 
+  test("surfaces an open-file validation error through the templates toast", async ({
+    page,
+  }) => {
+    await page.goto("/templates");
+
+    const fileChooserPromise = page.waitForEvent("filechooser");
+    await page.getByRole("button", { name: "Open from file" }).click();
+    const chooser = await fileChooserPromise;
+    await chooser.setFiles({
+      name: "unsafe-video.flodesk",
+      mimeType: "application/json",
+      buffer: Buffer.from(
+        JSON.stringify({
+          version: 1,
+          page: {
+            ...sampleDraft.page,
+            rows: [
+              {
+                ...sampleDraft.page.rows[0],
+                columns: [
+                  [
+                    {
+                      id: "video-1",
+                      type: "video",
+                      url: "https://example.com/embed/123",
+                      widthPct: 100,
+                      align: "center",
+                    },
+                  ],
+                ],
+              },
+            ],
+          },
+        })
+      ),
+    });
+
+    await expect(page).toHaveURL(/\/templates$/);
+    await expect(page.getByRole("alert")).toContainText(
+      "supported HTTPS video embed URL"
+    );
+  });
+
   test("saves the working page via the header Save button (fallback download)", async ({
     page,
   }, testInfo) => {
