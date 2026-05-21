@@ -31,24 +31,28 @@ bun install            # or `bun install --frozen-lockfile` to match CI exactly
 
 ## Scripts
 
-| Command                 | What it does                                                             |
-| ----------------------- | ------------------------------------------------------------------------ |
-| `bun run dev`           | Start the Vite dev server (HMR) at `http://localhost:5173`.              |
-| `bun run build`         | Type-check (`tsc -b`) and produce a production build in `dist/`.         |
-| `bun run build:analyze` | Build with `ANALYZE_BUNDLE=1` and emit `dist/bundle-analysis.json`.      |
-| `bun run preview`       | Serve the production build locally.                                      |
-| `bun run lint`          | Run ESLint over the source tree.                                         |
-| `bun run format:check`  | Check Prettier formatting without writing changes.                       |
-| `bun run test`          | Run Vitest in watch mode. Append `--run` for a single pass.              |
-| `bun run test:e2e`      | Run the Playwright end-to-end suite.                                     |
-| `bun run coverage`      | Run the test suite once with v8 coverage; report written to `coverage/`. |
+| Command                    | What it does                                                                           |
+| -------------------------- | -------------------------------------------------------------------------------------- |
+| `bun run dev`              | Start the Vite dev server (HMR) at `http://localhost:5173`.                            |
+| `bun run build`            | Type-check (`tsc -b`) and produce a production build in `dist/`.                       |
+| `bun run build:analyze`    | Build with `ANALYZE_BUNDLE=1` and emit `dist/bundle-analysis.json`.                    |
+| `bun run bundle:check`     | Build with bundle analysis and enforce per-chunk and total JS/CSS budgets.             |
+| `bun run preview`          | Build and serve the production bundle locally through Wrangler.                        |
+| `bun run lint`             | Run ESLint over the source tree.                                                       |
+| `bun run format:check`     | Check Prettier formatting without writing changes.                                     |
+| `bun run test`             | Run Vitest in watch mode. Append `--run` for a single pass.                            |
+| `bun run test:e2e`         | Run the Playwright end-to-end suite.                                                   |
+| `bun run test:perf`        | Build and run Playwright performance budget checks against the production preview.     |
+| `bun run lighthouse:check` | Build and run Lighthouse quality gates for performance, a11y, best practices, and SEO. |
+| `bun run coverage`         | Run the test suite once with v8 coverage thresholds; report written to `coverage/`.    |
+| `bun run deploy`           | Build and deploy with Wrangler.                                                        |
 
 ## Project layout
 
 ```
 flodesk-draw/
 ├── .github/
-│   └── workflows/ci.yml             GitHub Actions: format → lint → test → build → e2e
+│   └── workflows/ci.yml             GitHub Actions: format, lint, coverage, bundle, Lighthouse, perf, e2e
 ├── .bun-version                     Pinned Bun version
 ├── .prettierrc.json                 Prettier config
 ├── index.html                       Vite entry
@@ -119,7 +123,7 @@ flodesk-draw/
 
 ## Continuous integration
 
-Every pull request and every push to `main` runs `bun install --frozen-lockfile` → `format:check` → `lint` → `test --run` → `build` → `test:e2e` on Ubuntu via GitHub Actions ([`.github/workflows/ci.yml`](./.github/workflows/ci.yml)).
+Every pull request and every push to `main` runs `bun install --frozen-lockfile` → `format:check` → `lint` → `coverage` → `bundle:check` → `lighthouse:check` → `test:perf` → `test:e2e` on Ubuntu via GitHub Actions ([`.github/workflows/ci.yml`](./.github/workflows/ci.yml)).
 
 ## Known warnings
 

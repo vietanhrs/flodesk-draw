@@ -1,16 +1,26 @@
-import { screen, waitFor, within } from "@testing-library/react";
+import {
+  act,
+  fireEvent,
+  screen,
+  waitFor,
+  within,
+} from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { ALL_CATEGORY_ID, categories } from "@src/data/categories";
 import { templates } from "@src/data/templates";
 import * as flodeskFile from "@src/pages/Editor/exporter/flodeskFile";
-import { createEmptyPage } from "@src/pages/Editor/state/initialData";
+import {
+  createEmptyPage,
+  editorTemplateIds,
+} from "@src/pages/Editor/state/initialData";
 import { Templates } from "@src/pages/Templates/Templates";
 
 import { renderAtPath } from "./test-utils";
 
 afterEach(() => {
+  vi.useRealTimers();
   vi.restoreAllMocks();
 });
 
@@ -33,6 +43,22 @@ const openMobileSelect = async () => {
   );
   return user;
 };
+
+describe("Template data invariants", () => {
+  it("has an editor page builder for every gallery template", () => {
+    expect([...editorTemplateIds].sort()).toEqual(
+      templates.map((template) => template.id).sort()
+    );
+  });
+
+  it("uses only known categories for gallery templates", () => {
+    const categoryIds = new Set(categories.map((category) => category.id));
+
+    for (const template of templates) {
+      expect(categoryIds.has(template.categoryId)).toBe(true);
+    }
+  });
+});
 
 describe("Templates page — category list", () => {
   it("renders every category from the data file in the sidebar nav", () => {
@@ -143,6 +169,31 @@ describe("Templates page — category list", () => {
     );
     // No navigation when open fails.
     expect(screen.getByTestId("location")).toHaveTextContent("/templates");
+  });
+
+  it("ignores a stale toast dismiss timer after unmount", async () => {
+    vi.useFakeTimers();
+    vi.spyOn(flodeskFile, "openFlodeskFile").mockRejectedValue(
+      new Error("File is not a Flodesk draft.")
+    );
+    const { unmount } = renderTemplatesAt();
+
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: /open from file/i }));
+      await Promise.resolve();
+    });
+
+    expect(screen.getByRole("alert")).toHaveTextContent(
+      "File is not a Flodesk draft."
+    );
+
+    unmount();
+
+    expect(() => {
+      act(() => {
+        vi.advanceTimersByTime(5000);
+      });
+    }).not.toThrow();
   });
 
   it("surfaces mobile file-open errors through the shared toast", async () => {

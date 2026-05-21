@@ -47,8 +47,29 @@ export const isSafeLinkUrl = (value: string): boolean =>
 export const isSafeImageUrl = (value: string): boolean =>
   hasAbsoluteNetworkUrl(value, ["http:", "https:"]);
 
+const isAllowedVideoEmbedUrl = (url: URL): boolean => {
+  const hostname = url.hostname.toLowerCase();
+  const pathname = url.pathname;
+  const isYouTube =
+    hostname === "www.youtube.com" ||
+    hostname === "youtube.com" ||
+    hostname === "www.youtube-nocookie.com" ||
+    hostname === "youtube-nocookie.com";
+  if (isYouTube) return pathname.startsWith("/embed/") && pathname.length > 7;
+
+  return (
+    hostname === "player.vimeo.com" &&
+    pathname.startsWith("/video/") &&
+    pathname.length > 7
+  );
+};
+
 export const isSafeVideoUrl = (value: string): boolean =>
-  hasAbsoluteNetworkUrl(value, ["https:"]);
+  hasAbsoluteNetworkUrl(value, ["https:"]) &&
+  (() => {
+    const url = parseUrl(value);
+    return url !== null && isAllowedVideoEmbedUrl(url);
+  })();
 
 export const safeLinkUrl = (value: string): string =>
   isSafeLinkUrl(value) ? value.trim() : "#";

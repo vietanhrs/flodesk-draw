@@ -3,6 +3,7 @@ import { fireEvent, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 
+import { ElementRenderer } from "@src/pages/Editor/components/Canvas/ElementRenderer";
 import { registry } from "@src/pages/Editor/elements";
 import type { ElementHandler, PageElement } from "@src/pages/Editor/elements";
 import { createButton } from "@src/pages/Editor/elements/button/create";
@@ -103,6 +104,29 @@ describe("leaf element renderers", () => {
       "style",
       expect.stringContaining("border: 1px solid rgb(18, 52, 86)")
     );
+  });
+
+  it("canvas preview renders link-like elements without nested anchors", () => {
+    const { container } = render(
+      <>
+        <ElementRenderer
+          element={{
+            ...createButton(),
+            label: "Preview button",
+            href: "https://example.com",
+          }}
+        />
+        <ElementRenderer
+          element={{
+            ...createSocial(),
+            links: [{ platform: "website", url: "https://example.com" }],
+          }}
+        />
+      </>
+    );
+
+    expect(screen.getByText("Preview button")).toBeInTheDocument();
+    expect(container.querySelectorAll("a")).toHaveLength(0);
   });
 
   it("image and video renderers sanitize unsafe media URLs", () => {
@@ -337,10 +361,10 @@ describe("leaf element validators", () => {
     ).toThrow(/element\.height must be a number between 0 and 400/);
     expect(() =>
       validateVideo(
-        { ...createVideo(), url: "http://example.com/embed" },
+        { ...createVideo(), url: "https://example.com/embed" },
         "element"
       )
-    ).toThrow(/element\.url must be an https video URL/);
+    ).toThrow(/element\.url must be a supported HTTPS video embed URL/);
   });
 
   it("rejects unsafe URLs and malformed social links", () => {

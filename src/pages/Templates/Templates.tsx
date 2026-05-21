@@ -6,6 +6,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { ALL_CATEGORY_ID, categories } from "@src/data/categories";
 import { templates } from "@src/data/templates";
 import { openFlodeskFile } from "@src/pages/Editor/exporter/flodeskFile";
+import { useIsMountedRef } from "@src/shared";
 
 import { MobileHeader } from "./components/MobileHeader";
 import { Sidebar } from "./components/Sidebar";
@@ -14,8 +15,11 @@ import "./templates.css";
 
 export const Templates = () => {
   const navigate = useNavigate();
+  const isMountedRef = useIsMountedRef();
   const [searchParams] = useSearchParams();
   const [openError, setOpenError] = useState("");
+  const canUpdateState = () =>
+    isMountedRef.current && typeof window !== "undefined";
   const requestedCategory = searchParams.get("category") ?? ALL_CATEGORY_ID;
   const activeCategoryId = useMemo(() => {
     const known = categories.some((c) => c.id === requestedCategory);
@@ -32,8 +36,10 @@ export const Templates = () => {
     try {
       const result = await openFlodeskFile();
       if (!result) return;
+      if (!canUpdateState()) return;
       void navigate("/editor", { state: { loadedFile: result } });
     } catch (err) {
+      if (!canUpdateState()) return;
       setOpenError(
         err instanceof Error
           ? err.message
@@ -91,7 +97,9 @@ export const Templates = () => {
         isOpen={openError.length > 0}
         variant="danger"
         dismissTimeout={5000}
-        onDismiss={() => setOpenError("")}
+        onDismiss={() => {
+          if (canUpdateState()) setOpenError("");
+        }}
       >
         <span role="alert">{openError}</span>
       </Toast>

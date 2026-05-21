@@ -19,6 +19,7 @@ const templateBuilders: Record<string, () => PageData> = {
 const fallbackTemplate = createEmptyPage;
 
 export { createEmptyPage };
+export const editorTemplateIds = Object.keys(templateBuilders);
 
 export const buildPageForTemplate = (
   templateId: string | undefined
