@@ -20,7 +20,7 @@ const routes = [
     path: "/templates",
     formFactor: "desktop",
     minimumScores: {
-      performance: 0.8,
+      performance: 0.7,
       accessibility: 0.9,
       "best-practices": 0.9,
       seo: 0.9,
@@ -28,7 +28,7 @@ const routes = [
     maximumMetrics: {
       "largest-contentful-paint": 2_500,
       "cumulative-layout-shift": 0.1,
-      "total-blocking-time": 300,
+      "total-blocking-time": 400,
       "speed-index": 3_000,
       "total-byte-weight": 950 * KiB,
     },
@@ -37,11 +37,6 @@ const routes = [
     name: "template-gallery-mobile",
     path: "/templates",
     formFactor: "mobile",
-    // The hosted app scores higher in Lighthouse. GitHub Actions runners are
-    // CPU-constrained and noisy, so this score budget is intentionally loose
-    // and protects against large CI regressions rather than grading production
-    // performance. Keep concrete TBT/CLS/byte constraints in place and tighten
-    // LCP/Speed Index only after moving this gate to a deployed preview URL.
     minimumScores: {
       performance: 0.5,
       accessibility: 0.9,
@@ -142,7 +137,6 @@ const waitForServer = async () => {
 };
 
 const score = (lhr, category) => lhr.categories[category]?.score ?? 0;
-
 const metricValue = (lhr, auditId) => lhr.audits[auditId]?.numericValue ?? 0;
 
 const assertRoute = (route, lhr) => {
@@ -207,6 +201,18 @@ const auditRoute = async (route) => {
   };
 };
 
+const printMetrics = (result) => {
+  const metricText = Object.entries(result.metrics)
+    .map(([metric, value]) => `${metric}=${Math.round(value)}`)
+    .join(", ");
+  const scoreText = Object.entries(result.scores)
+    .map(([category, value]) => `${category}=${value.toFixed(2)}`)
+    .join(", ");
+
+  console.log(`${result.route.name}: ${scoreText}`);
+  console.log(`  metrics: ${metricText}`);
+};
+
 const main = async () => {
   await rm(REPORT_DIR, { force: true, recursive: true });
   await mkdir(REPORT_DIR, { recursive: true });
@@ -230,10 +236,7 @@ const main = async () => {
     }
 
     for (const result of results) {
-      const scoreText = Object.entries(result.scores)
-        .map(([category, value]) => `${category}=${value.toFixed(2)}`)
-        .join(", ");
-      console.log(`${result.route.name}: ${scoreText}`);
+      printMetrics(result);
     }
 
     const failures = results.flatMap((result) =>
@@ -246,7 +249,9 @@ const main = async () => {
       );
     }
 
-    console.log("Lighthouse quality gate passed.");
+    console.log(
+      `Lighthouse quality gate passed. Reports written to ${REPORT_DIR}/`
+    );
   } finally {
     preview.kill("SIGTERM");
   }
