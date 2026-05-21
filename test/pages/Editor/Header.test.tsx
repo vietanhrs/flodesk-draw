@@ -129,11 +129,11 @@ describe("Editor — Header", () => {
     );
   });
 
-  it("hides the modal and shows nothing when export returns false (user cancelled)", async () => {
+  it("hides the modal and shows nothing when export is cancelled by the user", async () => {
     const user = userEvent.setup();
     const exportSpy = vi
       .spyOn(exporter, "exportPageAsHtml")
-      .mockResolvedValue(false);
+      .mockResolvedValue({ ok: false, reason: "cancelled" });
 
     renderEditor();
     await user.click(screen.getByRole("button", { name: "Build & export" }));
