@@ -21,21 +21,33 @@ interface ConfigPaneContentProps {
   selection: Selection;
 }
 
+const deriveSelectionTab = (selection: Selection): TabKey => {
+  if (selection?.kind === "element") return "element";
+  if (selection?.kind === "row") return "layout";
+  return "page";
+};
+
+const selectionIdentity = (selection: Selection): string => {
+  if (!selection) return "none";
+  if (selection.kind === "element") {
+    return `${selection.kind}:${selection.rowId}:${selection.columnIndex}:${selection.elementId}`;
+  }
+  return `${selection.kind}:${selection.rowId}`;
+};
+
 const ConfigPaneContent = ({
   selectedRow,
   selectedElement,
   selection,
 }: ConfigPaneContentProps) => {
-  const [manualTab, setManualTab] = useState<TabKey | null>(null);
+  const selectionKey = selectionIdentity(selection);
+  const [lastSelectionKey, setLastSelectionKey] = useState(selectionKey);
+  const [tab, setTab] = useState<TabKey>(deriveSelectionTab(selection));
 
-  const activeTab: TabKey =
-    selection?.kind === "element"
-      ? "element"
-      : selection?.kind === "row"
-        ? manualTab === "page"
-          ? "page"
-          : "layout"
-        : manualTab ?? "page";
+  if (selectionKey !== lastSelectionKey) {
+    setLastSelectionKey(selectionKey);
+    setTab(deriveSelectionTab(selection));
+  }
 
   return (
     <>
@@ -47,19 +59,13 @@ const ConfigPaneContent = ({
         borderSide="none"
       >
         <TabGroup hasFullWidth>
-          <Tab isActive={activeTab === "page"} onClick={() => setManualTab("page")}>
+          <Tab isActive={tab === "page"} onClick={() => setTab("page")}>
             Page
           </Tab>
-          <Tab
-            isActive={activeTab === "layout"}
-            onClick={() => setManualTab("layout")}
-          >
+          <Tab isActive={tab === "layout"} onClick={() => setTab("layout")}>
             Layout
           </Tab>
-          <Tab
-            isActive={activeTab === "element"}
-            onClick={() => setManualTab("element")}
-          >
+          <Tab isActive={tab === "element"} onClick={() => setTab("element")}>
             Element
           </Tab>
         </TabGroup>
@@ -72,8 +78,8 @@ const ConfigPaneContent = ({
         padding="m"
         backgroundColor="background"
       >
-        {activeTab === "page" && <PageTab />}
-        {activeTab === "layout" &&
+        {tab === "page" && <PageTab />}
+        {tab === "layout" &&
           (selectedRow ? (
             <LayoutTab row={selectedRow} />
           ) : (
@@ -81,7 +87,7 @@ const ConfigPaneContent = ({
               Select a row in the canvas to configure its layout.
             </Text>
           ))}
-        {activeTab === "element" &&
+        {tab === "element" &&
           (selectedElement && selection?.kind === "element" ? (
             <ElementTab rowId={selection.rowId} element={selectedElement} />
           ) : (
