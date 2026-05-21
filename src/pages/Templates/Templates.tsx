@@ -3,7 +3,7 @@ import { useMemo, useState } from "react";
 import { Arrange, Text, Toast } from "@flodesk/grain";
 import { useNavigate, useSearchParams } from "react-router-dom";
 
-import { ALL_CATEGORY_ID, categories } from "@src/data/categories";
+import { ALL_CATEGORY_ID, hasCategory } from "@src/data/categories";
 import { templates } from "@src/data/templates";
 import { openFlodeskFile } from "@src/pages/Editor/exporter/flodeskFile";
 import { useIsMountedRef } from "@src/shared";
@@ -21,10 +21,11 @@ export const Templates = () => {
   const canUpdateState = () =>
     isMountedRef.current && typeof window !== "undefined";
   const requestedCategory = searchParams.get("category") ?? ALL_CATEGORY_ID;
-  const activeCategoryId = useMemo(() => {
-    const known = categories.some((c) => c.id === requestedCategory);
-    return known ? requestedCategory : ALL_CATEGORY_ID;
-  }, [requestedCategory]);
+  const activeCategoryId = useMemo(
+    () =>
+      hasCategory(requestedCategory) ? requestedCategory : ALL_CATEGORY_ID,
+    [requestedCategory]
+  );
 
   const visibleTemplates = useMemo(() => {
     if (activeCategoryId === ALL_CATEGORY_ID) return templates;

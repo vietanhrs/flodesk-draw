@@ -223,13 +223,13 @@ describe("Templates page — template grid filtering", () => {
       ).toBeInTheDocument();
     }
     expect(
-      screen.getAllByRole("link", { name: /^view details/i })
+      screen.getAllByRole("link", { name: /^open template/i })
     ).toHaveLength(templates.length);
   });
 
   it("filters the grid to one template when the welcome category is selected", () => {
     renderTemplatesAt("/templates?category=welcome");
-    const cards = screen.getAllByRole("link", { name: /^view details/i });
+    const cards = screen.getAllByRole("link", { name: /^open template/i });
     expect(cards).toHaveLength(1);
     expect(cards[0]).toHaveAttribute(
       "href",
@@ -251,7 +251,7 @@ describe("Templates page — template grid filtering", () => {
     renderTemplatesAt(`/templates?category=${id}`);
     const expected = templates.filter((t) => t.categoryId === id);
     expect(
-      screen.getAllByRole("link", { name: /^view details/i })
+      screen.getAllByRole("link", { name: /^open template/i })
     ).toHaveLength(expected.length);
     expect(expected.length).toBeGreaterThan(0); // sanity check the fixture
 
@@ -266,7 +266,7 @@ describe("Templates page — template grid filtering", () => {
   it("falls back to showing all templates when ?category= is unknown", () => {
     renderTemplatesAt("/templates?category=does-not-exist");
     expect(
-      screen.getAllByRole("link", { name: /^view details/i })
+      screen.getAllByRole("link", { name: /^open template/i })
     ).toHaveLength(templates.length);
   });
 
@@ -284,12 +284,12 @@ describe("Templates page — template grid filtering", () => {
     );
   });
 
-  it("navigates to /templates/:id when a View details link is clicked", async () => {
+  it("navigates to /templates/:id when a Open template link is clicked", async () => {
     const user = userEvent.setup();
     renderTemplatesAt();
     const bold = templates.find((t) => t.id === "bold-sale-announcement")!;
     await user.click(
-      screen.getByRole("link", { name: `View details: ${bold.title}` })
+      screen.getByRole("link", { name: `Open template: ${bold.title}` })
     );
     await waitFor(() =>
       expect(screen.getByTestId("location")).toHaveTextContent(

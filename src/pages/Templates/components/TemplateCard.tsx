@@ -33,7 +33,7 @@ export const TemplateCard = ({ template }: TemplateCardProps) => {
         <Link
           to={`/templates/${template.id}`}
           className="tpl-card__overlay"
-          aria-label={`View details: ${template.title}`}
+          aria-label={`Open template: ${template.title}`}
         >
           <span className="tpl-card__button">View details</span>
         </Link>
