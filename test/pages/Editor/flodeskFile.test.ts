@@ -9,7 +9,11 @@ import {
   parseFlodeskFile,
   saveFlodeskFile,
 } from "@src/pages/Editor/exporter/flodeskFile";
-import { createEmptyPage } from "@src/pages/Editor/state/initialData";
+import {
+  buildPageForTemplate,
+  createEmptyPage,
+  editorTemplateIds,
+} from "@src/pages/Editor/state/initialData";
 import type { PageData } from "@src/pages/Editor/state/types";
 
 const draftWith = (page: unknown) =>
@@ -40,6 +44,14 @@ describe("flodeskFile", () => {
     const page = createEmptyPage();
 
     expect(parseFlodeskFile(draftWith(page))).toEqual(page);
+  });
+
+  it("parses drafts saved from every bundled editor template", () => {
+    for (const templateId of editorTemplateIds) {
+      const page = buildPageForTemplate(templateId);
+
+      expect(parseFlodeskFile(draftWith(page))).toEqual(page);
+    }
   });
 
   it("rejects non-JSON content", () => {
