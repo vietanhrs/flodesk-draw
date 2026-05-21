@@ -31,6 +31,8 @@ const createPage = (title: string, extraText = ""): PageData => ({
             text: `${title}${extraText}`,
             fontSize: 16,
             lineHeight: 1.6,
+            fontWeight: 400,
+            fontFamily: "Helvetica Neue",
             align: "left",
             color: "#111111",
           },
