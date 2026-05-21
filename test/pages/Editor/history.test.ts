@@ -101,7 +101,11 @@ describe("history helpers", () => {
 
   it("uses the reduced history cap for large pages", () => {
     const base = createPage("Base");
-    let history = { past: [] as PageData[], present: base, future: [] as PageData[] };
+    let history = {
+      past: [] as PageData[],
+      present: base,
+      future: [] as PageData[],
+    };
     let lastCommitKey: string | null = null;
     let lastCommitAt = 0;
 
