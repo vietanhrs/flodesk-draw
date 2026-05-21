@@ -43,7 +43,9 @@ describe("ErrorBoundary", () => {
     );
 
     expect(screen.getByRole("heading", { name: "Oops!" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "refresh" })).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "try again" })
+    ).toBeInTheDocument();
   });
 
   it("renders a custom fallback when provided, passing the error and retry", () => {
@@ -65,7 +67,7 @@ describe("ErrorBoundary", () => {
     expect(retry).toBeInstanceOf(Function);
   });
 
-  it("clears the error state when the refresh button is clicked", async () => {
+  it("clears the error state when the try again button is clicked", async () => {
     silenceReactCaughtErrorLog();
     const user = userEvent.setup();
     let shouldThrow = true;
@@ -83,9 +85,9 @@ describe("ErrorBoundary", () => {
     // Fallback is showing first.
     expect(screen.getByRole("heading", { name: "Oops!" })).toBeInTheDocument();
 
-    // Stop throwing before triggering the re-render via refresh.
+    // Stop throwing before triggering the re-render via retry.
     shouldThrow = false;
-    await user.click(screen.getByRole("button", { name: "refresh" }));
+    await user.click(screen.getByRole("button", { name: "try again" }));
 
     expect(screen.getByText("recovered")).toBeInTheDocument();
     expect(

@@ -27,15 +27,15 @@ export class ErrorBoundary extends Component<
     console.error("[ErrorBoundary] Caught error:", error, errorInfo);
   }
 
-  handleRefresh = (e?: React.MouseEvent<HTMLElement>) => {
-    e?.preventDefault();
+  handleRetry = (event?: React.MouseEvent<HTMLElement>) => {
+    event?.preventDefault();
     this.setState({ hasError: false, error: null });
   };
 
   render() {
     if (this.state.hasError) {
       if (this.props.fallback) {
-        return this.props.fallback(this.state.error, this.handleRefresh);
+        return this.props.fallback(this.state.error, this.handleRetry);
       }
 
       return (
@@ -50,12 +50,12 @@ export class ErrorBoundary extends Component<
               Please{" "}
               <button
                 type="button"
-                onClick={this.handleRefresh}
+                onClick={this.handleRetry}
                 className="eb-link-button"
               >
-                refresh
+                try again
               </button>{" "}
-              the page or <a href="/">go back and try again</a>.
+              or <a href="/">go back home</a>.
             </p>
 
             <div className="paper-airplane" aria-hidden="true">
