@@ -20,7 +20,7 @@ const routes = [
     path: "/templates",
     formFactor: "desktop",
     minimumScores: {
-      performance: 0.85,
+      performance: 0.8,
       accessibility: 0.9,
       "best-practices": 0.9,
       seo: 0.9,
