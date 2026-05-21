@@ -9,7 +9,7 @@ test.describe("Template gallery", () => {
       page.getByRole("heading", { name: "What's your goal?" })
     ).toBeVisible();
     await expect(
-      page.getByRole("link", { name: "View details: Bold sale announcement" })
+      page.getByRole("link", { name: "Open template: Bold sale announcement" })
     ).toBeVisible();
   });
 
@@ -39,7 +39,7 @@ test.describe("Template gallery", () => {
     await page.goto("/templates");
 
     await page
-      .getByRole("link", { name: "View details: Bold sale announcement" })
+      .getByRole("link", { name: "Open template: Bold sale announcement" })
       .click();
 
     await expect(page).toHaveURL(/\/templates\/bold-sale-announcement$/);
