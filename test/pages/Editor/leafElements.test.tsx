@@ -39,6 +39,11 @@ const renderForm = <E extends PageElement>(
   return { element, setProp, ...renderResult };
 };
 
+const validateCreatedElement = (
+  validate: (element: Record<string, unknown>, path: string) => void,
+  element: PageElement
+) => validate(element as unknown as Record<string, unknown>, "element");
+
 describe("leaf element renderers", () => {
   it("quote renderer hides empty authors and sizes cite text from font size", () => {
     const quoted = { ...createQuote(), text: "Stay curious", fontSize: 20 };
@@ -297,15 +302,27 @@ describe("leaf element forms", () => {
 
 describe("leaf element validators", () => {
   it("accepts valid leaf element defaults", () => {
-    expect(() => validateButton(createButton(), "element")).not.toThrow();
-    expect(() => validateDivider(createDivider(), "element")).not.toThrow();
-    expect(() => validateImage(createImage(), "element")).not.toThrow();
-    expect(() => validateQuote(createQuote(), "element")).not.toThrow();
-    expect(() => validateSocial(createSocial(), "element")).not.toThrow();
+    expect(() =>
+      validateCreatedElement(validateButton, createButton())
+    ).not.toThrow();
+    expect(() =>
+      validateCreatedElement(validateDivider, createDivider())
+    ).not.toThrow();
+    expect(() =>
+      validateCreatedElement(validateImage, createImage())
+    ).not.toThrow();
+    expect(() =>
+      validateCreatedElement(validateQuote, createQuote())
+    ).not.toThrow();
+    expect(() =>
+      validateCreatedElement(validateSocial, createSocial())
+    ).not.toThrow();
     expect(() =>
       validateSpacer({ id: "el-1", type: "spacer", height: 32 }, "element")
     ).not.toThrow();
-    expect(() => validateVideo(createVideo(), "element")).not.toThrow();
+    expect(() =>
+      validateCreatedElement(validateVideo, createVideo())
+    ).not.toThrow();
   });
 
   it("rejects invalid leaf element values with field-specific paths", () => {
