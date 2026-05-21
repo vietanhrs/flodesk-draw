@@ -134,3 +134,53 @@ Accessing element.ref was removed in React 19. ref is now a regular prop.
 ```
 
 This comes from `@flodesk/grain`, not application code. The test setup filters that specific warning where appropriate and keeps all other unexpected console errors visible.
+
+## Tradeoffs
+
+A few implementation choices in this take-home are intentionally pragmatic:
+
+- **Zustand over a heavier editor state model**: the editor uses a shared Zustand store with explicit re-seeding per session. This keeps the state API small and easy to reason about for the assignment while still supporting undo/redo, selection state, and row/element mutations cleanly.
+- **Static template previews as local data**: built-in templates are stored in source rather than fetched from an API. That keeps the assignment self-contained and makes template browsing instant, while leaving a clear seam for a server-backed catalog later.
+- **Inline HTML export**: exported pages use inline HTML/CSS so the result opens without extra tooling. That favors portability and assignment clarity over maximum deduplication or theming sophistication.
+- **Browser capability fallbacks instead of browser-specific branches in the UI**: file open/save/export uses the File System Access API where available and otherwise falls back to classic downloads and file input selection. This keeps the product usable across browsers without turning the UI layer into a compatibility matrix.
+- **CI budgets tuned for regression detection, not production scoring**: Lighthouse and performance budgets are calibrated to noisy GitHub runners. They act as guardrails against major regressions, not as absolute product-quality grades.
+
+## Known limitations
+
+The current project is intentionally strong on breadth and correctness, but there are still limitations that I would address in a longer-lived production version:
+
+- **No backend or persistence layer**: templates, drafts, and exported artifacts are all local-only. There is no authenticated account model, server persistence, or collaboration flow.
+- **Editor schema is local-versioned, not migration-driven**: `.flodesk` files are versioned and validated, but there is not yet a full migration pipeline for evolving older draft versions over time.
+- **Preview rendering is optimized for the assignment, not a fully extensible plugin ecosystem**: the element registry is clean and structured, but not yet designed as a third-party plugin platform.
+- **Mobile editing is intentionally constrained**: mobile mode preserves preview and export flows, but the editing chrome stays desktop-first. That tradeoff keeps the interaction model simpler for the assignment.
+- **Performance quality gates still depend on CI variance**: the performance and Lighthouse thresholds are useful and meaningful, but runner variability still matters more than it would in a preview-deployment-based measurement setup.
+
+## What I would do next in production
+
+If this were the foundation for a longer-lived product, the next steps I would prioritize are:
+
+1. **Draft persistence and recovery**
+   - add autosave and recovery for in-progress work
+   - introduce a server-backed draft model with optimistic local caching
+
+2. **Schema migrations for `.flodesk` files**
+   - formalize version migration steps
+   - add compatibility tests across historical file versions
+
+3. **Richer editor ergonomics**
+   - keyboard shortcuts beyond undo/redo
+   - multi-select or block-level operations
+   - improved drag/drop affordances and insertion cues
+
+4. **Deeper accessibility pass**
+   - more systematic keyboard navigation for complex editor surfaces
+   - stronger semantics for drag-and-drop and selection states
+   - automated a11y checks in CI in addition to current smoke coverage
+
+5. **Preview-deployment performance measurement**
+   - run Lighthouse against a deployed preview environment rather than only local preview on CI runners
+   - tighten thresholds once the measurement environment is less noisy
+
+6. **Template/catalog evolution**
+   - fetch templates from an API
+   - support richer metadata, search, experimentation, and content ownership workflows
