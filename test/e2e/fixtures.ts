@@ -2,6 +2,7 @@ import { expect, test as base } from "@playwright/test";
 
 const allowedConsoleErrorPatterns = [
   /Accessing element\.ref was removed in React 19/,
+  /Falling back to download after picker write failure/,
 ];
 
 const isAllowedConsoleError = (text: string) =>
