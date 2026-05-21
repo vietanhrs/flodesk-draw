@@ -5,8 +5,6 @@ on:
     branches: [main]
   pull_request:
 
-# Cancel any in-flight run on the same ref when a new commit is pushed —
-# avoids stacking up CI runs on a rapidly-updated PR.
 concurrency:
   group: ci-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
@@ -15,8 +13,8 @@ permissions:
   contents: read
 
 jobs:
-  verify:
-    name: Lint, test, build
+  static-checks:
+    name: Static checks
     runs-on: ubuntu-latest
     timeout-minutes: 10
 
@@ -44,11 +42,37 @@ jobs:
       - name: Build and check bundle budget
         run: bun run bundle:check
 
+  browser-quality:
+    name: Browser quality checks
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: static-checks
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version-file: .bun-version
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
       - name: Install Playwright system deps
         run: bunx playwright install-deps chrome
 
       - name: Lighthouse quality gate
         run: bun run lighthouse:check
+
+      - name: Upload Lighthouse reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lighthouse-reports
+          path: .lighthouse/*.json
+          if-no-files-found: ignore
 
       - name: Performance regression tests
         run: bun run test:perf
