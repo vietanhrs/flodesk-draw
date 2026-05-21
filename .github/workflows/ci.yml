@@ -73,6 +73,7 @@ jobs:
           name: lighthouse-reports
           path: .lighthouse/*.json
           if-no-files-found: ignore
+          include-hidden-files: true
 
       - name: Performance regression tests
         run: bun run test:perf
