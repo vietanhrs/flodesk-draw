@@ -38,6 +38,9 @@ interface EditorHistoryContextValue {
   canRedo: boolean;
 }
 
+// The editor uses a shared Zustand store that is re-seeded per route/file
+// session. This keeps the editor API lightweight for the assignment while
+// still making session boundaries explicit through the provider keying.
 export const EditorProvider = ({
   templateId,
   initialFile,

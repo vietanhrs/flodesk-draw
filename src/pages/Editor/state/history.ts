@@ -18,6 +18,9 @@ const HISTORY_LIMIT = 100;
 const LARGE_PAGE_HISTORY_LIMIT = 25;
 const LARGE_PAGE_HISTORY_THRESHOLD_BYTES = 120_000;
 
+// History size uses a deliberately cheap JSON-size heuristic. It is not exact,
+// but it is deterministic, easy to reason about, and good enough to keep large
+// editor sessions from retaining an excessive number of snapshots.
 const estimatePageBytes = (page: PageData): number =>
   JSON.stringify(page).length;
 
