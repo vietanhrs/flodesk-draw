@@ -58,11 +58,11 @@
     "lint-staged": "^16.1.0"
   },
   "lint-staged": {
-    "*.{ts,tsx,js,jsx}": [
+    "*.{ts,tsx,js,jsx,mjs}": [
       "prettier --write",
       "eslint --fix"
     ],
-    "*.{json,md,css}": [
+    "*.{json,md,css,yml,yaml}": [
       "prettier --write"
     ]
   }
