@@ -16,19 +16,38 @@ import { PageTab } from "./PageTab";
 type TabKey = "page" | "layout" | "element";
 
 interface ConfigPaneContentProps {
-  defaultTab: TabKey;
   selectedRow: PageRow | null;
   selectedElement: PageElement | null;
   selection: Selection;
 }
 
+const deriveSelectionTab = (selection: Selection): TabKey => {
+  if (selection?.kind === "element") return "element";
+  if (selection?.kind === "row") return "layout";
+  return "page";
+};
+
+const selectionIdentity = (selection: Selection): string => {
+  if (!selection) return "none";
+  if (selection.kind === "element") {
+    return `${selection.kind}:${selection.rowId}:${selection.columnIndex}:${selection.elementId}`;
+  }
+  return `${selection.kind}:${selection.rowId}`;
+};
+
 const ConfigPaneContent = ({
-  defaultTab,
   selectedRow,
   selectedElement,
   selection,
 }: ConfigPaneContentProps) => {
-  const [tab, setTab] = useState<TabKey>(defaultTab);
+  const selectionKey = selectionIdentity(selection);
+  const [lastSelectionKey, setLastSelectionKey] = useState(selectionKey);
+  const [tab, setTab] = useState<TabKey>(deriveSelectionTab(selection));
+
+  if (selectionKey !== lastSelectionKey) {
+    setLastSelectionKey(selectionKey);
+    setTab(deriveSelectionTab(selection));
+  }
 
   return (
     <>
@@ -84,11 +103,6 @@ const ConfigPaneContent = ({
 export const ConfigPane = () => {
   const { page } = useEditorDocument();
   const selection = useEditorSelection();
-  const selectionKey = selection
-    ? selection.kind === "element"
-      ? `${selection.kind}:${selection.rowId}:${selection.columnIndex}:${selection.elementId}`
-      : `${selection.kind}:${selection.rowId}`
-    : "none";
 
   const selectedRow = useMemo(() => {
     if (!selection) return null;
@@ -103,13 +117,6 @@ export const ConfigPane = () => {
       ) ?? null
     );
   }, [selectedRow, selection]);
-
-  const defaultTab: TabKey =
-    selection?.kind === "element"
-      ? "element"
-      : selection?.kind === "row"
-        ? "layout"
-        : "page";
 
   return (
     <Flex
@@ -127,8 +134,6 @@ export const ConfigPane = () => {
       borderSide="left"
     >
       <ConfigPaneContent
-        key={selectionKey}
-        defaultTab={defaultTab}
         selectedRow={selectedRow}
         selectedElement={selectedElement}
         selection={selection}
