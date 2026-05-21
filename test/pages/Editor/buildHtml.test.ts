@@ -309,7 +309,7 @@ describe("buildHtml", () => {
               {
                 id: "v",
                 type: "video",
-                url: "http://example.com/embed",
+                url: "https://example.com/embed",
                 widthPct: 100,
               },
               {

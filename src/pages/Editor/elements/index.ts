@@ -1,4 +1,9 @@
-export type { BaseElement, ElementFormProps, ElementHandler } from "./base";
+export type {
+  BaseElement,
+  ElementFormProps,
+  ElementHandler,
+  ElementRendererProps,
+} from "./base";
 export {
   handlers,
   registry,

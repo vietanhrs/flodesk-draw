@@ -5,7 +5,10 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { ALL_CATEGORY_ID, categories } from "@src/data/categories";
 import { templates } from "@src/data/templates";
 import * as flodeskFile from "@src/pages/Editor/exporter/flodeskFile";
-import { createEmptyPage } from "@src/pages/Editor/state/initialData";
+import {
+  createEmptyPage,
+  editorTemplateIds,
+} from "@src/pages/Editor/state/initialData";
 import { Templates } from "@src/pages/Templates/Templates";
 
 import { renderAtPath } from "./test-utils";
@@ -33,6 +36,22 @@ const openMobileSelect = async () => {
   );
   return user;
 };
+
+describe("Template data invariants", () => {
+  it("has an editor page builder for every gallery template", () => {
+    expect([...editorTemplateIds].sort()).toEqual(
+      templates.map((template) => template.id).sort()
+    );
+  });
+
+  it("uses only known categories for gallery templates", () => {
+    const categoryIds = new Set(categories.map((category) => category.id));
+
+    for (const template of templates) {
+      expect(categoryIds.has(template.categoryId)).toBe(true);
+    }
+  });
+});
 
 describe("Templates page — category list", () => {
   it("renders every category from the data file in the sidebar nav", () => {

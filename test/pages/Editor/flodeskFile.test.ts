@@ -109,7 +109,7 @@ describe("flodeskFile", () => {
     });
     const videoPage = pageWithElement({
       ...createVideo(),
-      url: "http://example.com/embed",
+      url: "https://example.com/embed",
     });
     const socialPage = pageWithElement({
       ...createSocial(),
@@ -123,7 +123,7 @@ describe("flodeskFile", () => {
       /src must be an http or https image URL/
     );
     expect(() => parseFlodeskFile(draftWith(videoPage))).toThrow(
-      /url must be an https video URL/
+      /url must be a supported HTTPS video embed URL/
     );
     expect(() => parseFlodeskFile(draftWith(socialPage))).toThrow(
       /links\[0\]\.url must be an http, https, mailto, or tel URL/
@@ -151,7 +151,7 @@ describe("flodeskFile", () => {
       parseFlodeskFile(draftWith(protocolRelativeImagePage))
     ).toThrow(/src must be an http or https image URL/);
     expect(() => parseFlodeskFile(draftWith(schemeRelativeVideoPage))).toThrow(
-      /url must be an https video URL/
+      /url must be a supported HTTPS video embed URL/
     );
   });
 

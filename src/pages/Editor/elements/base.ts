@@ -22,11 +22,16 @@ export type ElementValidator = (
   path: string
 ) => void;
 
+export interface ElementRendererProps<E extends BaseElement> {
+  element: E;
+  isPreview?: boolean;
+}
+
 export interface ElementHandler<E extends BaseElement> {
   type: E["type"];
   create: () => E;
   catalog: ElementCatalogEntry;
-  Renderer: ComponentType<{ element: E }>;
+  Renderer: ComponentType<ElementRendererProps<E>>;
   Form: ComponentType<ElementFormProps<E>>;
   toHtml: (el: E) => string;
   validate: ElementValidator;
