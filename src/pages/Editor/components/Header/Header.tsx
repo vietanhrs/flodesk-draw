@@ -8,7 +8,6 @@ import {
   IconPhone,
   IconRedo,
   IconUndo,
-  IconUpload,
   Text,
   TextButton,
 } from "@flodesk/grain";
@@ -47,11 +46,7 @@ export const Header = ({
   const saveButtonTitle = isDirectSaveSupportedForCurrentDoc
     ? "Save draft"
     : "Download a copy of this draft";
-  const saveButtonIcon = isDirectSaveSupportedForCurrentDoc ? (
-    <IconUpload width={16} height={16} />
-  ) : (
-    <IconDownload width={16} height={16} />
-  );
+  const saveButtonIcon = <IconDownload width={16} height={16} />;
 
   return (
     <Flex

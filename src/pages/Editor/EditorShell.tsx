@@ -57,12 +57,16 @@ export const EditorShell = () => {
         onClose={exportFlow.closeBuildModal}
       />
       <Toast
-        isOpen={saveFlow.saveError.length > 0}
-        variant="danger"
+        isOpen={saveFlow.saveToast.isOpen}
+        variant={saveFlow.saveToast.variant}
         dismissTimeout={5000}
-        onDismiss={saveFlow.dismissSaveError}
+        onDismiss={saveFlow.dismissSaveToast}
       >
-        <span role="alert">{saveFlow.saveError}</span>
+        <span
+          role={saveFlow.saveToast.variant === "danger" ? "alert" : "status"}
+        >
+          {saveFlow.saveToast.message}
+        </span>
       </Toast>
     </Flex>
   );

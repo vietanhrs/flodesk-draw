@@ -32,9 +32,21 @@ interface BuildState {
   message: string;
 }
 
+interface SaveToastState {
+  isOpen: boolean;
+  variant: "success" | "danger";
+  message: string;
+}
+
 const INITIAL_BUILD_STATE: BuildState = {
   isOpen: false,
   status: "building",
+  message: "",
+};
+
+const INITIAL_SAVE_TOAST_STATE: SaveToastState = {
+  isOpen: false,
+  variant: "success",
   message: "",
 };
 
@@ -87,13 +99,15 @@ export const useSaveDraftFlow = (
   setLoadedFile: (loadedFile: LoadedFile) => void
 ) => {
   const isMountedRef = useIsMountedRef();
-  const [saveError, setSaveError] = useState("");
+  const [saveToast, setSaveToast] = useState<SaveToastState>(
+    INITIAL_SAVE_TOAST_STATE
+  );
 
   const canUpdateState = () =>
     isMountedRef.current && typeof window !== "undefined";
 
   const handleSave = async () => {
-    setSaveError("");
+    setSaveToast(INITIAL_SAVE_TOAST_STATE);
     try {
       const result = await saveFlodeskFile(
         page,
@@ -107,19 +121,27 @@ export const useSaveDraftFlow = (
           handle: result.handle,
           page,
         });
+        setSaveToast({
+          isOpen: true,
+          variant: "success",
+          message: "Your .flodesk file has been saved.",
+        });
       }
-    } catch (error) {
+    } catch {
       if (!canUpdateState()) return;
-      console.error("Save failed", error);
-      setSaveError("Could not save your .flodesk file. Please try again.");
+      setSaveToast({
+        isOpen: true,
+        variant: "danger",
+        message: "Could not save your .flodesk file. Please try again.",
+      });
     }
   };
 
   return {
-    saveError,
+    saveToast,
     handleSave,
-    dismissSaveError: () => {
-      if (canUpdateState()) setSaveError("");
+    dismissSaveToast: () => {
+      if (canUpdateState()) setSaveToast(INITIAL_SAVE_TOAST_STATE);
     },
   };
 };
