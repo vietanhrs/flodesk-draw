@@ -1,9 +1,15 @@
 /* eslint-disable react-refresh/only-export-components */
 import { lazy } from "react";
 
-import { Navigate, createBrowserRouter } from "react-router-dom";
+import {
+  Navigate,
+  createBrowserRouter,
+  isRouteErrorResponse,
+  useRouteError,
+  type RouteObject,
+} from "react-router-dom";
 
-import { SuspenseRoute } from "@src/shared";
+import { ErrorBoundary, SuspenseRoute } from "@src/shared";
 
 const Templates = lazy(() =>
   import("./pages/Templates").then((m) => ({ default: m.Templates }))
@@ -13,9 +19,28 @@ const Editor = lazy(() =>
   import("./pages/Editor").then((m) => ({ default: m.Editor }))
 );
 
-export const router = createBrowserRouter([
+const routeErrorToError = (routeError: unknown) => {
+  if (routeError instanceof Error) {
+    return routeError;
+  }
+
+  if (isRouteErrorResponse(routeError)) {
+    return new Error(
+      routeError.statusText || `Route error ${routeError.status}`
+    );
+  }
+
+  return new Error("Unknown route error");
+};
+
+const AppRouteErrorBoundary = () => (
+  <ErrorBoundary error={routeErrorToError(useRouteError())} />
+);
+
+export const appRoutes: RouteObject[] = [
   {
     path: "/",
+    errorElement: <AppRouteErrorBoundary />,
     children: [
       {
         index: true,
@@ -47,4 +72,6 @@ export const router = createBrowserRouter([
       },
     ],
   },
-]);
+];
+
+export const router = createBrowserRouter(appRoutes);
