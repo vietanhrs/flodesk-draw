@@ -33,7 +33,7 @@ export const boldSale = (): PageData => ({
             level: 1,
             color: "#f8c97a",
             fontSize: 132,
-            fontWeight: 900,
+            fontWeight: 600,
             fontFamily: "'Helvetica Neue', Arial, sans-serif",
             align: "left",
             letterSpacing: -5,
