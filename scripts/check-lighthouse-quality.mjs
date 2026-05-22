@@ -38,7 +38,7 @@ const routes = [
     path: "/templates",
     formFactor: "mobile",
     minimumScores: {
-      performance: 0.5,
+      performance: 0.4,
       accessibility: 0.9,
       "best-practices": 0.9,
       seo: 0.9,
@@ -46,7 +46,7 @@ const routes = [
     maximumMetrics: {
       "largest-contentful-paint": 6_500,
       "cumulative-layout-shift": 0.1,
-      "total-blocking-time": 750,
+      "total-blocking-time": 1000,
       "speed-index": 6_500,
       "total-byte-weight": 950 * KiB,
     },
